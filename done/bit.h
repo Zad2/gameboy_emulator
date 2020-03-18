@@ -24,10 +24,10 @@ typedef uint8_t bit_t;
 /**
  * @brief Enumeration type of rotation directions: either LEFT or RIGHT
  */
-/* TODO WEEK 04:
- * Définir ici le type rot_dir_t
- * (et supprimer ces quatre lignes de commentaire).
- */
+// typedef enum rot_dir_t;
+typedef enum {
+	LEFT, RIGHT, COUNT
+} rot_dir_t;
 
 
 /**
@@ -146,6 +146,7 @@ void bit_unset(uint8_t* value, int index);
  * @param v allows to choose between set and unset
  */
 void bit_edit(uint8_t* value, int index, uint8_t v);
+
 
 
 #ifdef __cplusplus
