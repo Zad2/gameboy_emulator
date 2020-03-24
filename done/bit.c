@@ -29,7 +29,6 @@ typedef uint8_t bit_t;
  */
 // #define CLAMP07(x) (((x) < 0) || ((x) > 7) ? 0 : (x))
 
-
 // ======================================================================
 /* TODO: check if useful
 #define size(T) (sizeof T / sizeof T[0])
@@ -38,55 +37,81 @@ typedef uint8_t bit_t;
 #define show(M, S1) printf(#M "(" FMT ## S1 ") = " FMT8 "\n", value, result)
 #define show2(M, V) printf("bit_" #M "(" FMT8 ", %d) = " FMT8 "\n", V, k, value2)
 */
+#define size(T) (sizeof T / sizeof T[0])
 
-uint8_t lsb4(uint8_t value){
+uint8_t lsb4(uint8_t value)
+{
 	return value & 0x0f;
 }
 
-uint8_t msb4(uint8_t value){
+uint8_t msb4(uint8_t value)
+{
 	return (value & 0xf0) >> 4;
 }
 
-uint8_t lsb8(uint16_t value){
+uint8_t lsb8(uint16_t value)
+{
 	return value & 0x00ff;
 }
 
-uint8_t msb8(uint16_t value){
+uint8_t msb8(uint16_t value)
+{
 	return (value & 0xff00) >> 8;
 }
 
-uint16_t merge8(uint8_t v1, uint8_t v2){
+uint16_t merge8(uint8_t v1, uint8_t v2)
+{
 	return v1 | v2 << 8;
 }
 
-uint8_t merge4(uint8_t v1, uint8_t v2){
+uint8_t merge4(uint8_t v1, uint8_t v2)
+{
 	return lsb4(v1) | (lsb4(v2) << 4);
 }
 
-bit_t bit_get(uint8_t value, int index){
+bit_t bit_get(uint8_t value, int index)
+{
 	int k = CLAMP07(index);
 	return (value & (1 << k)) >> k;
 }
 
-void bit_set(uint8_t* value, int index){
+void bit_set(uint8_t *value, int index)
+{
 	int k = CLAMP07(index);
 	*value = (1 << k) | *value;
 }
 
-void bit_unset(uint8_t* value, int index){
+void bit_unset(uint8_t *value, int index)
+{
 	int k = CLAMP07(index);
-	*value = ~ (1 << k) & *value;
+	*value = ~(1 << k) & *value;
 }
 
-void bit_rotate(uint8_t* value, rot_dir_t dir, int d){
+void bit_rotate(uint8_t *value, rot_dir_t dir, int d)
+{
 	int k = CLAMP07(d);
-	uint8_t temp = 1;
-#define SIZE_BYTE 8
-	if (dir == LEFT){
-		temp = *value >> (SIZE_BYTE - d);
-		*value = (*value << d) | temp;
-	} else if (dir == RIGHT){
-		temp = *value << (SIZE_BYTE - d) >> (SIZE_BYTE - d);
-		
+	uint8_t temp = 0;
+	int shift_complement = SIZE_BYTE - k;
+	if (dir == LEFT)
+	{
+		temp = *value >> shift_complement;
+		*value = (*value << k) | temp;
+	}
+	else if (dir == RIGHT)
+	{
+		temp = *value << shift_complement;
+		*value = (*value >> k) | temp;
+	}
+}
+
+void bit_edit(uint8_t *value, int index, uint8_t v)
+{
+	if (v == 0)
+	{
+		bit_unset(&value, index);
+	}
+	else if (v == 1)
+	{
+		bit_set(&value, index);
 	}
 }
