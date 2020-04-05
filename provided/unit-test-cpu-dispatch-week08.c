@@ -37,7 +37,6 @@
     do{ \
         INIT_RUN();\
         LOOP_ON(input_f) {\
-        ck_assert_int_eq(cpu_init(&cpu), ERR_NONE);\
             cpu_HL_set(&cpu,input_a[i_]);\
             cpu.F = input_f[i_];\
             cpu_reg_pair_SP_set(&cpu, reg_k, input_b[i_]);\

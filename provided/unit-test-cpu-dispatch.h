@@ -49,7 +49,6 @@
     do{ \
         INIT_RUN();\
         LOOP_ON(input_f) {\
-            ck_assert_int_eq(cpu_init(&cpu), ERR_NONE);\
             cpu.A = input_a[i_];\
             cpu.F = input_f[i_];\
             cpu_HL_set(&cpu,0);\
@@ -67,7 +66,6 @@
     do{ \
         INIT_RUN();\
         LOOP_ON(input_f) {\
-        ck_assert_int_eq(cpu_init(&cpu), ERR_NONE);\
             cpu.A = input_a[i_];\
             cpu.F = input_f[i_];\
             cpu.PC = 0;\
@@ -86,7 +84,6 @@
     do{ \
         INIT_RUN();\
         LOOP_ON(input_f) {\
-        ck_assert_int_eq(cpu_init(&cpu), ERR_NONE);\
             cpu.A = input_a[i_];\
             cpu.F = input_f[i_];\
             cpu_reg_set(&cpu, reg_k, input_b[i_]);\
@@ -103,7 +100,6 @@
     do{ \
         INIT_RUN();\
         LOOP_ON(input_f) {\
-            ck_assert_int_eq(cpu_init(&cpu), ERR_NONE);\
             cpu.F = input_f[i_];\
             cpu_reg_set(&cpu, reg_k, input_a[i_]);\
             DO_RUN(cpu,__VA_ARGS__);\
@@ -119,7 +115,6 @@
     do{ \
         INIT_RUN();\
         LOOP_ON(input_f) {\
-            ck_assert_int_eq(cpu_init(&cpu), ERR_NONE);\
             cpu.F = input_f[i_];\
             cpu_reg_pair_SP_set(&cpu, reg_k, input_a[i_]);\
             DO_RUN(cpu,__VA_ARGS__);\
