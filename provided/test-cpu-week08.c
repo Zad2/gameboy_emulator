@@ -28,7 +28,7 @@ const opcode_t instructions[] = {
     0x5B,       // LD E, E = NOP
     0x64,       // LD H, H = NOP
     0x6D,       // LD L, L = NOP
-    0x00,       // NOP  (to print; see line 202 below)
+    0x00,       // NOP  (to print; see line 193 below)
 
     // Diverses instructions
 
@@ -73,33 +73,23 @@ const opcode_t instructions[] = {
     0x57,       // LD D, A
     0x80,       // ADD A, B
     0x42,       // LD B, D
-    0x0D,       // DEC C
     0x00,       // NOP
     0x57,       // LD D, A
     0x80,       // ADD A, B
     0x42,       // LD B, D
-    0x0D,       // DEC C
     0x00,       // NOP
     0x57,       // LD D, A
     0x80,       // ADD A, B
     0x42,       // LD B, D
-    0x0D,       // DEC C
     0x00,       // NOP
     0x57,       // LD D, A
     0x80,       // ADD A, B
     0x42,       // LD B, D
-    0x0D,       // DEC C
     0x00,       // NOP
     0x57,       // LD D, A
     0x80,       // ADD A, B
     0x42,       // LD B, D
-    0x0D,       // DEC C
     0x00,       // NOP
-
-    // Fin
-
-    0x76, // HALT
-    0x00, // NOP
 };
 
 // ======================================================================
@@ -138,8 +128,6 @@ void cpu_dump(FILE* file, cpu_t* cpu)
             cpu->AF, cpu->BC,  cpu->DE, cpu->HL);
     fprintf(file, "PC: %" PRIu16 "\n", cpu->PC);
     fprintf(file, "SP: %" PRIu16 "\n", cpu->SP);
-    fprintf(file, "IME: %u, IE: %u, IF: %u, HALT: %u\n",
-            cpu->IME, cpu->IE, cpu->IF, cpu->HALT);
 }
 
 // ======================================================================
