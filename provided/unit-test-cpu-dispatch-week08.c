@@ -432,14 +432,9 @@ START_TEST(test_SLA_R8)
     const uint8_t expected_vl[] = SHFT_OUT_L_DATA;
     const uint8_t expected_fl[] = SHFT_OUT_L_FLAG;
 
-    const uint8_t expected_vr[] = SHFT_OUT_R_DATA;
-    const uint8_t expected_fr[] = SHFT_OUT_R_FLAG;
-
     ASSERT_EQ_NB_EL(input_f, input_a);
     ASSERT_EQ_NB_EL(input_f, expected_vl);
-    ASSERT_EQ_NB_EL(input_f, expected_vr);
     ASSERT_EQ_NB_EL(input_f, expected_fl);
-    ASSERT_EQ_NB_EL(input_f, expected_fr);
 
     RUN_DISPATCH_ALU_R8_S(input_a, input_f, expected_vl, expected_fl, REG_A_CODE, OP_SLA_A);
     RUN_DISPATCH_ALU_R8_S(input_a, input_f, expected_vl, expected_fl, REG_B_CODE, OP_SLA_B);
@@ -696,12 +691,10 @@ START_TEST(test_PUSH_R16)
     const uint8_t n2[] =  SPPP_N2;
     const uint16_t nn[] = SPPP_NN;
     const uint8_t n1f[] = SPPP_N1F;
-    const uint16_t nnf[] = SPPP_NNF;
 
     ASSERT_EQ_NB_EL(nn, n1);
     ASSERT_EQ_NB_EL(nn, n2);
     ASSERT_EQ_NB_EL(nn, n1f);
-    ASSERT_EQ_NB_EL(nn, nnf);
 
     cpu.SP = 0xFF;
     LOOP_ON(nn) {
@@ -736,12 +729,10 @@ START_TEST(test_POP_R16)
     const uint8_t n1[] =  SPPP_N1;
     const uint8_t n2[] =  SPPP_N2;
     const uint16_t nn[] = SPPP_NN;
-    const uint8_t n1f[] = SPPP_N1F;
     const uint16_t nnf[] = SPPP_NNF;
 
     ASSERT_EQ_NB_EL(nn, n1);
     ASSERT_EQ_NB_EL(nn, n2);
-    ASSERT_EQ_NB_EL(nn, n1f);
     ASSERT_EQ_NB_EL(nn, nnf);
 
     cpu.SP = 0xFF;

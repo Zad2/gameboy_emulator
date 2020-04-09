@@ -20,12 +20,10 @@
     ck_assert_int_eq(bus_forced_plug(bus, c, 0, (addr_t)(BUS_SIZE-1),0), ERR_NONE); \
 
 #define INIT_CPU(cpu, c) \
-    do{ \
     bus_t bus = {0}; \
     ck_assert_int_eq(cpu_init(cpu), ERR_NONE); \
     ck_assert_int_eq(cpu_plug(cpu,&bus), ERR_NONE); \
-    COMPONENT_FULL_BUS(bus,c);\
-    } while(0)
+    COMPONENT_FULL_BUS(bus,c)
 
 #define INIT_RUN()\
     cpu_t cpu;\
