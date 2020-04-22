@@ -54,7 +54,7 @@ const opcode_t instructions[] = {
     0x00,       // NOP
     0x33,       // INC SP       (INC_R16SP)    ---> ++SP : 6
     0x39,       // ADD HL, SP   (ADD_HL_R16SP) --->  HL = 0x03 + 0x06 = 0x09
-    0xBD,       // CP A, L      (CP_A_R8)      ---> A > 9  --> F = Z1HC0000b = 01010000b = 0x60
+    0xBD,       // CP A, L      (CP_A_R8)      ---> A > 9  --> F = Z1HC0000b = 01100000b = 0x60
     0x00,       // NOP
     0xCB, 0xC7, // SET 0, A     (CHG_U3_R8)    ---> A = A & 0x01 = 0x51
     0x00,       // NOP
