@@ -9,6 +9,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -18,19 +19,19 @@ extern "C" {
 /**
  * @brief types for Game Boy data (8 bits) and addresses (16 bits)
  */
-/* TODO WEEK 05:
- * Définir ici les types addr_t et data_t
- * (et supprimer ces quatre lignes de commentaire).
- */
+typedef uint16_t addr_t;
+typedef uint8_t data_t;
+
+#define MAX_MEM_SIZE 256
 
 /**
  * @brief Structure for memory,
  *        Holds a pointer to the memory, its size and if it is writable
  */
-/* TODO WEEK 05:
- * Définir ici le type memory_t
- * (et supprimer ces quatre lignes de commentaire).
- */
+typedef struct {
+    data_t memory[MAX_MEM_SIZE];
+    size_t size;
+} memory_t;
 
 /**
  * @brief Creates memory structure

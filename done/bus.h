@@ -13,6 +13,7 @@
 
 #include "memory.h"     // addr_t and data_t
 #include "component.h"
+#include "bit.h"        // merge8() lsb8() msb8()
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,12 +22,9 @@ extern "C" {
 #define BUS_SIZE 65536
 
 /**
- * @ brief Bus Type, a table of memory pointer pointing to the various component memories
+ * @brief Bus Type, a table of memory pointer pointing to the various component memories
  */
-/* TODO WEEK 05:
- * Définir ici le type bus_t
- * (et supprimer ces quatre lignes de commentaire).
- */
+typedef data_t* bus_t[BUS_SIZE];
 
 /**
  * @brief Plug a component into the bus

@@ -3,6 +3,7 @@
 #include <inttypes.h> // for PRIx8, etc.
 #include "bit.h"
 
+
 // ======================================================================
 /**
  * @brief a type to represent 1 single bit.
