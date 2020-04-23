@@ -16,6 +16,7 @@ extern "C" {
 
 #include "alu.h"
 #include "bus.h"
+#include "error.h"
 
 //=========================================================================
 /**
@@ -36,43 +37,45 @@ typedef enum {
 /**
  * @brief Type to represent CPU
  */
-union reg_AF {
-  struct {
-    uint8_t A;
-    uint8_t F;
-  };
-  uint16_t AF;
-};
-union reg_BC {
-  struct {
-    uint8_t B;
-    uint8_t C;
-  };
-  uint16_t BC;
-};
-union reg_DE {
-  struct {
-    uint8_t D;
-    uint8_t E;
-  };
-  uint16_t DE;
-};
-union reg_HL {
-  struct {
-    uint8_t H;
-    uint8_t L;
-  };
-  uint16_t HL;
-};
 typedef struct {
     alu_output_t alu;
-    union reg_AF AF;
-    union reg_BC BC;
-    union reg_DE DE;
-    union reg_HL HL;
+    union {
+        struct {
+            uint8_t F;
+
+            uint8_t A;
+        };
+        uint16_t AF;
+    };
+    union {
+        struct {
+            uint8_t C;
+
+            uint8_t B;
+
+        };
+        uint16_t BC;
+    };
+    union {
+        struct {
+            uint8_t E;
+
+            uint8_t D;
+        };
+        uint16_t DE;
+    };
+    union {
+        struct {
+            uint8_t L;
+            uint8_t H;
+        };
+        uint16_t HL;
+    };
     uint16_t PC;
     uint16_t SP;
-} cpu_t; 
+    bus_t* bus;
+    uint8_t idle_time;
+} cpu_t;
 
 
 //=========================================================================

@@ -17,7 +17,7 @@ flag_bit_t get_flag(flags_t flags, flag_bit_t flag)
 void set_flag(flags_t *flags, flag_bit_t flag)
 {
     if (flag == FLAG_Z || flag == FLAG_N || flag == FLAG_H || flag == FLAG_C) {
-        *flags = *flags | flag;
+        *flags = *flags | (flags_t)flag;
     }
     // Add errors (maybe)
 }
@@ -28,8 +28,8 @@ int alu_add8(alu_output_t *result, uint8_t x, uint8_t y, bit_t c0)
         return ERR_BAD_PARAMETER;
     }
 
-    uint8_t temp = lsb4(x) + lsb4(y) + c0;          // Compute the 4 LSBs of the result
-    uint8_t temp1 = msb4(x) + msb4(y) + msb4(temp); // Compute the 4 MSBs of the result
+    uint8_t temp = (uint8_t) (lsb4(x) + lsb4(y) + c0);          // Compute the 4 LSBs of the result
+    uint8_t temp1 = (uint8_t) (msb4(x) + msb4(y) + msb4(temp)); // Compute the 4 MSBs of the result
     uint16_t rslt = merge8(merge4(temp, temp1), 0); // Transforming 8-bit result to 16 bits
 
     result->value = rslt;
@@ -55,8 +55,8 @@ int alu_sub8(alu_output_t *result, uint8_t x, uint8_t y, bit_t b0)
         return ERR_BAD_PARAMETER;
     }
 
-    uint8_t temp = lsb4(x) - lsb4(y) - b0;          //Compute the 4 LSBs of the result
-    uint8_t temp1 = msb4(x) - msb4(y) + msb4(temp); // Compute the 4 MSBs of the result
+    uint8_t temp = (uint8_t) (lsb4(x) - lsb4(y) - b0);          //Compute the 4 LSBs of the result
+    uint8_t temp1 = (uint8_t) (msb4(x) - msb4(y) + msb4(temp)); // Compute the 4 MSBs of the result
     uint16_t rslt = merge8(merge4(temp, temp1), 0); // Transforming 8-bit result to 16 bits
 
     result->value = rslt;
@@ -83,12 +83,12 @@ int alu_add16_low(alu_output_t *result, uint16_t x, uint16_t y)
     uint8_t X = lsb8(x);
     uint8_t Y = lsb8(y);
 
-    uint8_t temp0 = lsb4(X) + lsb4(Y);          // Compute the 4 LSBs of the result
-    uint8_t temp01 = msb4(X) + msb4(Y) + msb4(temp0); // Compute the 4 MSBs of the result
+    uint8_t temp0 = (uint8_t) (lsb4(X) + lsb4(Y));          // Compute the 4 LSBs of the result
+    uint8_t temp01 = (uint8_t) (msb4(X) + msb4(Y) + msb4(temp0)); // Compute the 4 MSBs of the result
 
-    uint16_t temp = X + Y; //Compute the 8 LSBs of the result
-    uint16_t temp1 = msb8(x) + msb8(y) + msb8(temp); // Compute the 8 MSBs of the result
-    uint16_t rslt = merge8(temp, temp1);
+    uint16_t temp = (uint16_t) (X + Y); //Compute the 8 LSBs of the result
+    uint16_t temp1 = (uint16_t) (msb8(x) + msb8(y) + msb8(temp)); // Compute the 8 MSBs of the result
+    uint16_t rslt = merge8((uint8_t)temp, (uint8_t)temp1);
 
     result->value = rslt;
 
@@ -113,12 +113,12 @@ int alu_add16_high(alu_output_t *result, uint16_t x, uint16_t y)
     uint8_t X = msb8(x);
     uint8_t Y = msb8(y);
 
-    uint8_t temp0 = lsb4(X) + lsb4(Y);          // Compute the 4 LSBs of the result
-    uint8_t temp01 = msb4(X) + msb4(Y) + msb4(temp0); // Compute the 4 MSBs of the result
+    uint8_t temp0 = (uint8_t) (lsb4(X) + lsb4(Y));          // Compute the 4 LSBs of the result
+    uint8_t temp01 = (uint8_t) (msb4(X) + msb4(Y) + msb4(temp0)); // Compute the 4 MSBs of the result
 
-    uint16_t temp = lsb8(x) + lsb8(y);               //Compute the 8 LSBs of the result
-    uint16_t temp1 = X + Y + msb8(temp); // Compute the 8 MSBs of the result
-    uint16_t rslt = merge8(temp, temp1);
+    uint16_t temp = (uint16_t) (lsb8(x) + lsb8(y));               //Compute the 8 LSBs of the result
+    uint16_t temp1 = (uint16_t) (X + Y + msb8(temp)); // Compute the 8 MSBs of the result
+    uint16_t rslt = merge8((uint8_t)temp, (uint8_t)temp1);
 
     result->value = rslt;
 
@@ -144,10 +144,10 @@ int alu_shift(alu_output_t *result, uint8_t x, rot_dir_t dir)
     result->flags = 0;
     if (dir == LEFT) {
         ejected = bit_get(x, SIZE_BYTE - 1);
-        x = x << 1;
+        x = (uint8_t) (x << 1);
     } else if (dir == RIGHT) {
         ejected = bit_get(x, 0);
-        x = x >> 1;
+        x = (uint8_t) (x >> 1);
     }
 
     result->value = merge8(x, 0);
@@ -172,7 +172,7 @@ int alu_shiftR_A(alu_output_t *result, uint8_t x)
     bit_t ejected = bit_get(x, 0);
     x = x >> 1;
 
-    result->value = (msb << (SIZE_BYTE - 1)) | x;
+    result->value = (uint16_t)((msb << (SIZE_BYTE - 1)) | x);
     result->flags = 0;
 
     if (x == 0) {

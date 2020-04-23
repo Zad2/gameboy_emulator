@@ -4,6 +4,7 @@
 #include "bus.h"
 #include "component.h"
 #include "gameboy.h"
+#include "cpu.h"
 
 int gameboy_create(gameboy_t* gameboy, const char* filename)
 {
@@ -53,9 +54,10 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     return ERR_NONE;
 }
 
-void gameboy_free(gameboy_t* gameboy){
-    if (gameboy != NULL){
-        for (size_t i = 0; i < GB_NB_COMPONENTS; ++i){
+void gameboy_free(gameboy_t* gameboy)
+{
+    if (gameboy != NULL) {
+        for (size_t i = 0; i < GB_NB_COMPONENTS; ++i) {
             bus_unplug(gameboy->bus, &gameboy->components[i]);
             component_free(&gameboy->components[i]);
             //&gameboy->components[i]= NULL;

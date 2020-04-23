@@ -7,21 +7,6 @@
 #include "bus.h"
 #include "error.h"
 
-//------Auxiliary functions------
-/**
- * @brief Checks if an address is inside given bounds
- *
- * @param address The address to check
- * @param min The minimum possible address (included)
- * @param max The maximum possible addres (included)
- * @return int error code
- */
-int check_bounds(addr_t address, addr_t min, addr_t max)
-{
-    return (address < min || address > max) ? ERR_BAD_PARAMETER : ERR_NONE;
-}
-//-------------------------------
-
 int bus_remap(bus_t bus, component_t *c, addr_t offset)
 {
     addr_t start = c->start;
@@ -133,7 +118,7 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
     }
 
     data_t dat16 = 0xff;
-    
+
 
     *data16 = (addr_t) dat16;
     if (bus[address] != NULL) {
@@ -147,7 +132,7 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
         }
 
         //Extracting MSBs from bus at addr_t address + 1
-        err = bus_read(bus, address + 1, &ptr2);
+        err = bus_read(bus, (addr_t) (address + 1), &ptr2);
         if (err != ERR_NONE) {
             return err;
         }
@@ -161,8 +146,6 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
 
 int bus_write(bus_t bus, addr_t address, data_t data)
 {
-
-
     if (bus[address] == NULL ) {
         return ERR_BAD_PARAMETER;
     }
@@ -174,7 +157,7 @@ int bus_write(bus_t bus, addr_t address, data_t data)
 
 int bus_write16(bus_t bus, addr_t address, addr_t data16)
 {
-    if (address <= 0 || bus[address] == NULL) {
+    if (bus[address] == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
