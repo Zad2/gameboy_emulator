@@ -18,16 +18,20 @@
 extern "C" {
 #endif
 
-#define GB_NB_COMPONENTS 5
+#define GB_NB_COMPONENTS 6
 
 /**
  * @brief Game Boy data structure.
  *        Regroups everything needed to simulate the Game Boy.
  */
-/* TODO WEEK 06:
- * Définir ici le type gameboy_t
- * (et supprimer ces quatre lignes de commentaire).
- */
+typedef struct {
+    bus_t bus;
+    component_t components[GB_NB_COMPONENTS];
+} gameboy_t;
+
+typedef enum {
+    WORK_RAM, REGISTERS, EXTERN_RAM, VIDEO_RAM, GRAPH_RAM, USELESS
+} gb_components;
 
 // Number of Game Boy cycles per second (= 2^20)
 #define GB_CYCLES_PER_S  (((uint64_t) 1) << 20)

@@ -26,10 +26,10 @@
 #include "error.h"
 #include "util.h"
 
-#define INIT            \
-    bus_t bus;          \
+#define INIT \
+    bus_t bus; \
     zero_init_var(bus); \
-    component_t c;      \
+    component_t c; \
     zero_init_var(c)
 
 START_TEST(bus_plug_err)
@@ -42,13 +42,9 @@ START_TEST(bus_plug_err)
     ck_assert_int_eq(bus_plug(bus, NULL, 0, 0), ERR_BAD_PARAMETER);
     const int err = bus_plug(bus, &c, 0, 0);
     ck_assert((err == ERR_BAD_PARAMETER) || (err == ERR_ADDRESS));
-
     ck_assert_int_eq(component_create(&c, 2), ERR_NONE);
-
-    ck_assert_int_eq(bus_plug(bus, &c, 0, 5), ERR_ADDRESS); // range too large
     ck_assert_int_eq(bus_plug(bus, &c, 0, 1), ERR_NONE);
     ck_assert_int_eq(bus_plug(bus, &c, 0, 1), ERR_ADDRESS); // since we plugged already
-
     ck_assert_int_eq(bus_unplug(bus, NULL), ERR_BAD_PARAMETER);
     component_free(&c);
 
@@ -69,26 +65,24 @@ START_TEST(bus_plug_exec)
     INIT;
     ck_assert_int_eq(component_create(&c, c_size + 1), ERR_NONE);
 
-    ck_assert_int_eq(bus_plug(bus, &c, 0, (addr_t)c_size), ERR_NONE);
+    ck_assert_int_eq(bus_plug(bus, &c, 0, (addr_t) c_size), ERR_NONE);
     ck_assert(c.start == 0);
     ck_assert(c.end == c_size);
 
-    for (size_t i = 0; i < c_size; ++i)
-    {
+    for (size_t i = 0; i < c_size; ++i) {
         // fprintf(stderr, "Running bus plug for bus[i] = c.mem.memory + i  for i = %u\n", i);
         // fprintf(stderr, "bus[i] = %zx \t ||| \t c.mem.memory = %zx\n", bus[i], c.mem.memory);
-        ck_assert(bus[i] == c.mem.memory + i);
+        ck_assert(bus[i] == c.mem->memory + i);
         ck_assert(*bus[i] == 0);
         *bus[i] = data;
-        ck_assert(c.mem.memory[i] == data);
+        ck_assert(c.mem->memory[i] == data);
     }
 
     ck_assert_int_eq(bus_unplug(bus, &c), ERR_NONE);
     ck_assert(c.start == 0);
     ck_assert(c.end == 0);
 
-    for (size_t i = 0; i < c_size; ++i)
-    {
+    for (size_t i = 0; i < c_size; ++i) {
         ck_assert(bus[i] == NULL);
     }
 
@@ -99,6 +93,7 @@ START_TEST(bus_plug_exec)
 #endif
 }
 END_TEST
+
 
 START_TEST(bus_read_err)
 {
@@ -126,6 +121,7 @@ START_TEST(bus_read_err)
 }
 END_TEST
 
+
 START_TEST(bus_read_exec)
 {
 // ------------------------------------------------------------
@@ -139,15 +135,13 @@ START_TEST(bus_read_exec)
 
     ck_assert_int_eq(bus_plug(bus, &c, 0, (addr_t)c_size), ERR_NONE);
 
-    for (size_t i = 0; i < c_size; ++i)
-    {
+    for (size_t i = 0; i < c_size; ++i) {
         *bus[i] = (data_t)i;
     }
 
-    for (size_t addr = 0; addr < c_size; ++addr)
-    {
-        ck_assert_int_eq(bus_read(bus, (addr_t)addr, &data), ERR_NONE);
-        fprintf(stderr, " data = %u \t|||\t (data_t)addr = %u\n", data, (data_t)addr);
+    for (size_t addr = 0; addr < c_size; ++addr) {
+        ck_assert_int_eq(bus_read(bus, (addr_t) addr, &data), ERR_NONE);
+        //fprintf(stderr, " data = %u \t|||\t (data_t)addr = %u\n", data, (data_t)addr);
         ck_assert(data == (data_t)addr);
     }
 
@@ -158,6 +152,7 @@ START_TEST(bus_read_exec)
 #endif
 }
 END_TEST
+
 
 START_TEST(bus_write_err)
 {
@@ -180,6 +175,7 @@ START_TEST(bus_write_err)
 }
 END_TEST
 
+
 START_TEST(bus_write_exec)
 {
 // ------------------------------------------------------------
@@ -193,17 +189,15 @@ START_TEST(bus_write_exec)
 
     ck_assert_int_eq(bus_plug(bus, &c, 0, (addr_t)c_size), ERR_NONE);
 
-    for (size_t i = 0; i < c_size; ++i)
-    {
-        *bus[i] = (data_t)i;
+    for (size_t i = 0; i < c_size; ++i) {
+        *bus[i] = (data_t) i;
     }
 
-    for (size_t addr = 0; addr < c_size; ++addr)
-    {
-        ck_assert_int_eq(bus_write(bus, (addr_t)addr, (data_t)addr), ERR_NONE);
+    for (size_t addr = 0; addr < c_size; ++addr) {
+        ck_assert_int_eq(bus_write(bus, (addr_t) addr, (data_t) addr), ERR_NONE);
         data = 0x4a; // whatever
-        ck_assert_int_eq(bus_read(bus, (addr_t)addr, &data), ERR_NONE);
-        ck_assert(data == (data_t)addr);
+        ck_assert_int_eq(bus_read(bus, (addr_t) addr, &data), ERR_NONE);
+        ck_assert(data == (data_t) addr);
     }
 
     component_free(&c);
@@ -214,7 +208,8 @@ START_TEST(bus_write_exec)
 }
 END_TEST
 
-Suite *bus_test_suite()
+
+Suite* bus_test_suite()
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -222,7 +217,7 @@ Suite *bus_test_suite()
     srand(time(NULL) ^ getpid() ^ pthread_self());
 #pragma GCC diagnostic pop
 
-    Suite *s = suite_create("bus.c Tests");
+    Suite* s = suite_create("bus.c Tests");
 
     Add_Case(s, tc3, "bus tests");
 

@@ -130,6 +130,14 @@ START_TEST(lsb4_exec)
                       input[i_], result, expected[i_]);
     }
 
+    uint8_t a = 0xAB;
+    uint8_t ex = 0xAA;
+    bit_edit(&a,0,0);
+    ck_assert_msg(a == ex);
+
+    bit_edit(&a,0,1);
+    ck_assert_msg(0xAB == a);
+
 #ifdef WITH_PRINT
     printf("=== END of %s\n", __func__);
 #endif

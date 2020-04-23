@@ -10,7 +10,7 @@
 //------Auxiliary functions------
 /**
  * @brief Checks if an address is inside given bounds
- * 
+ *
  * @param address The address to check
  * @param min The minimum possible address (included)
  * @param max The maximum possible addres (included)
@@ -26,22 +26,19 @@ int bus_remap(bus_t bus, component_t *c, addr_t offset)
 {
     addr_t start = c->start;
     addr_t end = c->end;
-    memory_t mem = c->mem;
 
     // Check if the span of the zone is larger than the component's memory,
     // Or if the component's start address is bigger than its end
-    if (end - start + offset >= mem.size)
-    {
+    if (c->mem == NULL || end - start + offset >= (addr_t) (*c->mem).allocated) { //allocated?
+
         return ERR_ADDRESS;
     }
-    if (start > end || end == 0)
-    {
+    if (start > end || end == 0) {
         return ERR_BAD_PARAMETER;
     }
 
-    for (int i = 0; i <= end - start; ++i) //should it be addr_t i
-    {
-        bus[start + i] = &(c->mem.memory[offset + i]);
+    for (int i = 0; i <= end - start; ++i) { //should it be addr_t i
+        bus[start + i] = &(c->mem->memory[offset + i]);
     }
 
     return ERR_NONE;
@@ -49,17 +46,19 @@ int bus_remap(bus_t bus, component_t *c, addr_t offset)
 
 int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t offset)
 {
-    if (c == NULL)
-    {
+    if (c == NULL) {
         return ERR_BAD_PARAMETER;
+    }
+
+    if (c->mem == NULL || end-start + offset >= (addr_t)(*c->mem).allocated ||  start>end) { //start >end here or in err_bad_parameter
+        return ERR_ADDRESS;
     }
 
     c->start = start;
     c->end = end;
     int err = bus_remap(bus, c, offset);
 
-    if (err != ERR_NONE)
-    {
+    if (err != ERR_NONE) {
         c->start = 0;
         c->end = 0;
         return err;
@@ -70,15 +69,12 @@ int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t 
 
 int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 {
-    if (c == NULL)
-    {
+    if (c == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
-    for (int i = start; i <= end; i++) //revert
-    {
-        if (bus[i] != NULL)
-        {
+    for (int i = start; i <= end; i++) { //revert
+        if (bus[i] != NULL) {
             return ERR_ADDRESS;
         }
     }
@@ -88,16 +84,14 @@ int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 
 int bus_unplug(bus_t bus, component_t *c)
 {
-    if (c == NULL)
-    {
+    if (c == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
     addr_t start = c->start;
     addr_t end = c->end;
 
-    for (int i = start; i <= end; ++i)
-    {
+    for (int i = start; i <= end; ++i) {
         bus[i] = NULL;
     }
 
@@ -108,16 +102,11 @@ int bus_unplug(bus_t bus, component_t *c)
 
 int bus_read(const bus_t bus, addr_t address, data_t *data)
 {
-    int err = ERR_NONE;
-    if ((err = check_bounds(address, 0, BUS_SIZE)) != ERR_NONE)
-    {
-        //return err;
-    }
 
-    if (data == NULL)
-    {
+    if (data == NULL) {
         return ERR_BAD_PARAMETER;
     }
+
 
     data_t dat = 0xff;
     *data = dat;
@@ -128,93 +117,72 @@ int bus_read(const bus_t bus, addr_t address, data_t *data)
     //printf("bus[address] = %zx\n", bus[address]);
     //printf("*bus[address] = %zx\n", *bus[address]);
 
-    if (bus[address] != NULL)
-    {
+    if (bus[address] != NULL) {
         *data = *bus[address];
     }
 
     //printf("post data = %u\n", *data);
 
-    printf("--------------------------------------------------\n");
     return ERR_NONE;
 }
 
 int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
 {
-    int err = ERR_NONE;
-    if ((err = check_bounds(address, 0, BUS_SIZE)) != ERR_NONE)
-    {
-        return err;
-    }
-
-    if (data16 == NULL)
-    {
+    if (data16 == NULL) {
         return ERR_BAD_PARAMETER;
     }
-    addr_t dat16 = 0xff;
 
-    if (bus[address] != NULL)
-    {
-        data_t *ptr1 = &dat16;
-        data_t *ptr2 = &dat16;
+    data_t dat16 = 0xff;
+    
+
+    *data16 = (addr_t) dat16;
+    if (bus[address] != NULL) {
+        data_t ptr1 = dat16;
+        data_t ptr2 = dat16;
 
         // Extracting LSBs from bus at addr_t adress
-        err = bus_read(bus, address, ptr1);
-        if (err != ERR_NONE)
-        {
+        int err = bus_read(bus, address, &ptr1);
+        if (err != ERR_NONE) {
             return err;
         }
 
         //Extracting MSBs from bus at addr_t address + 1
-        err = bus_read(bus, address + 1, ptr2);
-        if (err != ERR_NONE)
-        {
+        err = bus_read(bus, address + 1, &ptr2);
+        if (err != ERR_NONE) {
             return err;
         }
 
-        dat16 = merge8(*ptr1, *ptr2);
+        *data16 = (addr_t) merge8(ptr1, ptr2);
     }
 
-    data16 = &dat16;
 
     return ERR_NONE;
 }
 
 int bus_write(bus_t bus, addr_t address, data_t data)
 {
-    int err = ERR_NONE;
-    if ((err = check_bounds(address, 0, BUS_SIZE)) != ERR_NONE)
-    {
-        return err;
-    }
 
-    if (address == 0)
-    {
+
+    if (bus[address] == NULL ) {
         return ERR_BAD_PARAMETER;
     }
 
-    bus[address] = &data;
+    //bus[address] = &data;
+    *bus[address] = data;
     return ERR_NONE;
 }
 
 int bus_write16(bus_t bus, addr_t address, addr_t data16)
 {
-    int err = ERR_NONE;
-    if ((err = check_bounds(address, 0, BUS_SIZE)) != ERR_NONE)
-    {
-        return err;
-    }
-
-    if (address == 0)
-    {
+    if (address <= 0 || bus[address] == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
     data_t data1 = lsb8(data16);
     data_t data2 = msb8(data16);
 
-    bus[address] = &data1;
-    bus[address + 1] = &data2;
+    *bus[address] = data1;
+    *bus[address + 1] = data2;
 
     return ERR_NONE;
 }

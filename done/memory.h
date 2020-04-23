@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,15 +23,15 @@ extern "C" {
 typedef uint16_t addr_t;
 typedef uint8_t data_t;
 
-#define MAX_MEM_SIZE 256
 
 /**
  * @brief Structure for memory,
  *        Holds a pointer to the memory, its size and if it is writable
  */
 typedef struct {
-    data_t memory[MAX_MEM_SIZE];
     size_t size;
+    size_t allocated;
+    data_t *memory;
 } memory_t;
 
 /**

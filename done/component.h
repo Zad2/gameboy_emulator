@@ -12,6 +12,7 @@
 #include <stdbool.h>
 
 #include "memory.h"
+#include "error.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,10 +24,10 @@ extern "C" {
  *        Holds a pointer to its memory and start/end addresses
  */
 typedef struct {
-    memory_t mem;
+    memory_t *mem;
     addr_t start;
     addr_t end;
-}component_t;
+} component_t;
 
 /**
  * @brief Creates a component given various arguments
