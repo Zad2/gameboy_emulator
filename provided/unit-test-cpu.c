@@ -19,7 +19,6 @@
 
 #include "tests.h"
 #include "alu.h"
-#include "opcode.h"
 #include "bit.h"
 #include "util.h"
 #include "error.h"
