@@ -35,7 +35,8 @@ typedef enum {
 
 //=========================================================================
 /**
- * @brief Type to represent CPU
+ * @brief Structure representing a CPU with register pairs, a Program Counter
+ * a Stack Pointer, a bus and other elements
  */
 typedef struct {
     alu_output_t alu;

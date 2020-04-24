@@ -1,3 +1,11 @@
+/**
+ * @file cpu.c
+ * @author Joseph Abboud & Zad Abi Fadel
+ * @brief Functions used to create, free and manipulate the cpu of the Gameboy
+ * @date 2020
+ * 
+ */
+
 #include <stdint.h>
 
 #include "alu.h"
@@ -5,21 +13,25 @@
 #include "cpu.h"
 #include "error.h"
 
-int cpu_init(cpu_t* cpu)
+// ==== see cpu.h ========================================
+int cpu_init(cpu_t *cpu)
 {
-    if (cpu == NULL) {
+    if (cpu == NULL)
+    {
         return ERR_BAD_PARAMETER;
     }
 
+    // Set all of the cpu's elements to 0
     memset(cpu, 0, sizeof(cpu_t));
-    cpu->idle_time = 0;
+    cpu->idle_time = 0; // Unnecessary?
     return ERR_NONE;
-
 }
 
-int cpu_plug(cpu_t* cpu, bus_t* bus)
+// ==== see cpu.h ========================================
+int cpu_plug(cpu_t *cpu, bus_t *bus)
 {
-    if (cpu == NULL || bus == NULL) {
+    if (cpu == NULL || bus == NULL)
+    {
         return ERR_BAD_PARAMETER;
     }
 
@@ -27,23 +39,28 @@ int cpu_plug(cpu_t* cpu, bus_t* bus)
     return ERR_NONE;
 }
 
-void cpu_free(cpu_t* cpu)
+// ==== see cpu.h ========================================
+void cpu_free(cpu_t *cpu)
 {
-    if (cpu != NULL) {
+    if (cpu != NULL)
+    {
         cpu->bus = NULL;
     }
 }
 
-int cpu_cycle(cpu_t* cpu)
+// ==== see cpu.h ========================================
+int cpu_cycle(cpu_t *cpu)
 {
 
-    if (cpu == NULL) {
+    if (cpu == NULL)
+    {
         return ERR_BAD_PARAMETER;
     }
 
-    if(cpu->idle_time != 0) {
+    if (cpu->idle_time != 0)
+    {
         --cpu->idle_time;
     }
-    //cpu->PC;
+
     return ERR_NONE;
 }

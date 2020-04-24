@@ -31,6 +31,9 @@ typedef struct {
     cpu_t cpu;
 } gameboy_t;
 
+/**
+ * @brief Enum for the different compononents' indices in the Gameboy's components array
+ */
 typedef enum {
     WORK_RAM, REGISTERS, EXTERN_RAM, VIDEO_RAM, GRAPH_RAM, USELESS
 } gb_components;
