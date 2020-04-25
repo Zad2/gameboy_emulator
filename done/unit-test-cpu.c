@@ -543,30 +543,30 @@ Suite* cpu_test_suite()
 
     Suite* s = suite_create("cpu.c Tests");
 
-    Add_Case(s, tc1, "Cpu Reg S/G Tests");
-    tcase_add_test(tc1, test_reg_get);
-    tcase_add_test(tc1, test_reg_set);
-    tcase_add_test(tc1, test_reg_pair_get);
-    tcase_add_test(tc1, test_reg_pair_set);
+    // Add_Case(s, tc1, "Cpu Reg S/G Tests");
+    // tcase_add_test(tc1, test_reg_get);
+    // tcase_add_test(tc1, test_reg_set);
+    // tcase_add_test(tc1, test_reg_pair_get);
+    // tcase_add_test(tc1, test_reg_pair_set);
 
-    Add_Case(s, tc2, "Cpu Start Tests");
-    tcase_add_test(tc2, test_cpu_init_err);
-    tcase_add_test(tc2, test_cpu_init_exec);
+    // Add_Case(s, tc2, "Cpu Start Tests");
+    // tcase_add_test(tc2, test_cpu_init_err);
+    // tcase_add_test(tc2, test_cpu_init_exec);
 
-    Add_Case(s, tc3, "Cpu Bus Tests");
-    tcase_add_test(tc3, test_cpu_plug_err);
-    tcase_add_test(tc3, test_cpu_plug_exec);
+    // Add_Case(s, tc3, "Cpu Bus Tests");
+    // tcase_add_test(tc3, test_cpu_plug_err);
+    // tcase_add_test(tc3, test_cpu_plug_exec);
 
-    Add_Case(s, tc4, "Cpu Bus R/W Tests");
-    tcase_add_test(tc4, test_cpu_read_at_idx);
-    tcase_add_test(tc4, test_cpu_read16_at_idx);
-    tcase_add_test(tc4, test_cpu_write_at_idx);
-    tcase_add_test(tc4, test_cpu_write16_at_idx);
+    // Add_Case(s, tc4, "Cpu Bus R/W Tests");
+    // tcase_add_test(tc4, test_cpu_read_at_idx);
+    // tcase_add_test(tc4, test_cpu_read16_at_idx);
+    // tcase_add_test(tc4, test_cpu_write_at_idx);
+    // tcase_add_test(tc4, test_cpu_write16_at_idx);
 
-    tcase_add_test(tc4, test_cpu_bus_HL_macro);
-    tcase_add_test(tc4, test_cpu_bus_after_op_macro);
-    tcase_add_test(tc4, test_cpu_sp_exec);
-    tcase_add_test(tc4, test_cpu_sp_exec);
+    // tcase_add_test(tc4, test_cpu_bus_HL_macro);
+    // tcase_add_test(tc4, test_cpu_bus_after_op_macro);
+    // tcase_add_test(tc4, test_cpu_sp_exec);
+    // tcase_add_test(tc4, test_cpu_sp_exec);
 
     Add_Case(s, tc5, "Cpu Cycle Tests");
     tcase_add_test(tc5, test_cpu_cycle_err);

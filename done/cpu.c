@@ -54,15 +54,15 @@ void cpu_free(cpu_t *cpu)
  * @param lu Instruction to execute
  * @return int Error code
  */
-int cpu_dispatch(cpu_t *cpu, const instruction_t *lu)
+int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
 {
     if (cpu == NULL || lu == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
     // Set flags and value to 0
-    cpu->alu.flags = 0;
-    cpu->alu.value = 0;
+    cpu->alu.flags = (flags_t) 0;
+    cpu->alu.value = (uint16_t) 0;
 
     // Execute instruction
     int err = cpu_dispatch_storage(lu, cpu);
@@ -92,11 +92,11 @@ int cpu_do_cycle(cpu_t *cpu)
     data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
     if (prefix == (data_t) 0xCB) {
         data_t opcode = cpu_read_data_after_opcode(cpu);
-        return cpu_dispatch(cpu, &instruction_prefixed[opcode]);
+        return cpu_dispatch(&instruction_prefixed[opcode], cpu);
     }
 
     // data_t opcode = cpu_read_data_after_opcode(cpu);
-    return cpu_dispatch(cpu, &instruction_direct[prefix]);
+    return cpu_dispatch(&instruction_direct[prefix], cpu);
 }
 
 //==== see cpu.h ========================================

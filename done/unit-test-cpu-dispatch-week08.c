@@ -1506,16 +1506,16 @@ Suite* cpu_test_suite()
     // tcase_add_test(tcalu0, test_INC8);
     // tcase_add_test(tcalu0, test_INC16);
 
-    //Add_Case(s, tcalu5, "Cpu Dispatch ALU ROT Tests");
+    Add_Case(s, tcalu5, "Cpu Dispatch ALU ROT Tests");
     // tcase_add_test(tcalu5, test_ROT_R8);
 
-    //Add_Case(s, tcalu6, "Cpu Dispatch ALU SHIFT Tests");
+    Add_Case(s, tcalu6, "Cpu Dispatch ALU SHIFT Tests");
     // tcase_add_test(tcalu6, test_SLA_R8);
 
-    //Add_Case(s, tcalu7, "Cpu Dispatch ALU CP Tests");
+    Add_Case(s, tcalu7, "Cpu Dispatch ALU CP Tests");
     // tcase_add_test(tcalu7, test_CP_A_R8);
 
-    //Add_Case(s, tcalu9, "Cpu Dispatch ALU BIT/CHG Tests");
+    Add_Case(s, tcalu9, "Cpu Dispatch ALU BIT/CHG Tests");
     // tcase_add_test(tcalu9, test_BIT_U3_R8);
     // tcase_add_test(tcalu9, test_CHG_U3_R8);
 
@@ -1548,11 +1548,11 @@ Suite* cpu_test_suite()
 
     Add_Case(s, tcld3, "Cpu Dispatch LD MISC Tests");
     tcase_add_test(tcld3, test_LD_SP_HL);
-    tcase_add_test(tcld3, test_LD_R8_R8);
+    // tcase_add_test(tcld3, test_LD_R8_R8);
 
     Add_Case(s, tc99, "Cpu Dispatch OTHER Tests");
-    // tcase_add_test(tc99, test_STOP); // Doing Nothing
-    // tcase_add_test(tc99, test_NOP);  // Doing Nothing
+    tcase_add_test(tc99, test_STOP); // Doing Nothing
+    tcase_add_test(tc99, test_NOP);  // Doing Nothing
 
     return s;
 }

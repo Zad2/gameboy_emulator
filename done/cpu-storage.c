@@ -134,7 +134,7 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_HLR_R8:
-        cpu_write_at_HL(cpu, extract_reg(lu->opcode, 0));
+        cpu_write_at_HL(cpu, cpu_reg_get(cpu, extract_reg(lu->opcode, 0)));
         break;
 
     case LD_N16R_A:
@@ -142,7 +142,7 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_N16R_SP:
-        cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu), cpu_reg_pair_SP_get(cpu, cpu_AF_get(cpu)));
+        cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu), cpu_reg_pair_SP_get(cpu, REG_AF_CODE));
         break;
 
     case LD_N8R_A:
@@ -150,7 +150,7 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_R16SP_N16:
-        cpu_reg_pair_set(cpu, cpu_reg_get(cpu, extract_reg_pair(lu->opcode)), cpu_read_addr_after_opcode(cpu));
+        cpu_reg_pair_SP_set(cpu, extract_reg_pair(lu->opcode), cpu_read_addr_after_opcode(cpu));
         break;
 
     case LD_R8_HLR:
@@ -162,9 +162,9 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_R8_R8: {
-        data_t r = extract_n3(lu->opcode);
-        data_t s = extract_reg(lu->opcode, 0);
-        (r != s) ? cpu_reg_set(cpu, r, cpu_reg_get(cpu, s)) : 0 /*Do nothing*/;
+        reg_kind r = extract_n3(lu->opcode);
+        reg_kind s = extract_reg(lu->opcode, 0);
+        (r != s) ? cpu_reg_set(cpu, r, cpu_reg_get(cpu, s)) : cpu_reg_set(cpu, r, r) /*Do nothing*/;
     }
     break;
 
@@ -173,13 +173,13 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case POP_R16:
-        cpu_reg_set(cpu, extract_reg_pair(lu->opcode), cpu_read16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE)));
+        cpu_reg_pair_set(cpu, extract_reg_pair(lu->opcode), cpu_read16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE)));
         cpu_reg_pair_SP_set(cpu, REG_AF_CODE, cpu_reg_pair_SP_get(cpu, REG_AF_CODE) + WORD_SIZE);
         break;
 
     case PUSH_R16:
         cpu_reg_pair_SP_set(cpu, REG_AF_CODE, cpu_reg_pair_SP_get(cpu, REG_AF_CODE) - WORD_SIZE);
-        cpu_write16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE), extract_reg_pair(lu->opcode));
+        cpu_write16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE), cpu_reg_pair_get(cpu, extract_reg_pair(lu->opcode)));
         break;
 
     default:
