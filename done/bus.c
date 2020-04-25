@@ -23,7 +23,7 @@ int bus_remap(bus_t bus, component_t *c, addr_t offset)
 
     // Check if the span of the zone is larger than the component's memory,
     // Or if the component's start address is bigger than its end
-    if (c->mem == NULL || end - start + offset >= (addr_t)(*c->mem).allocated) {
+    if (c->mem == NULL || end - start + offset >= c->mem->allocated) {
         //allocated?
 
         return ERR_ADDRESS;
@@ -50,7 +50,7 @@ int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t 
     }
 
     // Same error checks as bus_remap
-    if (c->mem == NULL || end - start + offset >= (addr_t)(*c->mem).allocated || start > end) {
+    if (c->mem == NULL || end - start + offset >= c->mem->allocated || start > end) {
         return ERR_ADDRESS;
     }
 
