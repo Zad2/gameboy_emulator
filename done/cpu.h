@@ -17,6 +17,7 @@ extern "C" {
 #include "alu.h"
 #include "bus.h"
 #include "error.h"
+#include "opcode.h"
 
 //=========================================================================
 /**
