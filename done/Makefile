@@ -35,7 +35,7 @@ unit-test-bus: unit-test-bus.o bus.o bit.o component.o memory.o tests.h
 unit-test-memory: unit-test-memory.o bus.o bit.o component.o memory.o tests.h
 unit-test-component: unit-test-component.o bus.o bit.o component.o memory.o tests.h
 unit-test-gameboy: unit-test-gameboy.o gameboy.o component.o memory.o bus.o bit.o cpu.o tests.h \
-	cpu-storage.o opcode.o
+	cpu-storage.o opcode.o cpu-registers.o
 unit-test-cpu: unit-test-cpu.o cpu-storage.o cpu-registers.o cpu.o  bit.o component.o \
 	memory.o bus.o gameboy.o tests.h opcode.o
 unit-test-cpu-dispatch-week08: unit-test-cpu-dispatch-week08.o bit.o alu.o cpu.h bus.o cpu-storage.o \

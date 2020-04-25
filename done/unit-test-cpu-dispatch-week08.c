@@ -1495,7 +1495,7 @@ Suite* cpu_test_suite()
     Add_Case(s, tc1, "Cpu Basic Dispatch Tests");
     tcase_add_test(tc1, dispatch_err);
 
-    //Add_Case(s, tcalu0, "Cpu Dispatch ALU ADD Tests");
+    Add_Case(s, tcalu0, "Cpu Dispatch ALU ADD Tests");
     // tcase_add_test(tcalu0, test_ADD_A_HLR);
     // tcase_add_test(tcalu0, test_ADC_A_HLR);
     // tcase_add_test(tcalu0, test_ADD_A_N8);

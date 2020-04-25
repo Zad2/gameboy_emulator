@@ -85,8 +85,18 @@ int cpu_dispatch(cpu_t *cpu, const instruction_t *lu)
 */
 int cpu_do_cycle(cpu_t *cpu)
 {
-    data_t opcode = cpu_read_at_idx(cpu, cpu->PC);
-    return cpu_dispatch(cpu, &instruction_direct[opcode]);
+    if (cpu == NULL) {
+        return ERR_BAD_PARAMETER;
+    }
+
+    data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
+    if (prefix == (data_t) 0xCB) {
+        data_t opcode = cpu_read_data_after_opcode(cpu);
+        return cpu_dispatch(cpu, &instruction_prefixed[opcode]);
+    }
+
+    // data_t opcode = cpu_read_data_after_opcode(cpu);
+    return cpu_dispatch(cpu, &instruction_direct[prefix]);
 }
 
 //==== see cpu.h ========================================
