@@ -3,7 +3,7 @@
  * @author Joseph Abboud & Zad Abi Fadel
  * @brief Functions used to access the Gameboy's cpu (read/write registers (single or pairs) )
  * @date 2020
- * 
+ *
  */
 
 #include <stdint.h> // uint8_t
@@ -15,14 +15,12 @@
 // ==== see cpu-registers.h ========================================
 uint16_t cpu_reg_pair_get(const cpu_t *cpu, reg_pair_kind reg)
 {
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return 0;
     }
 
     // Check the register's code and return the equivalent register pair from the cpu
-    switch (reg)
-    {
+    switch (reg) {
     case REG_BC_CODE:
         return cpu->BC;
         break;
@@ -44,14 +42,12 @@ uint16_t cpu_reg_pair_get(const cpu_t *cpu, reg_pair_kind reg)
 // ==== see cpu-registers.h ========================================
 uint8_t cpu_reg_get(const cpu_t *cpu, reg_kind reg)
 {
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return 0;
     }
 
     // Check the register's code and return the equivalent register from the cpu, except for F
-    switch (reg)
-    {
+    switch (reg) {
     case REG_B_CODE:
         return cpu->B;
         break;
@@ -82,13 +78,11 @@ uint8_t cpu_reg_get(const cpu_t *cpu, reg_kind reg)
 // ==== see cpu-registers.h ========================================
 void cpu_reg_pair_set(cpu_t *cpu, reg_pair_kind reg, uint16_t value)
 {
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return;
     }
     // Check the register's code and set the equivalent register pair in the cpu
-    switch (reg)
-    {
+    switch (reg) {
     case REG_BC_CODE:
         cpu->BC = value;
         break;
@@ -111,14 +105,12 @@ void cpu_reg_pair_set(cpu_t *cpu, reg_pair_kind reg, uint16_t value)
 // ==== see cpu-registers.h ========================================
 void cpu_reg_set(cpu_t *cpu, reg_kind reg, uint8_t value)
 {
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return;
     }
 
     // Check the register's code and set the equivalent register in the cpu, except for F
-    switch (reg)
-    {
+    switch (reg) {
     case REG_B_CODE:
         cpu->B = value;
         break;

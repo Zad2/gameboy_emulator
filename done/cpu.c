@@ -3,7 +3,7 @@
  * @author Joseph Abboud & Zad Abi Fadel
  * @brief Functions used to create, free and manipulate the cpu of the Gameboy
  * @date 2020
- * 
+ *
  */
 
 #include <stdint.h>
@@ -16,8 +16,7 @@
 // ==== see cpu.h ========================================
 int cpu_init(cpu_t *cpu)
 {
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -30,8 +29,7 @@ int cpu_init(cpu_t *cpu)
 // ==== see cpu.h ========================================
 int cpu_plug(cpu_t *cpu, bus_t *bus)
 {
-    if (cpu == NULL || bus == NULL)
-    {
+    if (cpu == NULL || bus == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -42,8 +40,7 @@ int cpu_plug(cpu_t *cpu, bus_t *bus)
 // ==== see cpu.h ========================================
 void cpu_free(cpu_t *cpu)
 {
-    if (cpu != NULL)
-    {
+    if (cpu != NULL) {
         cpu->bus = NULL;
     }
 }
@@ -52,13 +49,11 @@ void cpu_free(cpu_t *cpu)
 int cpu_cycle(cpu_t *cpu)
 {
 
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
-    if (cpu->idle_time != 0)
-    {
+    if (cpu->idle_time != 0) {
         --cpu->idle_time;
     }
 

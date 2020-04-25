@@ -19,7 +19,7 @@ extern "C" {
 /**
  * @brief Each word is 16 bits, so takes 2 bytes in memory
  */
-#define WORD_SIZE 2 
+#define WORD_SIZE 2
 
 /**
  * @brief Reads data from the bus at a given adress

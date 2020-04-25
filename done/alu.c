@@ -3,7 +3,7 @@
  * @author Joseph Abboud & Zad Abi Fadel
  * @brief Basic functions used for arithmetic operations
  * @date 2020
- * 
+ *
  */
 
 #include <stdio.h>
@@ -16,8 +16,7 @@
 // ==== see alu.h ========================================
 flag_bit_t get_flag(flags_t flags, flag_bit_t flag)
 {
-    if (flag == FLAG_Z || flag == FLAG_N || flag == FLAG_H || flag == FLAG_C)
-    {
+    if (flag == FLAG_Z || flag == FLAG_N || flag == FLAG_H || flag == FLAG_C) {
         return flags & flag;
     }
     return 0;
@@ -27,8 +26,7 @@ flag_bit_t get_flag(flags_t flags, flag_bit_t flag)
 // ==== see alu.h ========================================
 void set_flag(flags_t *flags, flag_bit_t flag)
 {
-    if (flag == FLAG_Z || flag == FLAG_N || flag == FLAG_H || flag == FLAG_C)
-    {
+    if (flag == FLAG_Z || flag == FLAG_N || flag == FLAG_H || flag == FLAG_C) {
         *flags = *flags | (flags_t)flag;
     }
     // Add errors (maybe)
@@ -37,8 +35,7 @@ void set_flag(flags_t *flags, flag_bit_t flag)
 // ==== see alu.h ========================================
 int alu_add8(alu_output_t *result, uint8_t x, uint8_t y, bit_t c0)
 {
-    if (result == NULL)
-    {
+    if (result == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -49,16 +46,13 @@ int alu_add8(alu_output_t *result, uint8_t x, uint8_t y, bit_t c0)
     result->value = rslt;
     result->flags = 0;
 
-    if (rslt == 0)
-    {
+    if (rslt == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (msb4(temp) != 0)
-    {
+    if (msb4(temp) != 0) {
         set_flag(&(*result).flags, FLAG_H);
     }
-    if (msb4(temp1) != 0)
-    {
+    if (msb4(temp1) != 0) {
         set_flag(&(*result).flags, FLAG_C);
     }
 
@@ -68,8 +62,7 @@ int alu_add8(alu_output_t *result, uint8_t x, uint8_t y, bit_t c0)
 // ==== see alu.h ========================================
 int alu_sub8(alu_output_t *result, uint8_t x, uint8_t y, bit_t b0)
 {
-    if (result == NULL)
-    {
+    if (result == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -80,16 +73,13 @@ int alu_sub8(alu_output_t *result, uint8_t x, uint8_t y, bit_t b0)
     result->value = rslt;
     result->flags = FLAG_N;
 
-    if (rslt == 0)
-    {
+    if (rslt == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (y + b0 > x)
-    {
+    if (y + b0 > x) {
         set_flag(&(*result).flags, FLAG_C);
     }
-    if (lsb4(x) < (lsb4(y) + b0))
-    {
+    if (lsb4(x) < (lsb4(y) + b0)) {
         set_flag(&(*result).flags, FLAG_H);
     }
     return ERR_NONE;
@@ -98,8 +88,7 @@ int alu_sub8(alu_output_t *result, uint8_t x, uint8_t y, bit_t b0)
 // ==== see alu.h ========================================
 int alu_add16_low(alu_output_t *result, uint16_t x, uint16_t y)
 {
-    if (result == NULL)
-    {
+    if (result == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -115,16 +104,13 @@ int alu_add16_low(alu_output_t *result, uint16_t x, uint16_t y)
 
     result->value = rslt;
 
-    if (rslt == 0)
-    {
+    if (rslt == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (msb4(temp0) != 0)
-    {
+    if (msb4(temp0) != 0) {
         set_flag(&(*result).flags, FLAG_H);
     }
-    if (msb4(temp01) != 0)
-    {
+    if (msb4(temp01) != 0) {
         set_flag(&(*result).flags, FLAG_C);
     }
     return ERR_NONE;
@@ -133,8 +119,7 @@ int alu_add16_low(alu_output_t *result, uint16_t x, uint16_t y)
 // ==== see alu.h ========================================
 int alu_add16_high(alu_output_t *result, uint16_t x, uint16_t y)
 {
-    if (result == NULL)
-    {
+    if (result == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -150,16 +135,13 @@ int alu_add16_high(alu_output_t *result, uint16_t x, uint16_t y)
 
     result->value = rslt;
 
-    if (rslt == 0)
-    {
+    if (rslt == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (msb4(temp0) != 0)
-    {
+    if (msb4(temp0) != 0) {
         set_flag(&(*result).flags, FLAG_H);
     }
-    if (msb4(temp01) != 0)
-    {
+    if (msb4(temp01) != 0) {
         set_flag(&(*result).flags, FLAG_C);
     }
     return ERR_NONE;
@@ -168,32 +150,26 @@ int alu_add16_high(alu_output_t *result, uint16_t x, uint16_t y)
 // ==== see alu.h ========================================
 int alu_shift(alu_output_t *result, uint8_t x, rot_dir_t dir)
 {
-    if (result == NULL || (dir != RIGHT && dir != LEFT))
-    {
+    if (result == NULL || (dir != RIGHT && dir != LEFT)) {
         return ERR_BAD_PARAMETER;
     }
 
     bit_t ejected = 0;
     result->flags = 0;
-    if (dir == LEFT)
-    {
+    if (dir == LEFT) {
         ejected = bit_get(x, SIZE_BYTE - 1);
         x = (uint8_t)(x << 1);
-    }
-    else if (dir == RIGHT)
-    {
+    } else if (dir == RIGHT) {
         ejected = bit_get(x, 0);
         x = (uint8_t)(x >> 1);
     }
 
     result->value = merge8(x, 0);
 
-    if (x == 0)
-    {
+    if (x == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (ejected == 1)
-    {
+    if (ejected == 1) {
         set_flag(&(*result).flags, FLAG_C);
     }
 
@@ -203,8 +179,7 @@ int alu_shift(alu_output_t *result, uint8_t x, rot_dir_t dir)
 // ==== see alu.h ========================================
 int alu_shiftR_A(alu_output_t *result, uint8_t x)
 {
-    if (result == NULL)
-    {
+    if (result == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -215,12 +190,10 @@ int alu_shiftR_A(alu_output_t *result, uint8_t x)
     result->value = (uint16_t)((msb << (SIZE_BYTE - 1)) | x);
     result->flags = 0;
 
-    if (x == 0)
-    {
+    if (x == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (ejected == 1)
-    {
+    if (ejected == 1) {
         set_flag(&(*result).flags, FLAG_C);
     }
 
@@ -230,30 +203,24 @@ int alu_shiftR_A(alu_output_t *result, uint8_t x)
 // ==== see alu.h ========================================
 int alu_rotate(alu_output_t *result, uint8_t x, rot_dir_t dir)
 {
-    if (result == NULL || (dir != RIGHT && dir != LEFT))
-    {
+    if (result == NULL || (dir != RIGHT && dir != LEFT)) {
         return ERR_BAD_PARAMETER;
     }
 
     bit_t ejected = 0;
-    if (dir == LEFT)
-    {
+    if (dir == LEFT) {
         ejected = bit_get(x, SIZE_BYTE - 1);
-    }
-    else if (dir == RIGHT)
-    {
+    } else if (dir == RIGHT) {
         ejected = bit_get(x, 0);
     }
 
     bit_rotate(&x, dir, 1);
     result->value = x;
 
-    if (x == 0)
-    {
+    if (x == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (ejected == 1)
-    {
+    if (ejected == 1) {
         set_flag(&(*result).flags, FLAG_C);
     }
 
@@ -264,36 +231,29 @@ int alu_rotate(alu_output_t *result, uint8_t x, rot_dir_t dir)
 
 int alu_carry_rotate(alu_output_t *result, uint8_t x, rot_dir_t dir, flags_t flags)
 {
-    if (result == NULL || (dir != RIGHT && dir != LEFT))
-    {
+    if (result == NULL || (dir != RIGHT && dir != LEFT)) {
         return ERR_BAD_PARAMETER;
     }
 
     bit_t carry = 0;
-    if (get_C(flags) == FLAG_C)
-    {
+    if (get_C(flags) == FLAG_C) {
         carry = 1;
     }
     result->flags = 0;
     bit_t ejected;
 
-    if (dir == LEFT)
-    {
+    if (dir == LEFT) {
         ejected = bit_get(x, SIZE_BYTE - 1);
         result->value = ((x << 1) | carry) & 0xff;
-    }
-    else if (dir == RIGHT)
-    {
+    } else if (dir == RIGHT) {
         ejected = bit_get(x, 0);
         result->value = ((x >> 1) | (carry << (SIZE_BYTE - 1))) & 0xff;
     }
 
-    if ((*result).value == 0)
-    {
+    if ((*result).value == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (ejected != 0)
-    {
+    if (ejected != 0) {
         set_flag(&(*result).flags, FLAG_C);
     }
 

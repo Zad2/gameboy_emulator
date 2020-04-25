@@ -36,8 +36,7 @@ addr_t cpu_read16_at_idx(const cpu_t *cpu, addr_t addr)
 // ==== see cpu-storage.h ========================================
 int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
 {
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -50,8 +49,7 @@ int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
 // ==== see cpu-storage.h ========================================
 int cpu_write16_at_idx(cpu_t *cpu, addr_t addr, addr_t data16)
 {
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -64,8 +62,7 @@ int cpu_write16_at_idx(cpu_t *cpu, addr_t addr, addr_t data16)
 // ==== see cpu-storage.h ========================================
 int cpu_SP_push(cpu_t *cpu, addr_t data16)
 {
-    if (cpu == NULL)
-    {
+    if (cpu == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -89,8 +86,7 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
 
-    switch (lu->family)
-    {
+    switch (lu->family) {
     case LD_A_BCR:
         break;
 
@@ -145,8 +141,7 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
     case LD_R8_N8:
         break;
 
-    case LD_R8_R8:
-    {
+    case LD_R8_R8: {
     }
     break;
 

@@ -3,7 +3,7 @@
  * @author Joseph Abboud & Zad Abi Fadel
  * @brief Basic functions used for bit operations and manipualtions
  * @date 2020
- * 
+ *
  */
 
 #include <stdio.h>
@@ -84,14 +84,11 @@ void bit_rotate(uint8_t *value, rot_dir_t dir, int d)
 
     uint8_t temp = 0;
     int shift_complement = SIZE_BYTE - k;
-    
-    if (dir == LEFT)
-    {
+
+    if (dir == LEFT) {
         temp = (uint8_t)(*value >> shift_complement);
         *value = (uint8_t)((*value << k) | temp);
-    }
-    else if (dir == RIGHT)
-    {
+    } else if (dir == RIGHT) {
         temp = (uint8_t)(*value << shift_complement);
         *value = (uint8_t)((*value >> k) | temp);
     }
@@ -101,12 +98,9 @@ void bit_rotate(uint8_t *value, rot_dir_t dir, int d)
 void bit_edit(uint8_t *value, int index, uint8_t v)
 {
     // Check if we want to set (v = 1) or unset (v = 0) the indexed bit
-    if (v == 0)
-    {
+    if (v == 0) {
         bit_unset(value, index);
-    }
-    else if (v == 1)
-    {
+    } else if (v == 1) {
         bit_set(value, index);
     }
 }

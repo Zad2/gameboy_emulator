@@ -3,7 +3,7 @@
  * @author Joseph Abboud & Zad Abi Fadel
  * @brief Functions used to create, free and share components for the Gameboy
  * @date 2020
- * 
+ *
  */
 
 #include <stdint.h>
@@ -17,8 +17,7 @@
 // ==== see component.h ========================================
 int component_create(component_t *c, size_t mem_size)
 {
-    if (c == NULL)
-    {
+    if (c == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -27,8 +26,7 @@ int component_create(component_t *c, size_t mem_size)
     component.end = 0;
 
     // If the given memory_size is zero, the component's memory doesn't exist
-    if (mem_size == 0)
-    {
+    if (mem_size == 0) {
         component.mem = NULL;
         *c = component;
         return ERR_NONE;
@@ -39,8 +37,7 @@ int component_create(component_t *c, size_t mem_size)
 
     // Call mem_create and get potential errors
     int err = mem_create(component.mem, mem_size);
-    if (err == ERR_NONE)
-    {
+    if (err == ERR_NONE) {
         *c = component;
     }
 
@@ -50,8 +47,7 @@ int component_create(component_t *c, size_t mem_size)
 // ==== see component.h ========================================
 void component_free(component_t *c)
 {
-    if ((c != NULL) && (c->mem != NULL))
-    {
+    if ((c != NULL) && (c->mem != NULL)) {
 
         // Call mem_free before freeing c->mem directly from the computer's memory
         mem_free(c->mem);
@@ -66,8 +62,7 @@ void component_free(component_t *c)
 // ==== see component.h ========================================
 int component_shared(component_t *c, component_t *c_old)
 {
-    if (c == NULL || c_old == NULL)
-    {
+    if (c == NULL || c_old == NULL) {
         return ERR_BAD_PARAMETER;
     }
 

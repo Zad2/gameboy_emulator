@@ -3,7 +3,7 @@
  * @author Joseph Abboud & Zad Abi Fadel
  * @brief Functions used to create, free and manipulate the memory of the Gameboy
  * @date 2020
- * 
+ *
  */
 
 #include <stdint.h>
@@ -15,8 +15,7 @@
 // ==== see memory.h ========================================
 int mem_create(memory_t *mem, size_t size)
 {
-    if (size <= 0 || mem == NULL)
-    {
+    if (size <= 0 || mem == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -25,13 +24,10 @@ int mem_create(memory_t *mem, size_t size)
     memory_t m = {0, 0, NULL};
     m.memory = calloc(size, sizeof(data_t));
 
-    if (m.memory != NULL)
-    {
+    if (m.memory != NULL) {
         m.size = size;
         m.allocated = size; //fixme
-    }
-    else
-    {
+    } else {
         return ERR_MEM;
     }
 
@@ -44,8 +40,7 @@ int mem_create(memory_t *mem, size_t size)
 // ==== see memory.h ========================================
 void mem_free(memory_t *mem)
 {
-    if ((mem != NULL) && (mem->memory != NULL))
-    {
+    if ((mem != NULL) && (mem->memory != NULL)) {
         // Free the memory from the computer's memory and setting all of its
         // elements to default state
         free(mem->memory);
