@@ -1496,9 +1496,9 @@ Suite* cpu_test_suite()
     tcase_add_test(tc1, dispatch_err);
 
     Add_Case(s, tcalu0, "Cpu Dispatch ALU ADD Tests");
-    // tcase_add_test(tcalu0, test_ADD_A_HLR);
-    // tcase_add_test(tcalu0, test_ADC_A_HLR);
-    // tcase_add_test(tcalu0, test_ADD_A_N8);
+    tcase_add_test(tcalu0, test_ADD_A_HLR);
+    tcase_add_test(tcalu0, test_ADC_A_HLR);
+    tcase_add_test(tcalu0, test_ADD_A_N8);
     // tcase_add_test(tcalu0, test_ADC_A_N8);
     // tcase_add_test(tcalu0, test_ADD_A_R8);
     // tcase_add_test(tcalu0, test_ADC_A_R8);
@@ -1548,7 +1548,7 @@ Suite* cpu_test_suite()
 
     Add_Case(s, tcld3, "Cpu Dispatch LD MISC Tests");
     tcase_add_test(tcld3, test_LD_SP_HL);
-    // tcase_add_test(tcld3, test_LD_R8_R8);
+    tcase_add_test(tcld3, test_LD_R8_R8);
 
     Add_Case(s, tc99, "Cpu Dispatch OTHER Tests");
     tcase_add_test(tc99, test_STOP); // Doing Nothing

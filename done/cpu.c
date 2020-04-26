@@ -15,6 +15,7 @@
 #include "opcode.h"
 #include "cpu-storage.h"
 #include "cpu-registers.h"
+#include "cpu-alu.h"
 
 // ==== see cpu.h ========================================
 int cpu_init(cpu_t *cpu)
@@ -65,7 +66,12 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
     cpu->alu.value = (uint16_t) 0;
 
     // Execute instruction
-    int err = cpu_dispatch_storage(lu, cpu);
+    int err = ERR_NONE;
+    if (lu->family >= LD_A_BCR && lu->family <= LD_SP_HL) {
+        err = cpu_dispatch_storage(lu, cpu);
+    } else if(lu->family >= ADD_A_HLR && lu->family <= CHG_U3_R8) {
+        err = cpu_dispatch_alu(lu, cpu);
+    }
 
     // Update idle_time
     cpu->idle_time += lu->cycles;
