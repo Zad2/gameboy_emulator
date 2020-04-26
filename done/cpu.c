@@ -12,10 +12,6 @@
 #include "bus.h"
 #include "cpu.h"
 #include "error.h"
-#include "opcode.h"
-#include "cpu-storage.h"
-#include "cpu-registers.h"
-#include "cpu-alu.h"
 
 // ==== see cpu.h ========================================
 int cpu_init(cpu_t *cpu)
@@ -95,17 +91,7 @@ int cpu_do_cycle(cpu_t *cpu)
         return ERR_BAD_PARAMETER;
     }
 
-    data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
-    if (prefix == (data_t) 0xCB) {
-        data_t opcode = cpu_read_data_after_opcode(cpu);
-        return cpu_dispatch(&instruction_prefixed[opcode], cpu);
-    }
-
-    // data_t opcode = cpu_read_data_after_opcode(cpu);
-    return cpu_dispatch(&instruction_direct[prefix], cpu);
-}
-
-//==== see cpu.h ========================================
+// ==== see cpu.h ========================================
 int cpu_cycle(cpu_t *cpu)
 {
 
@@ -115,8 +101,7 @@ int cpu_cycle(cpu_t *cpu)
 
     if (cpu->idle_time != 0) {
         --cpu->idle_time;
-        return ERR_NONE;
     }
 
-    return cpu_do_cycle(cpu);
+    return ERR_NONE;
 }

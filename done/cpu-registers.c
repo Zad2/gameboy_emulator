@@ -12,8 +12,6 @@
 #include "cpu.h" // cpu_t
 #include "cpu-registers.h"
 
-
-
 // ==== see cpu-registers.h ========================================
 uint16_t cpu_reg_pair_get(const cpu_t *cpu, reg_pair_kind reg)
 {
