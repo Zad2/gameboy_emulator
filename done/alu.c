@@ -138,10 +138,10 @@ int alu_add16_high(alu_output_t *result, uint16_t x, uint16_t y)
     if (rslt == 0) {
         set_flag(&(*result).flags, FLAG_Z);
     }
-    if (msb4(temp0) != 0) {
+    if (msb4(temp0 +msb8(temp)) != 0) {
         set_flag(&(*result).flags, FLAG_H);
     }
-    if (msb4(temp01) != 0) {
+    if (msb8(temp1) != 0) {
         set_flag(&(*result).flags, FLAG_C);
     }
     return ERR_NONE;

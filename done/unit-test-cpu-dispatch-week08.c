@@ -1495,29 +1495,29 @@ Suite* cpu_test_suite()
     Add_Case(s, tc1, "Cpu Basic Dispatch Tests");
     tcase_add_test(tc1, dispatch_err);
 
-    Add_Case(s, tcalu0, "Cpu Dispatch ALU ADD Tests");
+     Add_Case(s, tcalu0, "Cpu Dispatch ALU ADD Tests");
     tcase_add_test(tcalu0, test_ADD_A_HLR);
     tcase_add_test(tcalu0, test_ADC_A_HLR);
     tcase_add_test(tcalu0, test_ADD_A_N8);
-    // tcase_add_test(tcalu0, test_ADC_A_N8);
-    // tcase_add_test(tcalu0, test_ADD_A_R8);
-    // tcase_add_test(tcalu0, test_ADC_A_R8);
-    // tcase_add_test(tcalu0, test_ADD_HL_R16);
-    // tcase_add_test(tcalu0, test_INC8);
-    // tcase_add_test(tcalu0, test_INC16);
+    tcase_add_test(tcalu0, test_ADC_A_N8);
+    tcase_add_test(tcalu0, test_ADD_A_R8);
+    tcase_add_test(tcalu0, test_ADC_A_R8);
+    tcase_add_test(tcalu0, test_ADD_HL_R16);
+    tcase_add_test(tcalu0, test_INC8);
+    tcase_add_test(tcalu0, test_INC16);
 
     Add_Case(s, tcalu5, "Cpu Dispatch ALU ROT Tests");
-    // tcase_add_test(tcalu5, test_ROT_R8);
+    tcase_add_test(tcalu5, test_ROT_R8);
 
     Add_Case(s, tcalu6, "Cpu Dispatch ALU SHIFT Tests");
-    // tcase_add_test(tcalu6, test_SLA_R8);
+    tcase_add_test(tcalu6, test_SLA_R8);
 
     Add_Case(s, tcalu7, "Cpu Dispatch ALU CP Tests");
-    // tcase_add_test(tcalu7, test_CP_A_R8);
+    tcase_add_test(tcalu7, test_CP_A_R8);
 
     Add_Case(s, tcalu9, "Cpu Dispatch ALU BIT/CHG Tests");
-    // tcase_add_test(tcalu9, test_BIT_U3_R8);
-    // tcase_add_test(tcalu9, test_CHG_U3_R8);
+    tcase_add_test(tcalu9, test_BIT_U3_R8);
+    tcase_add_test(tcalu9, test_CHG_U3_R8);
 
     Add_Case(s, tcld0, "Cpu Dispatch LD LOAD Tests");
     tcase_add_test(tcld0, test_LD_A_BCR);

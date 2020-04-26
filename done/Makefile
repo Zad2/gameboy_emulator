@@ -40,6 +40,8 @@ unit-test-cpu: unit-test-cpu.o cpu-storage.o cpu-registers.o cpu.o  bit.o compon
 	memory.o bus.o gameboy.o tests.h opcode.o cpu-alu.o alu.o
 unit-test-cpu-dispatch-week08: unit-test-cpu-dispatch-week08.o bit.o alu.o cpu.h bus.o cpu-storage.o \
 	cpu-registers.o opcode.o component.o memory.o cpu-alu.o 
+test-cpu-week08: test-cpu-week08.o opcode.o bit.o cpu.o alu.o bus.o \
+ memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o  
 
 alu.o: alu.c alu.h bit.h error.h
 bit.o: bit.c bit.h
@@ -77,13 +79,15 @@ unit-test-cpu.o: unit-test-cpu.c tests.h error.h alu.h bit.h opcode.h \
 unit-test-cpu-dispatch-week08.o: unit-test-cpu-dispatch-week08.c tests.h \
  error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h gameboy.h \
  util.h unit-test-cpu-dispatch.h cpu.c cpu-storage.h cpu-registers.h cpu-alu.h
+test-cpu-week08.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
+ memory.h component.h error.h cpu-storage.h util.h
 
 sidlib.o: sidlib.c sidlib.h
 
 TARGETS := 
-CHECK_TARGETS := unit-test-cpu unit-test-cpu-dispatch-week08 #unit-test-bit unit-test-alu unit-test-bus \
+CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-bus \
 	unit-test-memory unit-test-component unit-test-gameboy unit-test-cpu \
-	unit-test-cpu-dispatch-week08
+	unit-test-cpu-dispatch-week08 
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 

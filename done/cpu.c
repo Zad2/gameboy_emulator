@@ -74,7 +74,7 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
     }
 
     // Update idle_time
-    cpu->idle_time += lu->cycles;
+    cpu->idle_time += lu->cycles-1;
 
     // Update PC
     cpu->PC += lu->bytes;

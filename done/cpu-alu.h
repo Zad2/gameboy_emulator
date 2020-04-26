@@ -41,6 +41,7 @@ typedef enum {
 #define ROT_FLAGS_SRC     CLEAR, CLEAR, CLEAR, ALU
 #define SHIFT_FLAGS_SRC   ALU,   CLEAR, CLEAR, ALU
 #define ALL_ALU_FLAGS_SRC ALU,   ALU,   ALU,   ALU
+#define ADD_HL_R16SP_FLAGS_SRC  CPU, CLEAR, ALU, ALU
 
 
 // ======================================================================
