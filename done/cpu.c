@@ -12,10 +12,6 @@
 #include "bus.h"
 #include "cpu.h"
 #include "error.h"
-#include "opcode.h"
-#include "cpu-storage.h"
-#include "cpu-registers.h"
-#include "cpu-alu.h"
 
 // ==== see cpu.h ========================================
 int cpu_init(cpu_t *cpu)
@@ -48,64 +44,8 @@ void cpu_free(cpu_t *cpu)
         cpu->bus = NULL;
     }
 }
-/**
- * @brief Obtain next instruction to execute, then call cpu_dispatch
- *
- * @param cpu Cpu which shall execute
- * @param lu Instruction to execute
- * @return int Error code
- */
-int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
-{
-    if (cpu == NULL || lu == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
 
-    // Set flags and value to 0
-    cpu->alu.flags = (flags_t) 0;
-    cpu->alu.value = (uint16_t) 0;
-
-    // Execute instruction
-    int err = ERR_NONE;
-    if (lu->family >= LD_A_BCR && lu->family <= LD_SP_HL) {
-        err = cpu_dispatch_storage(lu, cpu);
-    } else if(lu->family >= ADD_A_HLR && lu->family <= CHG_U3_R8) {
-        err = cpu_dispatch_alu(lu, cpu);
-    }
-
-    // Update idle_time
-    cpu->idle_time += lu->cycles;
-
-    // Update PC
-    cpu->PC += lu->bytes;
-
-    return err;
-
-}
-
-/**
-* @brief Update ALU of cpu, execute instruction, update idle_time and PC
-*
-* @param cpu Cpu which shall execute
-* @return Error code
-*/
-int cpu_do_cycle(cpu_t *cpu)
-{
-    if (cpu == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
-
-    data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
-    if (prefix == (data_t) 0xCB) {
-        data_t opcode = cpu_read_data_after_opcode(cpu);
-        return cpu_dispatch(&instruction_prefixed[opcode], cpu);
-    }
-
-    // data_t opcode = cpu_read_data_after_opcode(cpu);
-    return cpu_dispatch(&instruction_direct[prefix], cpu);
-}
-
-//==== see cpu.h ========================================
+// ==== see cpu.h ========================================
 int cpu_cycle(cpu_t *cpu)
 {
 
@@ -115,8 +55,7 @@ int cpu_cycle(cpu_t *cpu)
 
     if (cpu->idle_time != 0) {
         --cpu->idle_time;
-        return ERR_NONE;
     }
 
-    return cpu_do_cycle(cpu);
+    return ERR_NONE;
 }

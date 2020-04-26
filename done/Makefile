@@ -10,7 +10,7 @@ GTK_LIBS := `pkg-config --libs gtk+-3.0`
 CFLAGS += -std=c11 -Wall -pedantic -g
 
 # a bit more checks if you'd like to (uncomment
- #CFLAGS += -Wextra -Wfloat-equal -Wshadow                         \
+ CFLAGS += -Wextra -Wfloat-equal -Wshadow                         \
  -Wpointer-arith -Wbad-function-cast -Wcast-align -Wwrite-strings \
  -Wunreachable-code \
  -Wcast-qual -Winit-self \
@@ -34,12 +34,9 @@ unit-test-bit: unit-test-bit.o alu.o bit.o tests.h
 unit-test-bus: unit-test-bus.o bus.o bit.o component.o memory.o tests.h
 unit-test-memory: unit-test-memory.o bus.o bit.o component.o memory.o tests.h
 unit-test-component: unit-test-component.o bus.o bit.o component.o memory.o tests.h
-unit-test-gameboy: unit-test-gameboy.o gameboy.o component.o memory.o bus.o bit.o cpu.o tests.h \
-	cpu-storage.o opcode.o cpu-registers.o cpu-alu.o alu.o
+unit-test-gameboy: unit-test-gameboy.o gameboy.o component.o memory.o bus.o bit.o cpu.o tests.h
 unit-test-cpu: unit-test-cpu.o cpu-storage.o cpu-registers.o cpu.o  bit.o component.o \
-	memory.o bus.o gameboy.o tests.h opcode.o cpu-alu.o alu.o
-unit-test-cpu-dispatch-week08: unit-test-cpu-dispatch-week08.o bit.o alu.o cpu.h bus.o cpu-storage.o \
-	cpu-registers.o opcode.o component.o memory.o cpu-alu.o 
+	memory.o bus.o gameboy.o tests.h
 
 alu.o: alu.c alu.h bit.h error.h
 bit.o: bit.c bit.h
@@ -48,21 +45,12 @@ util.o: util.c
 bus.o: bus.c memory.h component.h bit.h bus.h error.h 
 memory.o: memory.c memory.h error.h
 component.o: component.c memory.h error.h component.h
-opcode.o: opcode.c opcode.h bit.h 
-cpu.o: cpu.c alu.h bit.h bus.h memory.h component.h error.h cpu.h \
- opcode.h cpu-storage.h
+gameboy.o: gameboy.c bus.h memory.h component.h error.h bit.h cpu.h gameboy.h
+cpu-registers.o: cpu-registers.c bit.h cpu.h alu.h bus.h memory.h \
+ component.h error.h cpu-registers.h
+cpu.o: cpu.c alu.h bit.h bus.h memory.h component.h error.h cpu.h
 cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
  bit.h cpu.h alu.h bus.h component.h cpu-registers.h gameboy.h util.h
-cpu-registers.o: cpu-registers.c bit.h cpu.h alu.h bus.h memory.h \
- component.h error.h opcode.h cpu-registers.h
-cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
- bit.h alu.h bus.h component.h cpu-registers.h gameboy.h util.h
-cpu-registers.o: cpu-registers.c bit.h cpu.h alu.h bus.h memory.h \
- component.h error.h opcode.h cpu-registers.h
-gameboy.o: gameboy.c bus.h memory.h component.h error.h bit.h gameboy.h \
- cpu.h alu.h opcode.h cpu-alu.h
-cpu-alu.o: cpu-alu.c error.h bit.h alu.h cpu-alu.h opcode.h cpu.h bus.h \
- memory.h component.h cpu-storage.h cpu-registers.h
 
 unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
 unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
@@ -70,20 +58,16 @@ unit-test-bus.o: unit-test-bus.c tests.h error.h bus.h memory.h component.h bit.
 unit-test-component.o: unit-test-component.c tests.h error.h bus.h memory.h component.h
 unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h component.h
 unit-test-gameboy.o: unit-test-gameboy.c tests.h error.h bus.h memory.h \
- component.h bit.h gameboy.h cpu.h cpu-alu.h
+ component.h bit.h gameboy.h cpu.h
 unit-test-cpu.o: unit-test-cpu.c tests.h error.h alu.h bit.h opcode.h \
  util.h cpu.h bus.h memory.h component.h cpu-registers.h cpu-storage.h \
  cpu-alu.h
-unit-test-cpu-dispatch-week08.o: unit-test-cpu-dispatch-week08.c tests.h \
- error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h gameboy.h \
- util.h unit-test-cpu-dispatch.h cpu.c cpu-storage.h cpu-registers.h cpu-alu.h
 
 sidlib.o: sidlib.c sidlib.h
 
 TARGETS := 
-CHECK_TARGETS := unit-test-cpu unit-test-cpu-dispatch-week08 #unit-test-bit unit-test-alu unit-test-bus \
-	unit-test-memory unit-test-component unit-test-gameboy unit-test-cpu \
-	unit-test-cpu-dispatch-week08
+CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-bus \
+	unit-test-memory unit-test-component unit-test-gameboy unit-test-cpu
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 

@@ -120,48 +120,21 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
 
     // ADD
     case ADD_A_HLR: {
-        alu_add8(&cpu->alu, cpu_reg_get(cpu, REG_A_CODE),
-                 cpu_read_at_HL(cpu),extract_carry(cpu, lu->opcode));
-
-        cpu_reg_set_from_alu8(cpu, REG_A_CODE);
-        cpu_combine_alu_flags(cpu, ADD_FLAGS_SRC);
-
-        //gives undefined reference
-        //do_cpu_arithm(cpu, alu_add8, cpu_read_at_HL(cpu), ADD_FLAGS_SRC);
     } break;
 
     case ADD_A_N8: {
-        cpu_reg_set(cpu, REG_A_CODE,
-                    cpu_reg_get(cpu, REG_A_CODE) + cpu_read_data_after_opcode(cpu) +
-                    extract_carry(cpu, lu->opcode));
-
-        return cpu_combine_alu_flags(cpu, ADD_FLAGS_SRC);
     } break;
 
     case ADD_A_R8: {
-        cpu_reg_set(cpu, REG_A_CODE,
-                    cpu_reg_get(cpu, REG_A_CODE) + cpu_reg_get(cpu, extract_reg(lu->opcode,0)) +
-                    extract_carry(cpu, lu->opcode));
-
-        return cpu_combine_alu_flags(cpu, ADD_FLAGS_SRC);
     } break;
 
     case INC_HLR: {
-        cpu_write_at_HL(cpu, cpu_read_at_HL(cpu) + 1);
-
-        return cpu_combine_alu_flags(cpu, INC_FLAGS_SRC);
     } break;
 
     case INC_R8: {
-        cpu_reg_set(cpu,extract_n3(lu->opcode), cpu_reg_get(cpu, extract_n3(lu->opcode) + 1));
-
-        return cpu_combine_alu_flags(cpu, INC_FLAGS_SRC);
     } break;
 
     case ADD_HL_R16SP: {
-        cpu_HL_set(cpu, cpu_HL_get(cpu) + cpu_reg_pair_get(cpu, extract_reg_pair(lu->opcode)));
-
-        //return cpu_combine_alu_flags(cpu, );
     } break;
 
     case INC_R16SP: {
