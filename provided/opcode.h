@@ -198,8 +198,10 @@ typedef struct {
 
 
 // ======================================================================
+#define INSTR_DFX(Kind, Family, Code, Bytes, Cycles, Xtra) \
+  { .kind=Kind, .family=Family, .opcode=Code, .bytes=Bytes, .cycles=Cycles, .xtra_cycles=Xtra }
 #define INSTR_DEF(Kind, Family, Code, Bytes, Cycles) \
-  { .kind=Kind, .family=Family, .opcode=Code, .bytes=Bytes, .cycles=Cycles, .xtra_cycles=0 }
+    INSTR_DFX(Kind, Family, Code, Bytes, Cycles, 0)
 
 /**
  * @brief All (500) Game Boy CPU instructions
@@ -242,11 +244,11 @@ typedef struct {
 #define OP_AND_A_HLR   INSTR_DEF(DIRECT, AND_A_HLR,    0xA6, 1, 2)
 #define OP_AND_A_L     INSTR_DEF(DIRECT, AND_A_R8,     0xA5, 1, 1)
 #define OP_AND_A_N8    INSTR_DEF(DIRECT, AND_A_N8,     0xE6, 2, 2)
-#define OP_CALL_C_N16  INSTR_DEF(DIRECT, CALL_CC_N16,  0xDC, 3, 3)
 #define OP_CALL_N16    INSTR_DEF(DIRECT, CALL_N16,     0xCD, 3, 6)
-#define OP_CALL_NC_N16 INSTR_DEF(DIRECT, CALL_CC_N16,  0xD4, 3, 3)
-#define OP_CALL_NZ_N16 INSTR_DEF(DIRECT, CALL_CC_N16,  0xC4, 3, 3)
-#define OP_CALL_Z_N16  INSTR_DEF(DIRECT, CALL_CC_N16,  0xCC, 3, 3)
+#define OP_CALL_C_N16  INSTR_DFX(DIRECT, CALL_CC_N16,  0xDC, 3, 3, 3)
+#define OP_CALL_NC_N16 INSTR_DFX(DIRECT, CALL_CC_N16,  0xD4, 3, 3, 3)
+#define OP_CALL_NZ_N16 INSTR_DFX(DIRECT, CALL_CC_N16,  0xC4, 3, 3, 3)
+#define OP_CALL_Z_N16  INSTR_DFX(DIRECT, CALL_CC_N16,  0xCC, 3, 3, 3)
 #define OP_CCF         INSTR_DEF(DIRECT, SCCF,         0x3F, 1, 1)
 #define OP_CPL         INSTR_DEF(DIRECT, CPL,          0x2F, 1, 1)
 #define OP_CP_A_A      INSTR_DEF(DIRECT, CP_A_R8,      0xBF, 1, 1)
@@ -273,7 +275,7 @@ typedef struct {
 #define OP_DEC_SP      INSTR_DEF(DIRECT, DEC_R16SP,    0x3B, 1, 2)
 #define OP_DI          INSTR_DEF(DIRECT, EDI,          0xF3, 1, 1)
 #define OP_EI          INSTR_DEF(DIRECT, EDI,          0xFB, 1, 1)
-#define OP_HALT        INSTR_DEF(DIRECT, HALT,         0x76, 1, 0)
+#define OP_HALT        INSTR_DEF(DIRECT, HALT,         0x76, 1, 1)
 #define OP_INC_A       INSTR_DEF(DIRECT, INC_R8,       0x3C, 1, 1)
 #define OP_INC_B       INSTR_DEF(DIRECT, INC_R8,       0x04, 1, 1)
 #define OP_INC_BC      INSTR_DEF(DIRECT, INC_R16SP,    0x03, 1, 2)
@@ -286,17 +288,17 @@ typedef struct {
 #define OP_INC_HLR     INSTR_DEF(DIRECT, INC_HLR,      0x34, 1, 3)
 #define OP_INC_L       INSTR_DEF(DIRECT, INC_R8,       0x2C, 1, 1)
 #define OP_INC_SP      INSTR_DEF(DIRECT, INC_R16SP,    0x33, 1, 2)
-#define OP_JP_C_N16    INSTR_DEF(DIRECT, JP_CC_N16,    0xDA, 3, 3)
 #define OP_JP_HL       INSTR_DEF(DIRECT, JP_HL,        0xE9, 1, 1)
 #define OP_JP_N16      INSTR_DEF(DIRECT, JP_N16,       0xC3, 3, 4)
-#define OP_JP_NC_N16   INSTR_DEF(DIRECT, JP_CC_N16,    0xD2, 3, 3)
-#define OP_JP_NZ_N16   INSTR_DEF(DIRECT, JP_CC_N16,    0xC2, 3, 3)
-#define OP_JP_Z_N16    INSTR_DEF(DIRECT, JP_CC_N16,    0xCA, 3, 3)
-#define OP_JR_C_E8     INSTR_DEF(DIRECT, JR_CC_E8,     0x38, 2, 2)
+#define OP_JP_C_N16    INSTR_DFX(DIRECT, JP_CC_N16,    0xDA, 3, 3, 1)
+#define OP_JP_NC_N16   INSTR_DFX(DIRECT, JP_CC_N16,    0xD2, 3, 3, 1)
+#define OP_JP_NZ_N16   INSTR_DFX(DIRECT, JP_CC_N16,    0xC2, 3, 3, 1)
+#define OP_JP_Z_N16    INSTR_DFX(DIRECT, JP_CC_N16,    0xCA, 3, 3, 1)
 #define OP_JR_E8       INSTR_DEF(DIRECT, JR_E8,        0x18, 2, 3)
-#define OP_JR_NC_E8    INSTR_DEF(DIRECT, JR_CC_E8,     0x30, 2, 2)
-#define OP_JR_NZ_E8    INSTR_DEF(DIRECT, JR_CC_E8,     0x20, 2, 2)
-#define OP_JR_Z_E8     INSTR_DEF(DIRECT, JR_CC_E8,     0x28, 2, 2)
+#define OP_JR_C_E8     INSTR_DFX(DIRECT, JR_CC_E8,     0x38, 2, 2, 1)
+#define OP_JR_NC_E8    INSTR_DFX(DIRECT, JR_CC_E8,     0x30, 2, 2, 1)
+#define OP_JR_NZ_E8    INSTR_DFX(DIRECT, JR_CC_E8,     0x20, 2, 2, 1)
+#define OP_JR_Z_E8     INSTR_DFX(DIRECT, JR_CC_E8,     0x28, 2, 2, 1)
 #define OP_LD_A_A      INSTR_DEF(DIRECT, NOP,          0x7F, 1, 1)
 #define OP_LD_A_B      INSTR_DEF(DIRECT, LD_R8_R8,     0x78, 1, 1)
 #define OP_LD_A_BCR    INSTR_DEF(DIRECT, LD_A_BCR,     0x0A, 1, 2)
@@ -409,10 +411,10 @@ typedef struct {
 #define OP_PUSH_HL     INSTR_DEF(DIRECT, PUSH_R16,     0xE5, 1, 4)
 #define OP_RET         INSTR_DEF(DIRECT, RET,          0xC9, 1, 4)
 #define OP_RETI        INSTR_DEF(DIRECT, RETI,         0xD9, 1, 4)
-#define OP_RET_C       INSTR_DEF(DIRECT, RET_CC,       0xD8, 1, 2)
-#define OP_RET_NC      INSTR_DEF(DIRECT, RET_CC,       0xD0, 1, 2)
-#define OP_RET_NZ      INSTR_DEF(DIRECT, RET_CC,       0xC0, 1, 2)
-#define OP_RET_Z       INSTR_DEF(DIRECT, RET_CC,       0xC8, 1, 2)
+#define OP_RET_C       INSTR_DFX(DIRECT, RET_CC,       0xD8, 1, 2, 3)
+#define OP_RET_NC      INSTR_DFX(DIRECT, RET_CC,       0xD0, 1, 2, 3)
+#define OP_RET_NZ      INSTR_DFX(DIRECT, RET_CC,       0xC0, 1, 2, 3)
+#define OP_RET_Z       INSTR_DFX(DIRECT, RET_CC,       0xC8, 1, 2, 3)
 #define OP_RLA         INSTR_DEF(DIRECT, ROTA,         0x17, 1, 1)
 #define OP_RLCA        INSTR_DEF(DIRECT, ROTCA,        0x07, 1, 1)
 #define OP_RRA         INSTR_DEF(DIRECT, ROTA,         0x1F, 1, 1)
