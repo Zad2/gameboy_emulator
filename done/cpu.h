@@ -41,11 +41,9 @@ typedef enum {
  * a Stack Pointer, a bus and other elements
  */
 typedef struct {
-    alu_output_t alu;
     union {
         struct {
             uint8_t F;
-
             uint8_t A;
         };
         uint16_t AF;
@@ -53,7 +51,6 @@ typedef struct {
     union {
         struct {
             uint8_t C;
-
             uint8_t B;
 
         };
@@ -62,7 +59,6 @@ typedef struct {
     union {
         struct {
             uint8_t E;
-
             uint8_t D;
         };
         uint16_t DE;
@@ -76,7 +72,14 @@ typedef struct {
     };
     uint16_t PC;
     uint16_t SP;
+    alu_output_t alu;
     bus_t* bus;
+    bit_t IME;
+    data_t IE;
+    data_t IF;
+    bit_t HALT;
+    component_t high_ram;
+
     uint8_t idle_time;
 } cpu_t;
 

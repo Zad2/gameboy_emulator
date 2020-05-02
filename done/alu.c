@@ -127,7 +127,6 @@ int alu_add16_high(alu_output_t *result, uint16_t x, uint16_t y)
     uint8_t Y = msb8(y);
 
     uint8_t temp0 = (uint8_t)(lsb4(X) + lsb4(Y));                // Compute the 4 LSBs of the result
-    uint8_t temp01 = (uint8_t)(msb4(X) + msb4(Y) + msb4(temp0)); // Compute the 4 MSBs of the result
 
     uint16_t temp = (uint16_t)(lsb8(x) + lsb8(y));   //Compute the 8 LSBs of the result
     uint16_t temp1 = (uint16_t)(X + Y + msb8(temp)); // Compute the 8 MSBs of the result

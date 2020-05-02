@@ -15,6 +15,7 @@ extern "C" {
 #include "memory.h"
 #include "opcode.h"
 #include "cpu.h"
+#include "util.h"
 
 /**
  * @brief Each word is 16 bits, so takes 2 bytes in memory

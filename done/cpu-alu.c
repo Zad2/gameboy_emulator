@@ -147,6 +147,13 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
         cpu_combine_alu_flags(cpu, INC_FLAGS_SRC);
     } break;
 
+    case DEC_R8: {
+        alu_sub8(&cpu->alu, cpu_reg_get(cpu,extract_n3(lu->opcode)), (uint8_t)1, (bit_t)0);
+        cpu_reg_set_from_alu8(cpu, extract_n3(lu->opcode));
+
+        cpu_combine_alu_flags(cpu, DEC_FLAGS_SRC);
+    } break;
+
     case ADD_HL_R16SP: {
         alu_add16_high(&cpu->alu, cpu_HL_get(cpu), cpu_reg_pair_SP_get(cpu, extract_reg_pair(lu->opcode)));
 
@@ -165,6 +172,11 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     case CP_A_R8: {
         alu_sub8(&cpu->alu, cpu_reg_get(cpu, REG_A_CODE), cpu_reg_get(cpu, extract_reg(lu->opcode, 0)), (bit_t)0);
         cpu_combine_alu_flags(cpu, ALL_ALU_FLAGS_SRC);
+    } break;
+
+    case CP_A_N8: {
+        alu_sub8(&cpu->alu, cpu_reg_get(cpu, REG_A_CODE), cpu_read_data_after_opcode(cpu), (bit_t)0);
+        cpu_combine_alu_flags(cpu, SUB_FLAGS_SRC);
     } break;
 
 

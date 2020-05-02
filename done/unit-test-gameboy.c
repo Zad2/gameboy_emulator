@@ -23,6 +23,7 @@
 #include "component.h"
 #include "error.h"
 #include "gameboy.h"
+#include "cpu-storage.h"
 
 #define INIT \
     gameboy_t g;    \
