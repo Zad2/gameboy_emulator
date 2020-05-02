@@ -149,7 +149,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
 
     case ADD_HL_R16SP: {
         alu_add16_high(&cpu->alu, cpu_HL_get(cpu), cpu_reg_pair_SP_get(cpu, extract_reg_pair(lu->opcode)));
-        
+
         cpu_HL_set(cpu, cpu->alu.value);
         cpu_combine_alu_flags(cpu, CPU,CLEAR,ALU,ALU);
     } break;
