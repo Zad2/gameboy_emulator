@@ -9,3 +9,6 @@
 /unit-test-component
 /unit-test-memory
 *.DS_Store
+*.idea
+**/cmake-build-debug
+CMakeLists.txt
