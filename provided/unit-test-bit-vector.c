@@ -19,8 +19,6 @@
 #include "tests.h"
 #include "bit_vector.h"
 #include "image.h"
-#include "cpu.h"
-#include "bus.h"
 
 
 #define PV1_SIZE 1
@@ -56,10 +54,12 @@
         for(size_t i = 0; i<size; ++i){ vec->content[i] = val; }\
     }while(0)
 
-#define vector_match_vector(vec1, vec2, size) \
-    do{\
-        for(size_t i = 0; i<size; ++i){ ck_assert_int_eq(vec1->content[i], vec2->content[i]); }\
-    }while(0)
+#define vector_match_vector(vec1, vec2) \
+    do{ \
+      ck_assert((vec1)->size == (vec2)->size); \
+      const size_t bound = (vec1)->size / IMAGE_LINE_WORD_BITS + ((vec1)->size % IMAGE_LINE_WORD_BITS ? 1 :0); \
+      for (size_t i = 0; i < bound; ++i) { ck_assert_int_eq((vec1)->content[i], (vec2)->content[i]); } \
+    } while(0)
 
 #define vector_match_tab(vec, tab, size) \
     do{\
@@ -144,8 +144,7 @@ START_TEST(bit_vector_cpy_exec)
     pbv = bit_vector_create(PV1_SIZE * IMAGE_LINE_WORD_BITS, 1);
     pbvc = bit_vector_cpy(pbv);
     ck_assert_ptr_ne(pbv, pbvc);
-    ck_assert(pbv->size == pbvc->size);
-    vector_match_vector(pbv, pbvc, PV1_SIZE);
+    vector_match_vector(pbv, pbvc);
     bit_vector_free(&pbv);
     bit_vector_free(&pbvc);
 
@@ -459,8 +458,14 @@ START_TEST(bit_vector_extract_zero_exec)
     printf("=== %s:\n", __func__);
 #endif
     bit_vector_t* pbv = bit_vector_create(PV2_SIZE * IMAGE_LINE_WORD_BITS, 1);
-    ck_assert_ptr_null(bit_vector_extract_zero_ext(NULL, 0, IMAGE_LINE_WORD_BITS));
     ck_assert_ptr_null(bit_vector_extract_zero_ext(pbv, 0, 0));
+
+    const size_t size = 5+2*IMAGE_LINE_WORD_BITS;
+    bit_vector_t* result   = bit_vector_extract_zero_ext(NULL, 0, size);
+    bit_vector_t* expected = bit_vector_create(size, 0);
+    vector_match_vector(result, expected);
+    bit_vector_free(&expected);
+    bit_vector_free(&result);
 
     const uint32_t pv2_1[] = PV2_1_VALUE;
     const uint32_t pv2_0[] = PV2_0_VALUE;
