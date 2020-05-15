@@ -21,18 +21,19 @@ int bus_remap(bus_t bus, component_t *c, addr_t offset)
     addr_t start = c->start;
     addr_t end = c->end;
 
+    // Make sure of the correctness of the component's limits
+    if (c == NULL || start > end ) {
+        return ERR_BAD_PARAMETER;
+    }
+
     // Check if the span of the zone is larger than the component's memory,
     // Or if the component's start address is bigger than its end
-    if (c->mem == NULL || end - start + offset >= c->mem->allocated) {
-        //allocated?
+    if (c->mem == NULL || end - start + offset >= c->mem->size) {
 
         return ERR_ADDRESS;
     }
 
-    // Make sure of the correctness of the component's limits
-    if (start > end || end == 0) {
-        return ERR_BAD_PARAMETER;
-    }
+
 
     // Go through all the data of the bus and assigning the pointers in the memory
     for (int i = 0; i <= end - start; ++i) {
@@ -50,7 +51,7 @@ int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t 
     }
 
     // Same error checks as bus_remap
-    if (c->mem == NULL || end - start + offset >= c->mem->allocated || start > end) {
+    if (c->mem == NULL || end - start + offset >= c->mem->size || start > end) {
         return ERR_ADDRESS;
     }
 
@@ -72,25 +73,24 @@ int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t 
 // ==== see bus.h ========================================
 int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 {
-    if (c == NULL) {
+    if (c == NULL || bus == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
     for (int i = start; i <= end; i++) {
-        //revert
         if (bus[i] != NULL) {
             return ERR_ADDRESS;
         }
     }
 
-    // After checking for errors, just simply call bus_force_plug and return its error code
+    // After checking for errors, call bus_force_plug and return its error code
     return bus_forced_plug(bus, c, start, end, 0);
 }
 
 // ==== see bus.h ========================================
 int bus_unplug(bus_t bus, component_t *c)
 {
-    if (c == NULL) {
+    if (c == NULL || bus == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -110,7 +110,7 @@ int bus_unplug(bus_t bus, component_t *c)
 // ==== see bus.h ========================================
 int bus_read(const bus_t bus, addr_t address, data_t *data)
 {
-    if (data == NULL) {
+    if (data == NULL || bus == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -128,7 +128,7 @@ int bus_read(const bus_t bus, addr_t address, data_t *data)
 // ==== see bus.h ========================================
 int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
 {
-    if (data16 == NULL) {
+    if (data16 == NULL || bus == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -152,6 +152,9 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
         }
 
         *data16 = (addr_t)merge8(ptr1, ptr2);
+        if (*data16 == 0xFFFF) {
+            *data16 = 0xFF;
+        }
     }
 
     return ERR_NONE;
@@ -160,7 +163,7 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
 // ==== see bus.h ========================================
 int bus_write(bus_t bus, addr_t address, data_t data)
 {
-    if (bus[address] == NULL) {
+    if (bus == NULL || bus[address] == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -172,7 +175,7 @@ int bus_write(bus_t bus, addr_t address, data_t data)
 // ==== see bus.h ========================================
 int bus_write16(bus_t bus, addr_t address, addr_t data16)
 {
-    if (bus[address] == NULL) {
+    if (bus == NULL || bus[address] == NULL) {
         return ERR_BAD_PARAMETER;
     }
 

@@ -186,7 +186,11 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
         case STOP:
             //acts like a NOP
             break;
+        case NOP:
+            cpu->PC += lu->bytes;
+            break;
         default:
+            cpu->PC += lu->bytes;
             break;
         }
 
@@ -266,7 +270,11 @@ int cpu_cycle(cpu_t *cpu)
     }
 
     interrupt_t i = first_interrupt(cpu->IE, ~cpu->IF);
-    if (cpu->HALT == 1 && i <= JOYPAD) {
+    // if (cpu->HALT == 1 && i <= JOYPAD) {
+    //     cpu->HALT = 0;
+    //     return cpu_do_cycle(cpu);
+    // }
+    if ((cpu->HALT == 1 && i <= JOYPAD) || cpu->HALT == 0) {
         cpu->HALT = 0;
         return cpu_do_cycle(cpu);
     }

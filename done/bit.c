@@ -66,41 +66,49 @@ bit_t bit_get(uint8_t value, int index)
 // ==== see bit.h ========================================
 void bit_set(uint8_t *value, int index)
 {
-    int k = CLAMP07(index);
-    *value = (uint8_t)((1 << k) | *value);
+    if (value != NULL) {
+        int k = CLAMP07(index);
+        *value = (uint8_t)((1 << k) | *value);
+    }
 }
 
 // ==== see bit.h ========================================
 void bit_unset(uint8_t *value, int index)
 {
-    int k = CLAMP07(index);
-    *value = (uint8_t)(~(1 << k) & *value);
+    if (value != NULL) {
+        int k = CLAMP07(index);
+        *value = (uint8_t)(~(1 << k) & *value);
+    }
 }
 
 // ==== see bit.h ========================================
 void bit_rotate(uint8_t *value, rot_dir_t dir, int d)
 {
-    int k = CLAMP07(d);
+    if (value != NULL) {
+        int k = CLAMP07(d);
 
-    uint8_t temp = 0;
-    int shift_complement = SIZE_BYTE - k;
+        uint8_t temp = 0;
+        int shift_complement = SIZE_BYTE - k;
 
-    if (dir == LEFT) {
-        temp = (uint8_t)(*value >> shift_complement);
-        *value = (uint8_t)((*value << k) | temp);
-    } else if (dir == RIGHT) {
-        temp = (uint8_t)(*value << shift_complement);
-        *value = (uint8_t)((*value >> k) | temp);
+        if (dir == LEFT) {
+            temp = (uint8_t)(*value >> shift_complement);
+            *value = (uint8_t)((*value << k) | temp);
+        } else if (dir == RIGHT) {
+            temp = (uint8_t)(*value << shift_complement);
+            *value = (uint8_t)((*value >> k) | temp);
+        }
     }
 }
 
 // ==== see bit.h ========================================
 void bit_edit(uint8_t *value, int index, uint8_t v)
 {
-    // Check if we want to set (v = 1) or unset (v = 0) the indexed bit
-    if (v == 0) {
-        bit_unset(value, index);
-    } else if (v == 1) {
-        bit_set(value, index);
+    if (value != NULL) {
+        // Check if we want to set (v = 1) or unset (v = 0) the indexed bit
+        if (v == 0) {
+            bit_unset(value, index);
+        } else if (v == 1) {
+            bit_set(value, index);
+        }
     }
 }

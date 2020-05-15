@@ -15,8 +15,84 @@
 #include <assert.h>
 #include <stdio.h>
 #include <inttypes.h> // PRIX8, etc.
+/*
+const opcode_t instructions[] = {
 
-const opcode_t instructions0[] = {
+    // Que des NOP
+
+    0x00,       // NOP
+    0x7F,       // LD A, A = NOP
+    0x40,       // LD B, B = NOP
+    0x49,       // LD C, C = NOP
+    0x51,       // LD D, D = NOP
+    0x5B,       // LD E, E = NOP
+    0x64,       // LD H, H = NOP
+    0x6D,       // LD L, L = NOP
+    0x00,       // NOP  (to print; see line 193 below)
+
+    // Diverses instructions
+
+    0x33,       // INC SP       (INC_R16SP)
+    0x33,       // INC SP
+    0x33,       // INC SP
+    0x33,       // INC SP
+    0x33,       // INC SP                   ---> SP = 5
+    0x23,       // INC HL       (INC_R16SP)
+    0x23,       // INC HL
+    0x23,       // INC HL                   ---> HL = 3
+    0x00,       // NOP
+    0x34,       // INC [HL]     (INC_HLR)   ---> ++bus[HL] : 0x49 --> 0x4A
+    0xBD,       // CP A, L      (CP_A_R8)   ---> A < 3 --> F = Z1HC0000b = 01110000b = 0x70
+    0x00,       // NOP
+    0x86,       // ADD A, [HL]  (ADD_A_HLR) ---> A = 0x00 + 0x4A = 0x4A
+    0x00,       // NOP
+    0xCE, 0x02, // ADC A, 0x02              ---> A = 0x4A + 0x02 = 0x4C
+    0x00,       // NOP
+    0x85,       // ADD A, L     (ADD_A_R8)  ---> A = 0x4C + 0x03 = 0x4F
+    0x00,       // NOP
+    0x3C,       // INC A        (INC_R8)    ---> ++A --> 0x50
+    0x00,       // NOP
+    0x33,       // INC SP       (INC_R16SP)    ---> ++SP : 6
+    0x39,       // ADD HL, SP   (ADD_HL_R16SP) --->  HL = 0x03 + 0x06 = 0x09
+    0xBD,       // CP A, L      (CP_A_R8)      ---> A > 9  --> F = Z1HC0000b = 01100000b = 0x60
+    0x00,       // NOP
+    0xCB, 0xC7, // SET 0, A     (CHG_U3_R8)    ---> A = A & 0x01 = 0x51
+    0x00,       // NOP
+    0xCB, 0x17, // RL A         (ROT_R8)       ---> A = 0x51 << 1 = 0xA2
+    0x00,       // NOP
+    0xCB, 0x57, // BIT 2, A     (BIT_U3_R8)    ---> BIT(A,2) == 0 --> Z = 1 --> F = 10100000b = 0xA0
+    0x00,       // NOP
+    0xCB, 0x27, // SLA A        (SLA_R8)       ---> A = 0xA2 << 1 = 0x44 and C set to 1 --> F = 0x10
+    0x00,       // NOP
+
+    // 5 boucles « de Fibonacci »
+
+    0x06, 0x00, // LD B, 0
+    0x3E, 0x01, // LD A, 1
+    0x0E, 0x0A, // LD C, 10
+    0x57,       // LD D, A
+    0x80,       // ADD A, B
+    0x42,       // LD B, D
+    0x00,       // NOP
+    0x57,       // LD D, A
+    0x80,       // ADD A, B
+    0x42,       // LD B, D
+    0x00,       // NOP
+    0x57,       // LD D, A
+    0x80,       // ADD A, B
+    0x42,       // LD B, D
+    0x00,       // NOP
+    0x57,       // LD D, A
+    0x80,       // ADD A, B
+    0x42,       // LD B, D
+    0x00,       // NOP
+    0x57,       // LD D, A
+    0x80,       // ADD A, B
+    0x42,       // LD B, D
+    0x00,       // NOP
+};*/
+
+const opcode_t instructions[] = {
 
     // suite de Fibonacci
 
@@ -41,7 +117,7 @@ const opcode_t instructions0[] = {
     0xC9              // RET
 };
 
-const opcode_t instructions0[] = {
+const opcode_t instructions1[] = {
 
     // Que des NOP
 

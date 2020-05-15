@@ -21,6 +21,8 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     if (gameboy == NULL) {
         return ERR_BAD_PARAMETER;
     }
+    gameboy->size_components = 0;
+
 
     // Instanciate a Gameboy
     gameboy_t gb;
@@ -66,30 +68,43 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     if (err != ERR_NONE) {
         return err;
     }
-    err = component_create(&echoRAM, MEM_SIZE(ECHO_RAM));
-    if (err != ERR_NONE) {
-        return err;
-    }
+    ++gameboy->size_components;
+
+    // err = component_create(&echoRAM, MEM_SIZE(ECHO_RAM));
+    // if (err != ERR_NONE) {
+    //     return err;
+    // }
     err = component_create(&registers, MEM_SIZE(REGISTERS));
     if (err != ERR_NONE) {
         return err;
     }
+    ++gameboy->size_components;
+
     err = component_create(&externRAM, MEM_SIZE(EXTERN_RAM));
     if (err != ERR_NONE) {
         return err;
     }
+    ++gameboy->size_components;
+
     err = component_create(&videoRAM, MEM_SIZE(VIDEO_RAM));
     if (err != ERR_NONE) {
         return err;
     }
+    ++gameboy->size_components;
+
     err = component_create(&graphRAM, MEM_SIZE(GRAPH_RAM));
     if (err != ERR_NONE) {
         return err;
     }
+    ++gameboy->size_components;
+
     err = component_create(&useless, MEM_SIZE(USELESS));
     if (err != ERR_NONE) {
         return err;
     }
+    ++gameboy->size_components;
+
+
 
 
     // Plug the components to the bus
@@ -155,6 +170,7 @@ void gameboy_free(gameboy_t *gameboy)
             component_free(&gameboy->components[i]);
             //&gameboy->components[i]= NULL;
         }
+        gameboy->size_components = 0;
     }
 }
 

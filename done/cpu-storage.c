@@ -16,16 +16,23 @@
 // ==== see cpu-storage.h ========================================
 data_t cpu_read_at_idx(const cpu_t *cpu, addr_t addr)
 {
+    if (cpu == NULL || cpu->bus == NULL) {
+        return NULL;
+    }
     data_t data = (data_t)0;
 
     // Call bus_read from bus.c and reads from the cpu's bus at address addr
     bus_read(*cpu->bus, addr, &data);
     return data;
+
 }
 
 // ==== see cpu-storage.h ========================================
 addr_t cpu_read16_at_idx(const cpu_t *cpu, addr_t addr)
 {
+    if (cpu == NULL || cpu->bus == NULL) {
+        return NULL;
+    }
     addr_t a = (addr_t)0;
 
     // Call bus_read16 from bus.c and read a word from the cpu's bus at addresses addr and addr+1
@@ -36,7 +43,7 @@ addr_t cpu_read16_at_idx(const cpu_t *cpu, addr_t addr)
 // ==== see cpu-storage.h ========================================
 int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
 {
-    if (cpu == NULL) {
+    if (cpu == NULL || cpu->bus == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -49,7 +56,7 @@ int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
 // ==== see cpu-storage.h ========================================
 int cpu_write16_at_idx(cpu_t *cpu, addr_t addr, addr_t data16)
 {
-    if (cpu == NULL) {
+    if (cpu == NULL || cpu->bus == NULL) {
         return ERR_BAD_PARAMETER;
     }
 

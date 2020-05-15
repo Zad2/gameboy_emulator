@@ -30,7 +30,6 @@ typedef uint8_t data_t;
  */
 typedef struct {
     size_t size;
-    size_t allocated;
     data_t *memory;
 } memory_t;
 
