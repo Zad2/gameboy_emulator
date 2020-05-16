@@ -11,13 +11,14 @@
 #include "cpu-alu.h"
 #include "cpu-storage.h" // cpu_read_at_HL
 #include "cpu-registers.h" // cpu_HL_get
+#include "alu_ext.h"
+
 
 // external library provided later to lower workload
 extern int cpu_dispatch_alu_ext(const instruction_t* lu, cpu_t* cpu);
 
 #include <assert.h>
 #include <stdbool.h>
-#include "error.c"
 
 // ======================================================================
 /**
@@ -215,7 +216,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     // All the others are handled elsewhere by provided library
     default:
         // uncomment this line if you have the cs212gbcpuext library
-        // M_EXIT_IF_ERR(cpu_dispatch_alu_ext(lu, cpu));
+        M_EXIT_IF_ERR(cpu_dispatch_alu_ext(lu, cpu));
         break;
     } // switch
 

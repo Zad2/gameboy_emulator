@@ -114,10 +114,10 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
     int err = ERR_NONE;
     if (lu->family >= LD_A_BCR && lu->family <= LD_SP_HL) {
         err = cpu_dispatch_storage(lu, cpu);
-    } else if(lu->family >= ADD_A_HLR && lu->family <= CHG_U3_R8) {
+    } else if(lu->family >= ADD_A_HLR && lu->family <= SCCF) {
         err = cpu_dispatch_alu(lu, cpu);
 
-    } else {
+    } else  {
         switch (lu->family) {
         case JP_N16:
             cpu->PC = cpu_read_addr_after_opcode(cpu);

@@ -72,18 +72,18 @@ int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
     data_t tima = cpu_read_at_idx(timer->cpu, REG_TIMA);
 
     if (old_state && !timer_state(timer)) {
-        if (tima == 0xFF){
+        if (tima == 0xFF) {
             //raise timer interrupt
             bit_set(&timer->cpu->IE, TIMER);
             bit_set(&timer->cpu->IF, TIMER);
             //reload value
             tima = cpu_read_at_idx(timer->cpu, REG_TMA);
-        }else{
+        } else {
             ++tima;
         }
-        
+
     }
-    
+
     int err = cpu_write_at_idx(timer->cpu, REG_TIMA, tima);
     return err;
 
@@ -135,7 +135,7 @@ int timer_bus_listener(gbtimer_t* timer, addr_t addr)
         timer_incr_if_state_change(timer, current_state);
         break;
     default :
-        return ERR_BAD_PARAMETER;
+        //return ERR_BAD_PARAMETER;
         break;
     }
 

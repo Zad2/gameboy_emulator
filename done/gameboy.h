@@ -40,6 +40,8 @@ typedef struct {
     cartridge_t cartridge;
 } gameboy_t;
 
+#define VBLANK_PERIOD 17556
+
 /**
  * @brief Enum for the different compononents' indices in the Gameboy's components array
  */
