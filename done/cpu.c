@@ -26,7 +26,6 @@ int cpu_init(cpu_t *cpu)
 
     // Set all of the cpu's elements to 0
     memset(cpu, 0, sizeof(cpu_t));
-    cpu->idle_time = 0; // Unnecessary?
 
     int err = component_create(&cpu->high_ram, HIGH_RAM_SIZE);
     return err;
@@ -268,6 +267,8 @@ int cpu_cycle(cpu_t *cpu)
         --cpu->idle_time;
         return ERR_NONE;
     }
+    cpu->write_listener = (addr_t) 0;
+
 
     interrupt_t i = first_interrupt(cpu->IE, ~cpu->IF);
     // if (cpu->HALT == 1 && i <= JOYPAD) {

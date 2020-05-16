@@ -14,6 +14,8 @@
 #include "bus.h"
 #include "component.h"
 #include "cpu.h"
+#include "cartridge.h"
+#include "timer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,8 +31,13 @@ typedef struct {
     bus_t bus;
     component_t components[GB_NB_COMPONENTS];
     size_t size_components;
+    component_t echoram;
+    component_t bootrom;
+    bit_t boot;
     cpu_t cpu;
     uint64_t cycles;
+    gbtimer_t timer;
+    cartridge_t cartridge;
 } gameboy_t;
 
 /**

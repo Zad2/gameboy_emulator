@@ -22,13 +22,13 @@ int bus_remap(bus_t bus, component_t *c, addr_t offset)
     addr_t end = c->end;
 
     // Make sure of the correctness of the component's limits
-    if (c == NULL || start > end ) {
+    if (c == NULL || c->mem == NULL || c->mem->memory == NULL || start > end ) {
         return ERR_BAD_PARAMETER;
     }
 
     // Check if the span of the zone is larger than the component's memory,
     // Or if the component's start address is bigger than its end
-    if (c->mem == NULL || end - start + offset >= c->mem->size) {
+    if (end - start + offset >= c->mem->size) {
 
         return ERR_ADDRESS;
     }
@@ -46,12 +46,12 @@ int bus_remap(bus_t bus, component_t *c, addr_t offset)
 // ==== see bus.h ========================================
 int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t offset)
 {
-    if (c == NULL) {
+    if (c == NULL || c->mem == NULL || c->mem->memory == NULL) {
         return ERR_BAD_PARAMETER;
     }
 
     // Same error checks as bus_remap
-    if (c->mem == NULL || end - start + offset >= c->mem->size || start > end) {
+    if ( end - start + offset >= c->mem->size || start > end) {
         return ERR_ADDRESS;
     }
 
@@ -73,7 +73,7 @@ int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t 
 // ==== see bus.h ========================================
 int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 {
-    if (c == NULL || bus == NULL) {
+    if (c == NULL || bus == NULL || c->mem == NULL || c->mem->memory == NULL ) {
         return ERR_BAD_PARAMETER;
     }
 
@@ -90,7 +90,7 @@ int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 // ==== see bus.h ========================================
 int bus_unplug(bus_t bus, component_t *c)
 {
-    if (c == NULL || bus == NULL) {
+    if (c == NULL || bus == NULL || c->mem == NULL || c->mem->memory == NULL) {
         return ERR_BAD_PARAMETER;
     }
 

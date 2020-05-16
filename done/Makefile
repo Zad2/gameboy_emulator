@@ -35,15 +35,19 @@ unit-test-bus: unit-test-bus.o bus.o bit.o component.o memory.o tests.h
 unit-test-memory: unit-test-memory.o bus.o bit.o component.o memory.o tests.h
 unit-test-component: unit-test-component.o bus.o bit.o component.o memory.o tests.h
 unit-test-gameboy: unit-test-gameboy.o gameboy.o component.o memory.o bus.o bit.o cpu.o tests.h \
-	cpu-storage.o opcode.o cpu-registers.o cpu-alu.o alu.o
+	cpu-storage.o opcode.o cpu-registers.o cpu-alu.o alu.o bootrom.o cartridge.o timer.o
 unit-test-cpu: unit-test-cpu.o cpu-storage.o cpu-registers.o cpu.o  bit.o component.o \
-	memory.o bus.o gameboy.o tests.h opcode.o cpu-alu.o alu.o
+	memory.o bus.o gameboy.o tests.h opcode.o cpu-alu.o alu.o bootrom.o cartridge.o timer.o
 unit-test-cpu-dispatch-week08: unit-test-cpu-dispatch-week08.o bit.o alu.o cpu.h bus.o cpu-storage.o \
 	cpu-registers.o opcode.o component.o memory.o cpu-alu.o 
 test-cpu-week08: test-cpu-week08.o opcode.o bit.o cpu.o alu.o bus.o \
  memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o  
 unit-test-cpu-dispatch-week09: unit-test-cpu-dispatch-week09.o bit.o alu.o cpu.h bus.o cpu-storage.o \
 	cpu-registers.o opcode.o component.o memory.o cpu-alu.o 
+unit-test-cartridge: unit-test-cartridge.o tests.h cartridge.o \
+ component.o memory.o bus.o bit.o cpu.h alu.o opcode.o
+unit-test-timer: unit-test-timer.o tests.h timer.o \
+ component.o memory.o bit.o cpu.o cpu-storage.o cpu-registers.o cpu-alu.o alu.o bus.o opcode.o 
 
 alu.o: alu.c alu.h bit.h error.h
 bit.o: bit.c bit.h
@@ -68,9 +72,15 @@ cpu-registers.o: cpu-registers.c bit.h cpu.h alu.h bus.h memory.h \
 #gameboy.o: gameboy.c bus.h memory.h component.h error.h bit.h gameboy.h \
  cpu.h alu.h opcode.h cpu-alu.h
 gameboy.o: gameboy.c bus.h memory.h component.h error.h bit.h gameboy.h \
- cpu.h alu.h opcode.h util.h
+ cpu.h alu.h opcode.h bootrom.h timer.h util.h
 cpu-alu.o: cpu-alu.c error.h bit.h alu.h cpu-alu.h opcode.h cpu.h bus.h \
  memory.h component.h cpu-storage.h cpu-registers.h
+bootrom.o: bootrom.c bus.h memory.h component.h error.h bit.h gameboy.h \
+ cpu.h alu.h opcode.h bootrom.h
+cartridge.o: cartridge.c component.h memory.h error.h bus.h bit.h \
+ cartridge.h
+timer.o: timer.c component.h memory.h error.h bit.h cpu.h alu.h bus.h \
+ opcode.h timer.h
 
 unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
 unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
@@ -80,10 +90,10 @@ unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h component.
 #unit-test-gameboy.o: unit-test-gameboy.c tests.h error.h bus.h memory.h \
  component.h bit.h gameboy.h cpu.h cpu-alu.h cpu-storage.h cpu-registers.h
 unit-test-gameboy.o: unit-test-gameboy.c tests.h error.h bus.h memory.h \
- component.h bit.h gameboy.h cpu.h alu.h opcode.h cpu-storage.h util.h
+ component.h bit.h gameboy.h cpu.h alu.h opcode.h cpu-storage.h util.h bootrom.h timer.h cartridge.h
 unit-test-cpu.o: unit-test-cpu.c tests.h error.h alu.h bit.h opcode.h \
  util.h cpu.h bus.h memory.h component.h cpu-registers.h cpu-storage.h \
- cpu-alu.h
+ cpu-alu.h bootrom.h timer.h cartridge.h
 unit-test-cpu-dispatch-week08.o: unit-test-cpu-dispatch-week08.c tests.h \
  error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h gameboy.h \
  util.h unit-test-cpu-dispatch.h cpu.c cpu-storage.h cpu-registers.h cpu-alu.h
@@ -92,13 +102,18 @@ test-cpu-week08.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
 unit-test-cpu-dispatch-week09.o: unit-test-cpu-dispatch-week09.c tests.h \
  error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h gameboy.h \
  util.h unit-test-cpu-dispatch.h cpu.c cpu-storage.h cpu-registers.h cpu-alu.h
+unit-test-cartridge.o: unit-test-cartridge.c tests.h error.h cartridge.h \
+ component.h memory.h bus.h bit.h cpu.h alu.h opcode.h
+unit-test-timer.o: unit-test-timer.c util.h tests.h error.h timer.h \
+ component.h memory.h bit.h cpu.h alu.h bus.h opcode.h
 
 sidlib.o: sidlib.c sidlib.h
 
 TARGETS := 
 CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-bus \
 	unit-test-memory unit-test-component unit-test-gameboy unit-test-cpu \
-	unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09
+	unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 \
+	unit-test-cartridge unit-test-timer
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 
