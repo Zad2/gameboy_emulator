@@ -76,6 +76,10 @@ int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
             //raise timer interrupt
             bit_set(&timer->cpu->IE, TIMER);
             bit_set(&timer->cpu->IF, TIMER);
+
+            // cpu_request_interrupt(&timer->cpu, TIMER);
+            // cpu_request_interrupt(&timer->cpu, TIMER);
+
             //reload value
             tima = cpu_read_at_idx(timer->cpu, REG_TMA);
         } else {
@@ -98,10 +102,10 @@ int timer_cycle(gbtimer_t* timer)
     // Get current state of principal timer
     bit_t current_state = timer_state(timer);
 
-    //int err = timer_incr_if_state_change(timer, current_state);//twice??
-    //if (err != ERR_NONE) {
+    // int err = timer_incr_if_state_change(timer, current_state);//twice??
+    // if (err != ERR_NONE) {
     //    return err;
-    //}
+    // }
 
     // Increment counter by 4 (A cycle is 4 clock ticks)
     timer->counter += 4;
@@ -135,7 +139,6 @@ int timer_bus_listener(gbtimer_t* timer, addr_t addr)
         timer_incr_if_state_change(timer, current_state);
         break;
     default :
-        //return ERR_BAD_PARAMETER;
         break;
     }
 

@@ -12,16 +12,27 @@ int cartridge_init_from_file(component_t* c, const char* filename)
         return ERR_BAD_PARAMETER;
     }
     FILE* input = NULL;
-    input = fopen(filename, "r");
+    input = fopen(filename, "rb");
 
     if (input == NULL) {
         return ERR_IO;
     } else {
         // == 1??
-        if( fread(c->mem->memory, sizeof(uint8_t), BANK_ROM_SIZE, input) != BANK_ROM_SIZE) {
+        // data_t bootrom_memory[BANK_ROM_SIZE];
+        if(fread(c->mem->memory, sizeof(uint8_t), BANK_ROM_SIZE, input) != BANK_ROM_SIZE) {
             fclose(input);
             return ERR_IO;
         }
+
+        // for (int i = 0; i < BANK_ROM_SIZE; ++i){
+        //     c->mem->memory[i] = bootrom_memory[i];
+
+        // }
+        // for (int i = 0; i < 100; ++i){
+        //     printf("%zx",c->mem->memory[i*2] );
+        //     printf("%zx ",c->mem->memory[i*2+1] );
+
+        // }
         c->mem->size = BANK_ROM_SIZE;
         if (c->mem->memory[CARTRIDGE_TYPE_ADDR] != 0) {
             fclose(input);
@@ -56,7 +67,7 @@ int cartridge_plug(cartridge_t* ct, bus_t bus)
     }
     // Plugs the cartridge to the bus
     //fixme
-    int err = bus_forced_plug(bus, &ct->c,BANK_ROM0_START, BANK_ROM1_END, BANK_ROM0_START);
+    int err = bus_forced_plug(bus, &ct->c,BANK_ROM0_START, BANK_ROM1_END, 0);
     return err;
 }
 

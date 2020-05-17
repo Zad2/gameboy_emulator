@@ -33,10 +33,6 @@ all:: test-gameboy unit-test-alu_ext unit-test-cpu-dispatch
 LDFLAGS += -L. 
 LDLIBS += -lcs212gbcpuext
 
-#export LD_LIBRARY_PATH=.
-#LD_LIBRARY_PATH=. ./test-gameboy ../provided/tests/data/fibonacci.gb 2165183
-#gcc -L . unit-test-alu_ext.o cpu-storage.o cpu-registers.o cpu-alu.o alu.o bus.o bit.o error.o -lcs212gbcpuext -lcheck -lm -lrt -pthread -lsubunit -o unit-test-alu_ext
-
 
 test-cpu-week08: test-cpu-week08.o opcode.o bit.o cpu.o alu.o bus.o \
  memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o  

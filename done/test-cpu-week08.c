@@ -230,6 +230,7 @@ void cpu_dump(FILE* file, cpu_t* cpu)
     fprintf(file, "PC: %" PRIu16 "\n", cpu->PC);
     fprintf(file, "SP: %" PRIu16 "\n", cpu->SP);
     fprintf(file, "IME: %u, IE: %u, IF: %u, HALT: %u\n", cpu->IME, cpu->IE, cpu->IF, cpu->HALT);
+    fprintf(file, "Write_listener: %" PRIu16 "\n", cpu->write_listener);
 }
 
 // ======================================================================
