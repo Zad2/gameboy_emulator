@@ -197,14 +197,12 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
 
         // Update idle_time
         cpu->idle_time += lu->cycles-1;
-        // cpu->idle_time += lu->xtra_cycles;
         return err;
 
     }
 
     // Update idle_time
     cpu->idle_time += lu->cycles-1;
-    // cpu->idle_time += lu->xtra_cycles;
 
     // Update PC
     cpu->PC += lu->bytes;
@@ -255,6 +253,7 @@ int cpu_do_cycle(cpu_t *cpu)
             cpu->PC = 0x40 + (i<<3);
             cpu->idle_time += 5;
         }
+
 
     }
     data_t prefix = cpu_read_at_idx(cpu, cpu->PC);

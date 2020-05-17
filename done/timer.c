@@ -9,13 +9,10 @@
 
 int timer_init(gbtimer_t* timer, cpu_t* cpu)
 {
-    if (timer == NULL || cpu == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
-    int err = cpu_init(cpu);
-    if (err != ERR_NONE) {
-        return err;
-    }
+    M_REQUIRE_NON_NULL(timer);
+    M_REQUIRE_NON_NULL(cpu);
+
+    // M_EXIT_IF_ERR(cpu_init(cpu));
 
     // *(timer->cpu) = *cpu;
     timer->cpu = cpu;
@@ -65,78 +62,59 @@ bit_t timer_state(gbtimer_t* timer)
 
 int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
 {
-    if (timer == NULL) {
-        return timer;
-    }
-
+    M_REQUIRE_NON_NULL(timer);
     data_t tima = cpu_read_at_idx(timer->cpu, REG_TIMA);
 
     if (old_state && !timer_state(timer)) {
+        ++tima;
+
         if (tima == 0xFF) {
             //raise timer interrupt
-            bit_set(&timer->cpu->IE, TIMER);
             bit_set(&timer->cpu->IF, TIMER);
 
-            // cpu_request_interrupt(&timer->cpu, TIMER);
-            // cpu_request_interrupt(&timer->cpu, TIMER);
 
             //reload value
             tima = cpu_read_at_idx(timer->cpu, REG_TMA);
-        } else {
-            ++tima;
         }
 
     }
 
-    int err = cpu_write_at_idx(timer->cpu, REG_TIMA, tima);
-    return err;
+    return cpu_write_at_idx(timer->cpu, REG_TIMA, tima);
 
 
 }
 
 int timer_cycle(gbtimer_t* timer)
 {
-    if (timer == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(timer);
+
     // Get current state of principal timer
     bit_t current_state = timer_state(timer);
-
-    // int err = timer_incr_if_state_change(timer, current_state);//twice??
-    // if (err != ERR_NONE) {
-    //    return err;
-    // }
 
     // Increment counter by 4 (A cycle is 4 clock ticks)
     timer->counter += 4;
 
     // copy 8 MSB from timer principal counter to DIV register
-    int err = cpu_write_at_idx(timer->cpu, REG_DIV, msb8(timer->counter));
-    if (err != ERR_NONE) {
-        return err;
-    }
+    M_EXIT_IF_ERR(cpu_write_at_idx(timer->cpu, REG_DIV, msb8(timer->counter)));
 
-    //bit_t current_state = timer_state(timer);
-    return timer_incr_if_state_change(timer, current_state); // twice??
+    return timer_incr_if_state_change(timer, current_state);
 }
 
 int timer_bus_listener(gbtimer_t* timer, addr_t addr)
 {
-    if (timer == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(timer);
 
     bit_t current_state = timer_state(timer);
 
     switch(addr) {
     case REG_DIV:
-        //timer_incr_if_state_change(timer, current_state);
         timer->counter = 0; // fixme or at bus
+        cpu_write_at_idx(timer->cpu, REG_DIV, 0);
         current_state = timer_state(timer);
-        timer_incr_if_state_change(timer, current_state);
+        return timer_incr_if_state_change(timer, current_state);
         break;
     case REG_TAC:
-        timer_incr_if_state_change(timer, current_state);
+        return timer_incr_if_state_change(timer, current_state);
         break;
     default :
         break;

@@ -94,6 +94,7 @@ int main(int argc, char* argv[])
     const char* const filename = argv[1];
     // const char* const filename = "tests/data/blargg_roms/02-interrupts.gb";
     // const char* const filename = "tests/data/blargg_roms/09-op r,r.gb";
+    // const char* const filename = "tests/data/blargg_roms/instr_timing.gb";
 
 
 
