@@ -15,20 +15,18 @@
 // ==== see memory.h ========================================
 int mem_create(memory_t *mem, size_t size)
 {
-    if (size <= 0 || mem == NULL) {
+    M_REQUIRE_NON_NULL(mem);
+    if (size <= 0) {
         return ERR_BAD_PARAMETER;
     }
 
     // Initialize a memory_t instance and allocate necessary
     // space for it in the computer memory
-    memory_t m = {0, 0, NULL};
+    memory_t m = {0, NULL};
     m.memory = calloc(size, sizeof(data_t));
+    M_EXIT_IF_NULL(m.memory, sizeof(data_t));
 
-    if (m.memory != NULL) {
-        m.size = size;
-    } else {
-        return ERR_MEM;
-    }
+    m.size = size;
 
     // Point the given memory to the created one
     *mem = m;

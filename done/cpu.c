@@ -20,38 +20,33 @@
 // ==== see cpu.h ========================================
 int cpu_init(cpu_t *cpu)
 {
-    if (cpu == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(cpu);
 
     // Set all of the cpu's elements to 0
     memset(cpu, 0, sizeof(cpu_t));
 
-    int err = component_create(&cpu->high_ram, HIGH_RAM_SIZE);
-    return err;
+    return component_create(&cpu->high_ram, HIGH_RAM_SIZE);
 }
 
 // ==== see cpu.h ========================================
 int cpu_plug(cpu_t *cpu, bus_t *bus)
 {
-    if (cpu == NULL || bus == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(bus);
 
     cpu->bus = bus;
 
     (*bus)[REG_IE]=&cpu->IE;
     (*bus)[REG_IF]=&cpu->IF;
 
-    int err = bus_plug(*cpu->bus, &cpu->high_ram, HIGH_RAM_START, HIGH_RAM_END);
-    return err;
+    return bus_plug(*cpu->bus, &cpu->high_ram, HIGH_RAM_START, HIGH_RAM_END);
 }
 
 // ==== see cpu.h ========================================
 void cpu_free(cpu_t *cpu)
 {
     if (cpu != NULL) {
-        //bus_unplug(*cpu->bus, &cpu->high_ram);
+        // bus_unplug(*cpu->bus, &cpu->high_ram);
         component_free(&cpu->high_ram);
         cpu->bus = NULL;
     }
@@ -72,24 +67,26 @@ typedef enum { NZ, Z, NC, C, CC_COUNT } cc_t;
  */
 int check_CC(cpu_t *cpu, opcode_t op)
 {
-    uint8_t cc = extract_cc(op);
-    flags_t f = lsb8(cpu_reg_pair_get(cpu, REG_AF_CODE));
+    if (cpu != NULL) {
+        uint8_t cc = extract_cc(op);
+        flags_t f = lsb8(cpu_reg_pair_get(cpu, REG_AF_CODE));
 
-    switch(cc) {
-    case NZ:
-        return  get_Z(f) == 0;
-        break;
-    case Z:
-        return get_Z(f) != 0;
-        break;
-    case NC:
-        return get_C(f) == 0;
-        break;
-    case C:
-        return get_C(f) != 0;
-        break;
-    default:
-        break;
+        switch(cc) {
+        case NZ:
+            return  get_Z(f) == 0;
+            break;
+        case Z:
+            return get_Z(f) != 0;
+            break;
+        case NC:
+            return get_C(f) == 0;
+            break;
+        case C:
+            return get_C(f) != 0;
+            break;
+        default:
+            break;
+        }
     }
     return 0;
 }
@@ -102,20 +99,18 @@ int check_CC(cpu_t *cpu, opcode_t op)
  */
 int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
 {
-    if (cpu == NULL || lu == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(lu);
 
     // Set flags and value to 0
     cpu->alu.flags = (flags_t) 0;
     cpu->alu.value = (uint16_t) 0;
 
     // Execute instruction
-    int err = ERR_NONE;
     if (lu->family >= LD_A_BCR && lu->family <= LD_SP_HL) {
-        err = cpu_dispatch_storage(lu, cpu);
+        M_EXIT_IF_ERR(cpu_dispatch_storage(lu, cpu));
     } else if(lu->family >= ADD_A_HLR && lu->family <= SCCF) {
-        err = cpu_dispatch_alu(lu, cpu);
+        M_EXIT_IF_ERR(cpu_dispatch_alu(lu, cpu));
     } else  {
         switch (lu->family) {
         case JP_N16:
@@ -144,12 +139,12 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
             }
             break;
         case CALL_N16:
-            cpu_SP_push(cpu, cpu->PC + lu->bytes);
+            M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
             cpu->PC = cpu_read_addr_after_opcode(cpu);
             break;
         case CALL_CC_N16:
             if (check_CC(cpu, lu->opcode)) {
-                cpu_SP_push(cpu, cpu->PC + lu->bytes);
+                M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
                 cpu->PC = cpu_read_addr_after_opcode(cpu);
                 cpu->idle_time += lu->xtra_cycles;
             } else {
@@ -157,7 +152,7 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
             }
             break;
         case RST_U3:
-            cpu_SP_push(cpu, cpu->PC + lu->bytes);
+            M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
             cpu->PC = extract_n3(lu->opcode) << 3;
             break;
         case RET:
@@ -185,7 +180,6 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
             break;
         case STOP:
             //acts like a NOP
-            // cpu->PC += lu->bytes;
             break;
         case NOP:
             cpu->PC += lu->bytes;
@@ -197,7 +191,7 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
 
         // Update idle_time
         cpu->idle_time += lu->cycles-1;
-        return err;
+        return ERR_NONE;
 
     }
 
@@ -207,9 +201,16 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
     // Update PC
     cpu->PC += lu->bytes;
 
-    return err;
-
+    return ERR_NONE;
 }
+
+/**
+ * @brief Outputs the least significant index for which both arguments' respective bits are 1
+ *
+ * @param IE The interrupt enable
+ * @param IF The interrupt flags
+ * @return interrupt_t The index of the least significant common 1 bit
+ */
 interrupt_t first_interrupt(data_t IE, data_t IF)
 {
     data_t interrupts = IE & IF;
@@ -231,25 +232,18 @@ interrupt_t first_interrupt(data_t IE, data_t IF)
 */
 int cpu_do_cycle(cpu_t *cpu)
 {
-    if (cpu == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu->bus);
 
 
-
-    if ( (cpu->IME !=0) && (cpu->IE & cpu->IF) != 0) { // ie != 0 && if != 0
+    if ( (cpu->IME !=0) && (cpu->IE & cpu->IF) != 0) {
         cpu->IME = 0;
         interrupt_t i = first_interrupt(cpu->IE, cpu->IF);
         if (i <= JOYPAD) {
             data_t data = cpu_read_at_idx(cpu, REG_IF);
-            printf("IF = %d, IF from bus = %d\n", cpu->IF, data);
             bit_unset(&data, i);
-            cpu_write_at_idx(cpu, REG_IF, data);
-            // bit_unset(&cpu->IF, i);
-
-            printf("IF = %d, IF from bus = %d\n\n\n", cpu->IF, data);
-
-            cpu_SP_push(cpu, cpu->PC);
+            M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
+            M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));
             cpu->PC = 0x40 + (i<<3);
             cpu->idle_time += 5;
         }
@@ -262,17 +256,14 @@ int cpu_do_cycle(cpu_t *cpu)
         return cpu_dispatch(&instruction_prefixed[opcode], cpu);
     }
 
-    // data_t opcode = cpu_read_data_after_opcode(cpu);
     return cpu_dispatch(&instruction_direct[prefix], cpu);
 }
 
 //==== see cpu.h ========================================
 int cpu_cycle(cpu_t *cpu)
 {
-
-    if (cpu == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu->bus);
 
     if (cpu->idle_time != 0) {
         --cpu->idle_time;
@@ -282,10 +273,7 @@ int cpu_cycle(cpu_t *cpu)
 
 
     interrupt_t i = first_interrupt(cpu->IE, ~cpu->IF);
-    // if (cpu->HALT == 1 && i <= JOYPAD) {
-    //     cpu->HALT = 0;
-    //     return cpu_do_cycle(cpu);
-    // }
+
     if ((cpu->HALT == 1 && i <= JOYPAD) || cpu->HALT == 0) {
         cpu->HALT = 0;
         return cpu_do_cycle(cpu);
@@ -293,29 +281,11 @@ int cpu_cycle(cpu_t *cpu)
     return ERR_NONE;
 }
 
+// ==== see cpu.h ========================================
 void cpu_request_interrupt(cpu_t* cpu, interrupt_t i)
 {
-    // if (cpu->IME ==1 && bit_get(cpu->IE, i) == 1) { //
-    // bit_set(&cpu->IF, i);
     data_t data = cpu_read_at_idx(cpu, REG_IF);
-    // printf("IF = %d, IF from bus = %d\n", cpu->IF, data);
     bit_set(&data, i);
-    cpu_write_at_idx(cpu, REG_IF, data);
-    // printf("IF = %d, IF from bus = %d\n", cpu->IF, data);
-
-
-    // }
-    // cpu->IE = cpu_read_at_idx(cpu, REG_IE);
-    // if (bit_get(cpu_read_at_idx(cpu, REG_IE), i) == 1) { //cpu->IME ==1 &&
-    //     data_t data = cpu_read_at_idx(cpu, REG_IF);
-    //     bit_set(&data, i);
-    //     // printf("cpu->IF = %d  cpu_read_at_idx(cpu, REG_IF) = %d\n", cpu->IF, cpu_read_at_idx(cpu, REG_IF) );
-    //     cpu_write_at_idx(cpu,REG_IF, data);
-    //     cpu->IF = cpu_read_at_idx(cpu, REG_IF);
-    //     // printf("cpu->IE = %d  cpu_read_at_idx(cpu, REG_IE) = %d\n", cpu->IE, cpu_read_at_idx(cpu, REG_IE) );
-    //     // printf("cpu->IF = %d  cpu_read_at_idx(cpu, REG_IF) = %d\n", cpu->IF, cpu_read_at_idx(cpu, REG_IF) );
-    // }
-    // printf("cpu->IF = %d  cpu_read_at_idx(cpu, REG_IF) = %d\n", cpu->IF, cpu_read_at_idx(cpu, REG_IF) );
-
+    M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
 }
 

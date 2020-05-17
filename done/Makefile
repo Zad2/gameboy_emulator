@@ -14,12 +14,12 @@ CFLAGS += -std=c11 -Wall -pedantic -g
  -Wpointer-arith -Wbad-function-cast -Wcast-align -Wwrite-strings \
  -Wunreachable-code \
  -Wcast-qual -Winit-self \
- #-Wconversion
- #-Wstrict-prototypes -Wmissing-declarations
+ -Wconversion \
+ -Wstrict-prototypes -Wmissing-declarations
  
 
 # uncomment if you want to add DEBUG flag
-CPPFLAGS += -DDEBUG
+#CPPFLAGS += -DDEBUG
 CPPFLAGS += -DBLARGG
 
 # ----------------------------------------------------------------------
@@ -43,9 +43,9 @@ test-gameboy: test-gameboy.o gameboy.o bus.o memory.o component.o \
 
 unit-test-alu: unit-test-alu.o alu.o bit.o tests.h
 unit-test-bit: unit-test-bit.o alu.o bit.o tests.h
-unit-test-bus: unit-test-bus.o bus.o bit.o component.o memory.o tests.h
-unit-test-memory: unit-test-memory.o bus.o bit.o component.o memory.o tests.h
-unit-test-component: unit-test-component.o bus.o bit.o component.o memory.o tests.h
+unit-test-bus: unit-test-bus.o bus.o bit.o component.o memory.o tests.h error.o
+unit-test-memory: unit-test-memory.o bus.o bit.o component.o memory.o tests.h error.o
+unit-test-component: unit-test-component.o bus.o bit.o component.o memory.o tests.h error.o
 unit-test-gameboy: unit-test-gameboy.o gameboy.o component.o memory.o bus.o bit.o cpu.o tests.h \
 	cpu-storage.o opcode.o cpu-registers.o cpu-alu.o alu.o bootrom.o cartridge.o timer.o error.o \
 	alu_ext.h
@@ -79,14 +79,10 @@ cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
  bit.h cpu.h alu.h bus.h component.h cpu-registers.h gameboy.h util.h
 cpu-registers.o: cpu-registers.c bit.h cpu.h alu.h bus.h memory.h \
  component.h error.h opcode.h cpu-registers.h
-#cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
- bit.h alu.h bus.h component.h cpu-registers.h gameboy.h util.h
 cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
  bit.h cpu.h alu.h bus.h component.h cpu-registers.h gameboy.h util.h
 cpu-registers.o: cpu-registers.c bit.h cpu.h alu.h bus.h memory.h \
  component.h error.h opcode.h cpu-registers.h
-#gameboy.o: gameboy.c bus.h memory.h component.h error.h bit.h gameboy.h \
- cpu.h alu.h opcode.h cpu-alu.h
 gameboy.o: gameboy.c bus.h memory.h component.h error.h bit.h gameboy.h \
  cpu.h alu.h opcode.h bootrom.h timer.h util.h
 cpu-alu.o: cpu-alu.c error.h bit.h alu.h cpu-alu.h opcode.h cpu.h bus.h \
@@ -106,8 +102,6 @@ unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
 unit-test-bus.o: unit-test-bus.c tests.h error.h bus.h memory.h component.h bit.h util.h
 unit-test-component.o: unit-test-component.c tests.h error.h bus.h memory.h component.h
 unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h component.h
-#unit-test-gameboy.o: unit-test-gameboy.c tests.h error.h bus.h memory.h \
- component.h bit.h gameboy.h cpu.h cpu-alu.h cpu-storage.h cpu-registers.h
 unit-test-gameboy.o: unit-test-gameboy.c tests.h error.h bus.h memory.h \
  component.h bit.h gameboy.h cpu.h alu.h opcode.h cpu-storage.h util.h bootrom.h timer.h cartridge.h \
  alu_ext.h

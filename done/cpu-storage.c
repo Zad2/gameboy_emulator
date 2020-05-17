@@ -17,7 +17,7 @@
 data_t cpu_read_at_idx(const cpu_t *cpu, addr_t addr)
 {
     if (cpu == NULL || cpu->bus == NULL) {
-        return NULL;
+        return (data_t) 0;
     }
     data_t data = (data_t)0;
 
@@ -31,7 +31,7 @@ data_t cpu_read_at_idx(const cpu_t *cpu, addr_t addr)
 addr_t cpu_read16_at_idx(const cpu_t *cpu, addr_t addr)
 {
     if (cpu == NULL || cpu->bus == NULL) {
-        return NULL;
+        return (data_t) 0;
     }
     addr_t a = (addr_t)0;
 
@@ -43,44 +43,39 @@ addr_t cpu_read16_at_idx(const cpu_t *cpu, addr_t addr)
 // ==== see cpu-storage.h ========================================
 int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
 {
-    if (cpu == NULL || cpu->bus == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu->bus);
 
     // Call bus_write from bus.c and write to the cpu's bus at address addr,
     // while getting potential errors
-    int err = bus_write(*cpu->bus, addr, data);
+    M_EXIT_IF_ERR(bus_write(*cpu->bus, addr, data));
 
     cpu->write_listener = addr;
-    return err;
+    return ERR_NONE;
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_write16_at_idx(cpu_t *cpu, addr_t addr, addr_t data16)
 {
-    if (cpu == NULL || cpu->bus == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu->bus);
 
     // Call bus_write16 from bus.c and write to the cpu's bus at addresses addr and addr+1,
     // while getting potential errors
-    int err = bus_write16(*cpu->bus, addr, data16);
+    M_EXIT_IF_ERR(bus_write16(*cpu->bus, addr, data16));
 
     cpu->write_listener = addr;
-    return err;
+    return ERR_NONE;
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_SP_push(cpu_t *cpu, addr_t data16)
 {
-    if (cpu == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(cpu);
 
     // Update the stack pointer value and write data16 to the new address
     cpu->SP = (uint16_t)(cpu->SP - WORD_SIZE);
-    int err = cpu_write16_at_idx(cpu, cpu->SP, data16);
-    return err;
+    return cpu_write16_at_idx(cpu, cpu->SP, data16);
 }
 
 // ==== see cpu-storage.h ========================================
@@ -124,15 +119,15 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_BCR_A:
-        cpu_write_at_idx(cpu, cpu_BC_get(cpu), cpu_reg_get(cpu, REG_A_CODE));
+        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, cpu_BC_get(cpu), cpu_reg_get(cpu, REG_A_CODE)));
         break;
 
     case LD_CR_A:
-        cpu_write_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_reg_get(cpu, REG_C_CODE)), cpu_reg_get(cpu, REG_A_CODE));
+        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_reg_get(cpu, REG_C_CODE)), cpu_reg_get(cpu, REG_A_CODE)));
         break;
 
     case LD_DER_A:
-        cpu_write_at_idx(cpu, cpu_DE_get(cpu), cpu_reg_get(cpu, REG_A_CODE));
+        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, cpu_DE_get(cpu), cpu_reg_get(cpu, REG_A_CODE)));
         break;
 
     case LD_HLRU_A:
@@ -149,15 +144,15 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_N16R_A:
-        cpu_write_at_idx(cpu, cpu_read_addr_after_opcode(cpu), cpu_reg_get(cpu, REG_A_CODE));
+        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, cpu_read_addr_after_opcode(cpu), cpu_reg_get(cpu, REG_A_CODE)));
         break;
 
     case LD_N16R_SP:
-        cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu), cpu_reg_pair_SP_get(cpu, REG_AF_CODE));
+        M_EXIT_IF_ERR(cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu), cpu_reg_pair_SP_get(cpu, REG_AF_CODE)));
         break;
 
     case LD_N8R_A:
-        cpu_write_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_read_data_after_opcode(cpu)), cpu_reg_get(cpu, REG_A_CODE));
+        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_read_data_after_opcode(cpu)), cpu_reg_get(cpu, REG_A_CODE)));
         break;
 
     case LD_R16SP_N16:
@@ -190,7 +185,7 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
 
     case PUSH_R16:
         cpu_reg_pair_SP_set(cpu, REG_AF_CODE, cpu_reg_pair_SP_get(cpu, REG_AF_CODE) - WORD_SIZE);
-        cpu_write16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE), cpu_reg_pair_get(cpu, extract_reg_pair(lu->opcode)));
+        M_EXIT_IF_ERR(cpu_write16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE), cpu_reg_pair_get(cpu, extract_reg_pair(lu->opcode))));
         break;
 
     default:

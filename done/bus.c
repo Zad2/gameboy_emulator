@@ -18,22 +18,18 @@
 // ==== see bus.h ========================================
 int bus_remap(bus_t bus, component_t *c, addr_t offset)
 {
+    M_REQUIRE_NON_NULL(c);
+    M_REQUIRE_NON_NULL(c->mem);
+    M_REQUIRE_NON_NULL(c->mem->memory);
+
     addr_t start = c->start;
     addr_t end = c->end;
 
-    // Make sure of the correctness of the component's limits
-    if (c == NULL || c->mem == NULL || c->mem->memory == NULL || start > end ) {
-        return ERR_BAD_PARAMETER;
-    }
-
     // Check if the span of the zone is larger than the component's memory,
     // Or if the component's start address is bigger than its end
-    if (end - start + offset >= c->mem->size) {
-
+    if (end - start + offset >= c->mem->size || start > end) {
         return ERR_ADDRESS;
     }
-
-
 
     // Go through all the data of the bus and assigning the pointers in the memory
     for (int i = 0; i <= end - start; ++i) {
@@ -46,9 +42,9 @@ int bus_remap(bus_t bus, component_t *c, addr_t offset)
 // ==== see bus.h ========================================
 int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t offset)
 {
-    if (c == NULL || c->mem == NULL || c->mem->memory == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(c);
+    M_REQUIRE_NON_NULL(c->mem);
+    M_REQUIRE_NON_NULL(c->mem->memory);
 
     // Same error checks as bus_remap
     if ( end - start + offset >= c->mem->size || start > end) {
@@ -73,9 +69,10 @@ int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t 
 // ==== see bus.h ========================================
 int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 {
-    if (c == NULL || bus == NULL || c->mem == NULL || c->mem->memory == NULL ) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(c);
+    M_REQUIRE_NON_NULL(bus);
+    M_REQUIRE_NON_NULL(c->mem);
+    M_REQUIRE_NON_NULL(c->mem->memory);
 
     for (int i = start; i <= end; i++) {
         if (bus[i] != NULL) {
@@ -90,9 +87,10 @@ int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 // ==== see bus.h ========================================
 int bus_unplug(bus_t bus, component_t *c)
 {
-    if (c == NULL || bus == NULL || c->mem == NULL || c->mem->memory == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(c);
+    M_REQUIRE_NON_NULL(bus);
+    M_REQUIRE_NON_NULL(c->mem);
+    M_REQUIRE_NON_NULL(c->mem->memory);
 
     addr_t start = c->start;
     addr_t end = c->end;
@@ -110,11 +108,10 @@ int bus_unplug(bus_t bus, component_t *c)
 // ==== see bus.h ========================================
 int bus_read(const bus_t bus, addr_t address, data_t *data)
 {
-    if (data == NULL || bus == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(data);
+    M_REQUIRE_NON_NULL(bus);
 
-    data_t dat = 0xff;
+    data_t dat = 0xff; // Default value
     *data = dat;
 
     // Get the data pointer from the bus and make the given data pointer point to it
@@ -128,9 +125,8 @@ int bus_read(const bus_t bus, addr_t address, data_t *data)
 // ==== see bus.h ========================================
 int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
 {
-    if (data16 == NULL || bus == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(data16);
+    M_REQUIRE_NON_NULL(bus);
 
     data_t dat16 = 0xff; // Initialize dat16 to the default value
 
@@ -140,32 +136,24 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
         data_t ptr2 = dat16;
 
         // Extract LSBs from bus at addr_t address
-        int err = bus_read(bus, address, &ptr1);
-        if (err != ERR_NONE) {
-            return err;
-        }
+        M_EXIT_IF_ERR(bus_read(bus, address, &ptr1));
 
         //Extract MSBs from bus at addr_t address + 1
-        err = bus_read(bus, (addr_t)(address + 1), &ptr2);
-        if (err != ERR_NONE) {
-            return err;
-        }
+        M_EXIT_IF_ERR(bus_read(bus, (addr_t)(address + 1), &ptr2));
 
         *data16 = (addr_t)merge8(ptr1, ptr2);
         if (*data16 == 0xFFFF) {
             *data16 = 0xFF;
         }
     }
-
     return ERR_NONE;
 }
 
 // ==== see bus.h ========================================
 int bus_write(bus_t bus, addr_t address, data_t data)
 {
-    if (bus == NULL || bus[address] == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(bus);
+    M_REQUIRE_NON_NULL(bus[address]);
 
     // Make the required pointer point the given data_t
     *bus[address] = data;
@@ -175,9 +163,16 @@ int bus_write(bus_t bus, addr_t address, data_t data)
 // ==== see bus.h ========================================
 int bus_write16(bus_t bus, addr_t address, addr_t data16)
 {
-    if (bus == NULL || bus[address] == NULL) {
+    M_REQUIRE_NON_NULL(bus);
+#ifndef DBLARGG
+    M_REQUIRE_NON_NULL(bus[address]);
+#else
+    if (bus[address] == NULL) {
         return ERR_BAD_PARAMETER;
     }
+#endif
+
+
 
     data_t data1 = lsb8(data16);
     data_t data2 = msb8(data16);

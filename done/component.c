@@ -17,9 +17,7 @@
 // ==== see component.h ========================================
 int component_create(component_t *c, size_t mem_size)
 {
-    if (c == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(c);
 
     component_t component = {NULL, 0, 0};
     component.start = 0;
@@ -34,9 +32,7 @@ int component_create(component_t *c, size_t mem_size)
 
     // Allocate memory space to the component
     component.mem = calloc(mem_size, sizeof(memory_t));
-    if (component.mem == NULL) {
-        return ERR_MEM;
-    }
+    M_EXIT_IF_NULL(component.mem, sizeof(memory_t));
 
     // Call mem_create and get potential errors
     int err = mem_create(component.mem, mem_size);
@@ -67,11 +63,18 @@ void component_free(component_t *c)
 // ==== see component.h ========================================
 int component_shared(component_t *c, component_t *c_old)
 {
-    if (c == NULL || c_old == NULL
-        || c->mem == NULL || c_old->mem == NULL
-        || c->mem->memory == NULL || c_old->mem->memory == NULL) {
+    M_REQUIRE_NON_NULL(c);
+    M_REQUIRE_NON_NULL(c_old);
+#ifndef DBLARGG
+    M_REQUIRE_NON_NULL(c->mem);
+#else
+    if (c->mem == NULL) {
         return ERR_BAD_PARAMETER;
     }
+#endif
+    M_REQUIRE_NON_NULL(c_old->mem);
+    M_REQUIRE_NON_NULL(c->mem->memory);
+    M_REQUIRE_NON_NULL(c_old->mem->memory);
 
     // Reset the component's start and end and plug c'memory to c_old's memory
     c->start = 0;

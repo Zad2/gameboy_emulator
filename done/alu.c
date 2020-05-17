@@ -13,6 +13,27 @@
 #include "bit.h"
 #include "error.h"
 
+/**
+ * @brief Set the flags values given a result and booleans
+ *
+ * @param result the alu result on which we want to assign flags
+ * @param bool_H Set the H flag if true and don't do anything if false
+ * @param bool_C Set the C flag if true and don't do anything if false
+ */
+void set_flags_value(alu_output_t *result,  uint16_t bool_H, uint16_t bool_C)
+{
+
+    if (result->value == 0) {
+        set_Z(&result->flags);
+    }
+    if (bool_H != 0) {
+        set_H(&result->flags);
+    }
+    if (bool_C != 0) {
+        set_C(&result->flags);
+    }
+}
+
 // ==== see alu.h ========================================
 flag_bit_t get_flag(flags_t flags, flag_bit_t flag)
 {
@@ -32,26 +53,10 @@ void set_flag(flags_t *flags, flag_bit_t flag)
     }
 }
 
-void set_flags_value(alu_output_t *result,  uint16_t bool_H, uint16_t bool_C)
-{
-
-    if (result->value == 0) {
-        set_Z(&result->flags);
-    }
-    if (bool_H != 0) {
-        set_H(&result->flags);
-    }
-    if (bool_C != 0) {
-        set_C(&result->flags);
-    }
-}
-
 // ==== see alu.h ========================================
 int alu_add8(alu_output_t *result, uint8_t x, uint8_t y, bit_t c0)
 {
-    if (result == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(result);
 
     uint8_t temp = (uint8_t)(lsb4(x) + lsb4(y) + c0);          // Compute the 4 LSBs of the result
     uint8_t temp1 = (uint8_t)(msb4(x) + msb4(y) + msb4(temp)); // Compute the 4 MSBs of the result
@@ -68,9 +73,7 @@ int alu_add8(alu_output_t *result, uint8_t x, uint8_t y, bit_t c0)
 // ==== see alu.h ========================================
 int alu_sub8(alu_output_t *result, uint8_t x, uint8_t y, bit_t b0)
 {
-    if (result == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(result);
 
     uint8_t temp = (uint8_t)(lsb4(x) - lsb4(y) - b0);          //Compute the 4 LSBs of the result
     uint8_t temp1 = (uint8_t)(msb4(x) - msb4(y) + msb4(temp)); // Compute the 4 MSBs of the result
@@ -87,9 +90,7 @@ int alu_sub8(alu_output_t *result, uint8_t x, uint8_t y, bit_t b0)
 // ==== see alu.h ========================================
 int alu_add16_low(alu_output_t *result, uint16_t x, uint16_t y)
 {
-    if (result == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(result);
 
     uint8_t X = lsb8(x);
     uint8_t Y = lsb8(y);
@@ -111,9 +112,7 @@ int alu_add16_low(alu_output_t *result, uint16_t x, uint16_t y)
 // ==== see alu.h ========================================
 int alu_add16_high(alu_output_t *result, uint16_t x, uint16_t y)
 {
-    if (result == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(result);
 
     uint8_t X = msb8(x);
     uint8_t Y = msb8(y);
@@ -158,9 +157,7 @@ int alu_shift(alu_output_t *result, uint8_t x, rot_dir_t dir)
 // ==== see alu.h ========================================
 int alu_shiftR_A(alu_output_t *result, uint8_t x)
 {
-    if (result == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
+    M_REQUIRE_NON_NULL(result);
 
     bit_t msb = bit_get(x, SIZE_BYTE - 1);
     bit_t ejected = bit_get(x, 0);

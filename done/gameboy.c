@@ -20,13 +20,7 @@
 int gameboy_create(gameboy_t *gameboy, const char *filename)
 {
 
-    if (gameboy == NULL) {
-        return ERR_BAD_PARAMETER;
-    }
-
-    // Instanciate a Gameboy
-    gameboy_t gb;
-    memset(&gb, 0, sizeof(gameboy_t));
+    M_REQUIRE_NON_NULL(gameboy);
 
     // Instanciate components
     component_t workRAM;
@@ -49,26 +43,13 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     component_t useless;
     memset(&useless, 0, sizeof(component_t));
 
-    // component_t bootROM;
-    // memset(&bootROM, 0, sizeof(component_t));
-
-    // Instanciate the Gameboy's bus
-    // bus_t bus;
-    // memset(&bus, 0, sizeof(bus_t));
-
-    // Create the Gameboy's cpu
-    // cpu_t cpu;
-    // memset(&cpu, 0, sizeof(cpu_t));
     M_EXIT_IF_ERR(cpu_init(&gameboy->cpu));
 
 
     // Create the components
     M_EXIT_IF_ERR(component_create(&workRAM, MEM_SIZE(WORK_RAM)));
     ++gameboy->size_components;
-    // err = component_create(&gb.echoram, MEM_SIZE(ECHO_RAM));
-    // if (err != ERR_NONE) {
-    //     return err;
-    // }
+
     M_EXIT_IF_ERR(component_create(&registers, MEM_SIZE(REGISTERS)));
     ++gameboy->size_components;
     M_EXIT_IF_ERR(component_create(&externRAM, MEM_SIZE(EXTERN_RAM)));
@@ -93,7 +74,7 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     M_EXIT_IF_ERR(bus_plug(gameboy->bus, &graphRAM, GRAPH_RAM_START, GRAPH_RAM_END));
     M_EXIT_IF_ERR(bus_plug(gameboy->bus, &useless, USELESS_START, USELESS_END));
     M_EXIT_IF_ERR(bootrom_plug(&gameboy->bootrom, gameboy->bus));
-    M_EXIT_IF_ERR(cartridge_plug(&gameboy->cartridge, &gameboy->bus));
+    M_EXIT_IF_ERR(cartridge_plug(&gameboy->cartridge, gameboy->bus));
 
 
     // Copy the created bus to the Gameboy's bus
@@ -106,7 +87,6 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     gameboy->components[VIDEO_RAM] = videoRAM;
     gameboy->components[GRAPH_RAM] = graphRAM;
     gameboy->components[USELESS] = useless;
-    // gameboy->cpu = cpu;
 
     gameboy->boot = (bit_t) 1;
 
@@ -124,12 +104,9 @@ void gameboy_free(gameboy_t *gameboy)
             // Unplug the bus from all components and free them
             bus_unplug(gameboy->bus, &gameboy->components[i]);
             component_free(&gameboy->components[i]);
-            //&gameboy->components[i]= NULL;
         }
-        // bus_unplug(gameboy->bus, &gameboy->echoram);
         bus_unplug(gameboy->bus, &gameboy->bootrom);
-        //free timer??
-        bus_unplug(gameboy->bus, &gameboy->cartridge);
+        bus_unplug(gameboy->bus, &gameboy->cartridge.c);
         component_free(&gameboy->echoram);
         component_free(&gameboy->cartridge.c);
         component_free(&gameboy->bootrom);
@@ -154,6 +131,7 @@ static int blargg_bus_listener(gameboy_t* gameboy, addr_t addr)
 }
 #endif
 
+// ==== see gameboy.h ========================================
 int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
 {
     M_REQUIRE_NON_NULL(gameboy);

@@ -92,11 +92,6 @@ int main(int argc, char* argv[])
     }
 
     const char* const filename = argv[1];
-    // const char* const filename = "tests/data/blargg_roms/02-interrupts.gb";
-    // const char* const filename = "tests/data/blargg_roms/09-op r,r.gb";
-    // const char* const filename = "tests/data/blargg_roms/instr_timing.gb";
-
-
 
     gameboy_t gb;
     zero_init_var(gb);
@@ -105,19 +100,15 @@ int main(int argc, char* argv[])
         gameboy_free(&gb);
         return err;
     }
-    // printf("gameboy created\n");
 
-    // uint64_t cycle = 1;
-    uint64_t cycle = 25000000;
+    uint64_t cycle = 1;
 
     if (argc > 2) {
         cycle = (uint64_t) atoll(argv[2]);
     }
 
     err = gameboy_run_until(&gb, cycle);
-    // printf("gameboy run until\n");
     if (err == ERR_NONE) {
-        // printf("dump \n");
         cpu_dump_to_file("dump_cpu.txt", &(gb.cpu));
         mem_dump_to_file("dump_mem.bin", gb.components);
     }
