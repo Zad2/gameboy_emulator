@@ -61,10 +61,17 @@
       for (size_t i = 0; i < bound; ++i) { ck_assert_int_eq((vec1)->content[i], (vec2)->content[i]); } \
     } while(0)
 
-#define vector_match_tab(vec, tab, size) \
-    do{\
-        for(size_t i = 0; i<size; ++i){ ck_assert_int_eq(vec->content[i], tab[i]); }\
-    }while(0)
+#define vector_match_tab(vec, tab, S) \
+    do {\
+        const size_t bound1 = (vec)->size / IMAGE_LINE_WORD_BITS; \
+        const size_t bound = (bound1 < (S) ? bound1 : (S));       \
+        for (size_t i = 0; i < bound; ++i) { ck_assert_int_eq((vec)->content[i], (tab)[i]); } \
+        if ((S) > bound) { \
+            ck_assert_uint_eq(S, bound1 + 1); \
+            const size_t shift = 8*sizeof((vec)->content[0]) - ((vec)->size % IMAGE_LINE_WORD_BITS) ; \
+            ck_assert_int_eq((vec)->content[bound1] << shift, (tab)[bound1] << shift); \
+        } \
+    } while(0)
 
 #define vector_match_val(vec, val, size) \
     do{\
@@ -186,6 +193,7 @@ START_TEST(bit_vector_get_exec)
         ck_assert_int_eq(rval, bit_vector_get(pbv, i));
     }
 
+    bit_vector_free(&pbv);
 #ifdef WITH_PRINT
     printf("=== END of %s\n", __func__);
 #endif
