@@ -134,7 +134,7 @@ START_TEST(bit_vector_create_exec)
 
 }
 END_TEST
-/*
+
 
 START_TEST(bit_vector_cpy_exec)
 {
@@ -262,6 +262,7 @@ START_TEST(bit_vector_not_exec)
 }
 END_TEST
 
+
 START_TEST(bit_vector_and_exec)
 {
 // ------------------------------------------------------------
@@ -325,6 +326,7 @@ START_TEST(bit_vector_and_exec)
 
 }
 END_TEST
+
 
 START_TEST(bit_vector_or_exec)
 {
@@ -538,6 +540,7 @@ START_TEST(bit_vector_extract_zero_exec)
 }
 END_TEST
 
+/*
 START_TEST(bit_vector_extract_wrap_exec)
 {
 // ------------------------------------------------------------
@@ -908,13 +911,13 @@ Suite* cartridge_test_suite()
 
     Add_Case(s, tc1, "BitVector Tests");
     tcase_add_test(tc1, bit_vector_create_exec);
-    // tcase_add_test(tc1, bit_vector_cpy_exec);
-    // tcase_add_test(tc1, bit_vector_get_exec);
-    // tcase_add_test(tc1, bit_vector_not_exec);
-    // tcase_add_test(tc1, bit_vector_and_exec);
-    // tcase_add_test(tc1, bit_vector_or_exec);
-    // tcase_add_test(tc1, bit_vector_xor_exec);
-    // tcase_add_test(tc1, bit_vector_extract_zero_exec);
+    tcase_add_test(tc1, bit_vector_cpy_exec);
+    tcase_add_test(tc1, bit_vector_get_exec);
+    tcase_add_test(tc1, bit_vector_not_exec);
+    tcase_add_test(tc1, bit_vector_and_exec);
+    tcase_add_test(tc1, bit_vector_or_exec);
+    tcase_add_test(tc1, bit_vector_xor_exec);
+    tcase_add_test(tc1, bit_vector_extract_zero_exec);
     // tcase_add_test(tc1, bit_vector_extract_wrap_exec);
     // tcase_add_test(tc1, bit_vector_shift_exec);
     // tcase_add_test(tc1, bit_vector_join_exec);

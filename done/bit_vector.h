@@ -16,6 +16,8 @@ extern "C" {
 
 #include <stddef.h> // for size_t
 #include <stdint.h>
+#include <stdlib.h> // for allocs
+#include <string.h> // for memset
 
 //=========================================================================
 /**
