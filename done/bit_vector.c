@@ -223,50 +223,76 @@ bit_vector_t* bit_vector_extract_zero_ext(const bit_vector_t* pbv, int64_t index
 
     bit_vector_t *result = bit_vector_create(size, 0);
 
-    // if (index % FOUR_BYTES_SIZE == 0){
-    //     for (int64_t i = index / FOUR_BYTES_SIZE; i < size / FOUR_BYTES_SIZE; ++i){
-    //         if (i >= 0 && i * FOUR_BYTES_SIZE < pbv->allocated) {
-    //             result->content[i] = pbv->content[i];
-    //         }
-    //     }
-    // }
-
-    const int64_t offset = index / FOUR_BYTES_SIZE;
-
-    for (size_t words = 0; words <= size / FOUR_BYTES_SIZE; ++words){
-        
-        uint32_t pbv_word = pbv->content[words];
-        uint8_t pbv_byte0 = (uint8_t) pbv_word;
-        uint8_t pbv_byte1 = (uint8_t) (pbv_word >> ONE_BYTE_SIZE);
-        uint8_t pbv_byte2 = (uint8_t) (pbv_word >> TWO_BYTES_SIZE);
-        uint8_t pbv_byte3 = (uint8_t) (pbv_word >> THREE_BYTES_SIZE);
-
-        uint8_t pbv_bytes[4] = {pbv_byte0, pbv_byte1, pbv_byte2, pbv_byte3};
-        uint8_t result_bytes[4] = {0, 0, 0, 0};
-
-        for (size_t w = 0; w < 4; ++w){
-            for (size_t i = 0; i < 8; ++i){
-                if (i + index >= 0) {
-                    size_t word_index = i + index / FOUR_BYTES_SIZE;
-                    uint32_t pbv_word = pbv->content[word_index];
-
-                    size_t rest = (i + index) % FOUR_BYTES_SIZE;
-
-                    uint8_t pbv_byte0 = (uint8_t) pbv_word;
-                    uint8_t pbv_byte1 = (uint8_t) (pbv_word >> ONE_BYTE_SIZE);
-                    uint8_t pbv_byte2 = (uint8_t) (pbv_word >> TWO_BYTES_SIZE);
-                    uint8_t pbv_byte3 = (uint8_t) (pbv_word >> THREE_BYTES_SIZE);
-
-                    uint8_t pbv_bytes[4] = {pbv_byte0, pbv_byte1, pbv_byte2, pbv_byte3};
-
-                    if (bit_get(pbv_bytes[rest / 8], rest) != 0){
-                        bit_set(&result_bytes[w], i);
-                    }
-                }
+    if (index % FOUR_BYTES_SIZE == 0){
+        for (int64_t i = index / FOUR_BYTES_SIZE; i < size / FOUR_BYTES_SIZE; ++i){
+            if (i >= 0 && i * FOUR_BYTES_SIZE < pbv->allocated) {
+                result->content[i] = pbv->content[i];
             }
         }
-        result->content[words] = create_word32(result_bytes[0], result_bytes[1], result_bytes[2], result_bytes[3]);
+    } else {
+        size_t offset = 0;
+        int64_t i = index;
+        while(i % FOUR_BYTES_SIZE != 0){
+            ++offset;
+            ++i;
+        }
+
+        for (int64_t i = index / FOUR_BYTES_SIZE; i < size / FOUR_BYTES_SIZE; ++i){
+            // if (i >= 0 && i * FOUR_BYTES_SIZE < pbv->allocated) {
+            //     result->content[i] = pbv->content[i];
+            // }
+            uint32_t word1 = 0;
+            uint32_t word2 = 0;
+            
+            // if (i * FOUR_BYTES_SIZE < pbv->allocated){
+                if (i == 0){
+                    word2 = pbv->content[i];
+                } else if (i == size / FOUR_BYTES_SIZE){
+                    word1 = pbv->content[i - 1];
+                } else {
+                    word1 = pbv->content[i - 1];
+                    word2 = pbv->content[i];
+                }
+            // }
+
+
+            uint32_t word = (word1 >> 32 - offset) + (word2 << offset);
+            result->content[i] = word;
+        }
+
     }
+
+    // const int64_t offset = index / FOUR_BYTES_SIZE;
+
+    // for (size_t words = 0; words <= size / FOUR_BYTES_SIZE; ++words){
+    //     uint8_t result_bytes[4] = {0, 0, 0, 0};
+
+    //     for (size_t w = 0; w < 4; ++w){
+    //         for (size_t i = 0; i < 8; ++i){
+    //             if ((int64_t) i + index >= 0) {
+    //                 printf("motorway\n");
+    //                 size_t word_index = (i + index) / FOUR_BYTES_SIZE;
+    //                 uint32_t pbv_word = pbv->content[word_index];
+
+    //                 size_t rest = (i + index) % FOUR_BYTES_SIZE;
+
+    //                 uint8_t pbv_byte0 = (uint8_t) pbv_word;
+    //                 uint8_t pbv_byte1 = (uint8_t) (pbv_word >> ONE_BYTE_SIZE);
+    //                 uint8_t pbv_byte2 = (uint8_t) (pbv_word >> TWO_BYTES_SIZE);
+    //                 uint8_t pbv_byte3 = (uint8_t) (pbv_word >> THREE_BYTES_SIZE);
+
+    //                 uint8_t pbv_bytes[4] = {pbv_byte0, pbv_byte1, pbv_byte2, pbv_byte3};
+
+    //                 if (bit_get(pbv_bytes[rest / 8], rest) != 0){
+    //                     bit_set(&result_bytes[w], i);
+    //                 }
+    //             } else {
+    //                 printf("Highway\n");
+    //             }
+    //         }
+    //     }
+    //     result->content[words] = create_word32(result_bytes[0], result_bytes[1], result_bytes[2], result_bytes[3]);
+    // }
 
     return result;
 }
