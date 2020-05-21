@@ -64,6 +64,8 @@ unit-test-alu_ext: unit-test-alu_ext.o tests.h error.o alu.o bit.o \
 unit-test-cpu-dispatch: unit-test-cpu-dispatch.o error.o alu.o \
  bit.o cpu.h bus.o memory.o component.o opcode.o util.h \
  cpu-storage.o cpu-registers.o cpu-alu.o 
+unit-test-bit-vector: unit-test-bit-vector.o tests.h error.o \
+ bit_vector.o bit.o image.h
 
 alu.o: alu.c alu.h bit.h error.h
 bit.o: bit.c bit.h
@@ -93,6 +95,7 @@ cartridge.o: cartridge.c component.h memory.h error.h bus.h bit.h \
  cartridge.h
 timer.o: timer.c component.h memory.h error.h bit.h cpu.h alu.h bus.h \
  opcode.h timer.h
+bit_vector.o: bit_vector.c bit.h bit_vector.h
 test-gameboy.o: test-gameboy.c gameboy.h bus.h memory.h component.h \
  error.h bit.h cpu.h alu.h opcode.h cartridge.h timer.h util.h
 
@@ -125,6 +128,8 @@ unit-test-alu_ext.o: unit-test-alu_ext.c tests.h error.h alu.h bit.h \
 unit-test-cpu-dispatch.o: unit-test-cpu-dispatch.c tests.h error.h alu.h \
  bit.h cpu.h bus.h memory.h component.h opcode.h util.h \
  unit-test-cpu-dispatch.h cpu-storage.h cpu-registers.h cpu-alu.h
+unit-test-bit-vector.o: unit-test-bit-vector.c tests.h error.h \
+ bit_vector.h bit.h image.h
 
 sidlib.o: sidlib.c sidlib.h
 
