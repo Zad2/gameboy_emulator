@@ -229,36 +229,53 @@ bit_vector_t* bit_vector_extract_zero_ext(const bit_vector_t* pbv, int64_t index
                 result->content[i] = pbv->content[i];
             }
         }
-    } else {
+    } else if (index > 0){
         size_t offset = 0;
         int64_t i = index;
+        uint32_t mask1 = 1;
+        uint32_t mask2 = 0xffffffff;
+        size_t dec = 1;
         while(i % FOUR_BYTES_SIZE != 0){
+            mask1 = mask1 * 2 + 1;
+            mask2 -= dec;
+            dec *= 2;
             ++offset;
             ++i;
         }
+        mask1 = ((mask1 - 1) / 2);
+        mask2 = mask2;
+        printf("mask1 == ~mask2 -> %d\n", mask1==~mask2);
 
+        bit_t boolean = (index < 0);
         for (int64_t i = index / FOUR_BYTES_SIZE; i < size / FOUR_BYTES_SIZE; ++i){
             // if (i >= 0 && i * FOUR_BYTES_SIZE < pbv->allocated) {
             //     result->content[i] = pbv->content[i];
             // }
-            uint32_t word1 = 0;
-            uint32_t word2 = 0;
+            uint32_t word1 = pbv->content[i];
+            uint32_t word2 = pbv->content[i+1];
             
             // if (i * FOUR_BYTES_SIZE < pbv->allocated){
-                if (i == 0){
-                    word2 = pbv->content[i];
-                } else if (i == size / FOUR_BYTES_SIZE){
-                    word1 = pbv->content[i - 1];
-                } else {
-                    word1 = pbv->content[i - 1];
-                    word2 = pbv->content[i];
-                }
+                // if (i == 0 && boolean){
+                //     word2 = pbv->content[i];
+                //     boolean = 0;
+                // } else if (i == 0 && !boolean){
+                //     word2 = pbv->content[i];
+
+                // } else if (i == size / FOUR_BYTES_SIZE){
+                //     word1 = pbv->content[i - 1];
+                // } else {
+                //     word1 = pbv->content[i - 1];
+                //     word2 = pbv->content[i];
+                // }
             // }
+            // uint32_t mask2 = (0xffff << offset);
 
 
-            uint32_t word = (word1 >> 32 - offset) + (word2 << offset);
-            result->content[i] = word;
+            uint32_t word = (word1 & mask1) + (word2 & mask2);
+            result->content[i - index / FOUR_BYTES_SIZE] = word;
         }
+
+    } else {
 
     }
 
