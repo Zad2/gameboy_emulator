@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h> // for allocs
 #include <string.h> // for memset
+#include <stdio.h>
 
 #include "bit_vector.h"
 
@@ -100,6 +101,36 @@ bit_vector_t* bit_vector_cpy(const bit_vector_t* pbv){
     }
 
     return copy;
+}
+
+bit_vector_t* bit_vector_set(const bit_vector_t* pbv, size_t index, bit_t value){
+    if (pbv == NULL || index < 0 || index >= pbv->size){
+        return NULL;
+    }
+
+
+    size_t index_in_word = index % FOUR_BYTES_SIZE;
+    size_t index_of_word = index / FOUR_BYTES_SIZE;
+
+    uint32_t word = pbv->content[index_of_word];
+    uint8_t word1 = (uint8_t) word;
+    uint8_t word2 = (uint8_t) (word >> ONE_BYTE_SIZE);
+    uint8_t word3 = (uint8_t) (word >> TWO_BYTES_SIZE);
+    uint8_t word4 = (uint8_t) (word >> THREE_BYTES_SIZE);
+
+
+    if (index_in_word < ONE_BYTE_SIZE){
+        bit_edit(&word1, index_in_word, value);
+    } else if (index_in_word < TWO_BYTES_SIZE){
+        bit_edit(&word2, index_in_word % 8, value);
+    } else if (index_in_word < THREE_BYTES_SIZE) {
+        bit_edit(&word3, index_in_word % 8, value);
+    } else {
+        bit_edit(&word4, index_in_word % 8, value);
+    }
+    word = create_word32(word1, word2, word3, word4);
+    pbv->content[index_of_word] = word;
+    return pbv;
 }
 
 bit_t bit_vector_get(const bit_vector_t* pbv, size_t index){
@@ -216,47 +247,21 @@ bit_vector_t* bit_vector_extract_zero_ext(const bit_vector_t* pbv, int64_t index
     if (size == 0){
         return NULL;
     }
-    
+
     if (pbv == NULL){
         return bit_vector_create(size, 0);
     }
 
     bit_vector_t *result = bit_vector_create(size, 0);
 
-    if (index % FOUR_BYTES_SIZE == 0){
-        for (int64_t i = (int64_t)((int64_t) index / (int64_t) FOUR_BYTES_SIZE); i <= (int64_t)((int64_t)size / (int64_t)FOUR_BYTES_SIZE); ++i){
-            if (i >= 0 && i < pbv->allocated / FOUR_BYTES_SIZE) {
-                result->content[i - index / FOUR_BYTES_SIZE] = pbv->content[i];
-            }
+    size_t offset = FOUR_BYTES_SIZE - (index % FOUR_BYTES_SIZE);
+    for (size_t i = 0; i< size; ++i){
+        bit_t value=0;
+        if (i + index >= 0 && i+index < pbv->size) {
+            value = bit_vector_get(pbv, i + index);
         }
-    } else{
-        size_t offset = (FOUR_BYTES_SIZE - (index % FOUR_BYTES_SIZE)) % FOUR_BYTES_SIZE;
-
-        for (int64_t i = (int64_t)((int64_t) index / (int64_t) FOUR_BYTES_SIZE); i <= (int64_t)((int64_t)size / (int64_t)FOUR_BYTES_SIZE); ++i){
-            uint32_t word1 = 0;
-            uint32_t word2 = 0;
-
-            if (index > 0){
-                if (i < pbv->allocated / FOUR_BYTES_SIZE ){
-                    word1 = pbv->content[i];
-                }
-                if (i < pbv->allocated / FOUR_BYTES_SIZE - 1){
-                    word2 = pbv->content[i+1];
-                }
-            } else {
-                if (i > 0 && i <= pbv->allocated / FOUR_BYTES_SIZE){
-                    word1 = pbv->content[i-1];
-                }
-                if (i >= 0 && i < pbv->allocated / FOUR_BYTES_SIZE){
-                    word2 = pbv->content[i];
-                } 
-            }
-
-            uint32_t word = (word1 >> (32 - offset)) + (word2 << offset);
-            result->content[i - index / FOUR_BYTES_SIZE] = word;
-        }
-
-    } 
+        result = bit_vector_set(result, i, value);
+    }
     return result;
 }
 
@@ -266,43 +271,17 @@ bit_vector_t* bit_vector_extract_wrap_ext(const bit_vector_t* pbv, int64_t index
     }
 
     bit_vector_t *result = bit_vector_create(size, 0);
-    for (size_t i = 0; i <= size / FOUR_BYTES_SIZE; ++i){
-        if (pbv->size/32 != 0){
-            result->content[i] = pbv->content[i % (pbv->size / FOUR_BYTES_SIZE)];
+
+    size_t offset = FOUR_BYTES_SIZE - (index % FOUR_BYTES_SIZE);
+    for (size_t i = 0; i< size; ++i){
+        bit_t value=0;
+        if (i + index >= 0 && i+index < pbv->size) {
+            value = bit_vector_get(pbv, i + index);
         } else {
-            result->content[i] = pbv->content[i];
+            value = bit_vector_get(pbv, (i+index) % pbv->size);
         }
-        
+        result = bit_vector_set(result, i, value);
     }
-
-    if (index % FOUR_BYTES_SIZE == 0){
-        for (int64_t i = (int64_t)((int64_t) index / (int64_t) FOUR_BYTES_SIZE); i <= (int64_t)((int64_t)size / (int64_t)FOUR_BYTES_SIZE); ++i){
-            if (pbv->size/32 != 0){
-                result->content[i - index / FOUR_BYTES_SIZE] = pbv->content[i % ((pbv->size)/ 32)];
-            } else {
-                result->content[i - index / FOUR_BYTES_SIZE] = pbv->content[i];
-            }
-        }
-    } else{
-        size_t offset = (FOUR_BYTES_SIZE - (index % FOUR_BYTES_SIZE)) % FOUR_BYTES_SIZE;
-
-        for (int64_t i = (int64_t)((int64_t) index / (int64_t) FOUR_BYTES_SIZE); i <= (int64_t)((int64_t)size / (int64_t)FOUR_BYTES_SIZE); ++i){
-            uint32_t word1 = 0;
-            uint32_t word2 = 0;
-
-            if (index > 0){
-                word1 = pbv->content[i% ((pbv->size)/ 32)];
-                word2 = pbv->content[((i+1)% ((pbv->size)/ 32))];
-            } else {
-                word1 = pbv->content[((i-1) % ((pbv->size)/ 32))];
-                word2 = pbv->content[i% ((pbv->size)/ 32)];
-            }
-
-            uint32_t word = (word1 >> (32 - offset)) + (word2 << offset);
-            result->content[i - index / FOUR_BYTES_SIZE] = word;
-        }
-
-    } 
     return result;
 }
 
