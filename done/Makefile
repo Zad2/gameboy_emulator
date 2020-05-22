@@ -20,7 +20,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 
 # uncomment if you want to add DEBUG flag
 #CPPFLAGS += -DDEBUG
-CPPFLAGS += -DBLARGG
+#CPPFLAGS += -DBLARGG
 
 # ----------------------------------------------------------------------
 # feel free to update/modifiy this part as you wish
@@ -30,10 +30,12 @@ LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
 all:: test-gameboy unit-test-alu_ext unit-test-cpu-dispatch
 
-LDFLAGS += -L. 
-LDLIBS += -lcs212gbcpuext
+test-gameboy: LDFLAGS += -L.
+test-gameboy: LDLIBS += -lcs212gbcpuext
 
-test-image: LDLIBS += $(GTK_LIBS) -lsid
+
+
+
 
 test-cpu-week08: test-cpu-week08.o opcode.o bit.o cpu.o alu.o bus.o \
  memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o  
@@ -67,9 +69,7 @@ unit-test-cpu-dispatch: unit-test-cpu-dispatch.o error.o alu.o \
  cpu-storage.o cpu-registers.o cpu-alu.o 
 unit-test-bit-vector: unit-test-bit-vector.o tests.h error.o \
  bit_vector.o bit.o image.h
-test-image: test-image.o error.o util.o image.o bit_vector.o bit.o \
- libsid.so
-	$(CC) -fPIC -shared $(CPPFLAGS) $(CFLAGS) $(GTK_INCLUDE) $^ -o $@
+
 
 alu.o: alu.c alu.h bit.h error.h
 bit.o: bit.c bit.h
@@ -136,10 +136,6 @@ unit-test-bit-vector.o: unit-test-bit-vector.c tests.h error.h \
  bit_vector.h bit.h image.h
 test-image.o: test-image.c error.h util.h image.h bit_vector.h bit.h \
  libsid.so
-	$(CC) -fPIC -shared $(CPPFLAGS) $(CFLAGS) $(GTK_INCLUDE) $^ -o $@
-	
-
-sidlib.o: sidlib.c sidlib.h
 
 TARGETS := test-gameboy 
 CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-bus \
@@ -201,3 +197,10 @@ libsid_demo.o: CFLAGS += $(GTK_INCLUDE)
 libsid_demo: LDFLAGS += -L.
 libsid_demo: LDLIBS += $(GTK_LIBS) -lsid
 libsid_demo: libsid_demo.o libsid.so
+
+test-image.o: CFLAGS += $(GTK_INCLUDE)
+
+test-image: LDFLAGS +=  -L.
+test-image: LDLIBS += $(GTK_LIBS) -lsid
+test-image: test-image.o error.o util.o image.o bit_vector.o bit.o libsid.so
+
