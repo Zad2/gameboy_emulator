@@ -224,15 +224,15 @@ bit_vector_t* bit_vector_extract_zero_ext(const bit_vector_t* pbv, int64_t index
     bit_vector_t *result = bit_vector_create(size, 0);
 
     if (index % FOUR_BYTES_SIZE == 0){
-        for (int64_t i = index / FOUR_BYTES_SIZE; i < size / FOUR_BYTES_SIZE; ++i){
+        for (int64_t i = (int64_t)((int64_t) index / (int64_t) FOUR_BYTES_SIZE); i <= (int64_t)((int64_t)size / (int64_t)FOUR_BYTES_SIZE); ++i){
             if (i >= 0 && i < pbv->allocated / FOUR_BYTES_SIZE) {
                 result->content[i - index / FOUR_BYTES_SIZE] = pbv->content[i];
             }
         }
     } else{
-        size_t offset = FOUR_BYTES_SIZE - (index % FOUR_BYTES_SIZE);
+        size_t offset = (FOUR_BYTES_SIZE - (index % FOUR_BYTES_SIZE)) % FOUR_BYTES_SIZE;
 
-        for (int64_t i = index / FOUR_BYTES_SIZE; i < size / FOUR_BYTES_SIZE; ++i){
+        for (int64_t i = (int64_t)((int64_t) index / (int64_t) FOUR_BYTES_SIZE); i <= (int64_t)((int64_t)size / (int64_t)FOUR_BYTES_SIZE); ++i){
             uint32_t word1 = 0;
             uint32_t word2 = 0;
 
@@ -266,34 +266,36 @@ bit_vector_t* bit_vector_extract_wrap_ext(const bit_vector_t* pbv, int64_t index
     }
 
     bit_vector_t *result = bit_vector_create(size, 0);
+    for (size_t i = 0; i <= size / FOUR_BYTES_SIZE; ++i){
+        if (pbv->size/32 != 0){
+            result->content[i] = pbv->content[i % (pbv->size / FOUR_BYTES_SIZE)];
+        } else {
+            result->content[i] = pbv->content[i];
+        }
+        
+    }
 
     if (index % FOUR_BYTES_SIZE == 0){
-        for (int64_t i = index / FOUR_BYTES_SIZE; i < size / FOUR_BYTES_SIZE; ++i){
-            if (i >= 0 && i < pbv->allocated / FOUR_BYTES_SIZE) {
-                result->content[i - index / FOUR_BYTES_SIZE] = pbv->content[i % (size / FOUR_BYTES_SIZE + 1)];
+        for (int64_t i = (int64_t)((int64_t) index / (int64_t) FOUR_BYTES_SIZE); i <= (int64_t)((int64_t)size / (int64_t)FOUR_BYTES_SIZE); ++i){
+            if (pbv->size/32 != 0){
+                result->content[i - index / FOUR_BYTES_SIZE] = pbv->content[i % ((pbv->size)/ 32)];
+            } else {
+                result->content[i - index / FOUR_BYTES_SIZE] = pbv->content[i];
             }
         }
     } else{
-        size_t offset = FOUR_BYTES_SIZE - (index % FOUR_BYTES_SIZE);
+        size_t offset = (FOUR_BYTES_SIZE - (index % FOUR_BYTES_SIZE)) % FOUR_BYTES_SIZE;
 
-        for (int64_t i = index / FOUR_BYTES_SIZE; i < size / FOUR_BYTES_SIZE; ++i){
+        for (int64_t i = (int64_t)((int64_t) index / (int64_t) FOUR_BYTES_SIZE); i <= (int64_t)((int64_t)size / (int64_t)FOUR_BYTES_SIZE); ++i){
             uint32_t word1 = 0;
             uint32_t word2 = 0;
 
             if (index > 0){
-                if (i < pbv->allocated / FOUR_BYTES_SIZE ){
-                    word1 = pbv->content[i];
-                }
-                if (i < pbv->allocated / FOUR_BYTES_SIZE - 1){
-                    word2 = pbv->content[i+1];
-                }
+                word1 = pbv->content[i% ((pbv->size)/ 32)];
+                word2 = pbv->content[((i+1)% ((pbv->size)/ 32))];
             } else {
-                if (i > 0 && i <= pbv->allocated / FOUR_BYTES_SIZE){
-                    word1 = pbv->content[i-1];
-                }
-                if (i >= 0 && i < pbv->allocated / FOUR_BYTES_SIZE){
-                    word2 = pbv->content[i];
-                } 
+                word1 = pbv->content[((i-1) % ((pbv->size)/ 32))];
+                word2 = pbv->content[i% ((pbv->size)/ 32)];
             }
 
             uint32_t word = (word1 >> (32 - offset)) + (word2 << offset);
@@ -302,6 +304,62 @@ bit_vector_t* bit_vector_extract_wrap_ext(const bit_vector_t* pbv, int64_t index
 
     } 
     return result;
+}
+
+bit_vector_t* bit_vector_shift(const bit_vector_t* pbv, int64_t shift){
+    if (pbv == NULL){
+        return NULL;
+    }
+
+    return bit_vector_extract_zero_ext(pbv, -shift, pbv->size);
+}
+
+bit_vector_t* bit_vector_join(const bit_vector_t* pbv1, const bit_vector_t* pbv2, int64_t shift){
+    if (pbv1 == NULL || pbv2 == NULL || pbv1->size != pbv2->size || shift < 0 || shift > pbv1->size){
+        return NULL;
+    }
+    bit_vector_t *pbv1_cpy = bit_vector_cpy(pbv1);
+    bit_vector_t *pbv2_cpy = bit_vector_cpy(pbv2);
+
+    bit_vector_t *pbv_mask = bit_vector_create(pbv1->size, 1);
+
+    pbv_mask = bit_vector_extract_zero_ext(pbv_mask, -shift, pbv1->size);
+
+    const bit_vector_t *pbv2_shift = bit_vector_and(pbv2_cpy, pbv_mask);
+    bit_vector_t *pbv1_shift = bit_vector_and(pbv1_cpy, bit_vector_not(pbv_mask));
+    
+    bit_vector_t *result = bit_vector_or(pbv1_shift, pbv2_shift);
+
+    return result;
+
+}
+
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0')
+
+
+int bit_vector_print(const bit_vector_t* pbv){
+    for (size_t i = 0; i < pbv->size / 32 + 1; ++i) {
+        pbv->content[i] = pbv->content[i] & pbv->content[i];
+        printf(""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN"",
+               BYTE_TO_BINARY(pbv->content[i]>>24), BYTE_TO_BINARY(pbv->content[i]>>16), BYTE_TO_BINARY(pbv->content[i]>>8), BYTE_TO_BINARY(pbv->content[i]));
+    }
+    return pbv->size;
+}
+
+int bit_vector_println(const char* prefix, const bit_vector_t* pbv){
+    printf("%s", prefix);
+    int printed = bit_vector_print(pbv);
+    printf("\n");
+    return strlen(prefix) + printed + 1; // +1 is for the '\n'
 }
 
 void bit_vector_free(bit_vector_t** pbv){
