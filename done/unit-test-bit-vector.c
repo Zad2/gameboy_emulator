@@ -739,8 +739,6 @@ START_TEST(bit_vector_join_exec)
 
     pbv1 = bit_vector_create(PV1_SIZE * IMAGE_LINE_WORD_BITS, 1);
 
-    bit_vector_print(pbv1);
-
     fill_vector_with(pbv1, 0xB055B055, PV1_SIZE);
     pbv0 = bit_vector_create(PV1_SIZE * IMAGE_LINE_WORD_BITS, 0);
     fill_vector_with(pbv0, 0xDEADDEAD, PV1_SIZE);
