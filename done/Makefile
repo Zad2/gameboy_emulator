@@ -19,7 +19,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g
  
 
 # uncomment if you want to add DEBUG flag
-CPPFLAGS += -DDEBUG
+#CPPFLAGS += -DDEBUG
 #CPPFLAGS += -DBLARGG
 
 # ----------------------------------------------------------------------
@@ -27,9 +27,10 @@ CPPFLAGS += -DDEBUG
 
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
+LDFLAGS += -L.
+LDLIBS += -lcs212gbfinalext 
 
-all:: gbsimulator
-#test-gameboy unit-test-alu_ext unit-test-cpu-dispatch
+all:: gbsimulator test-image test-gameboy unit-test-alu_ext unit-test-cpu-dispatch
 gbsimulator: LDFLAGS += -L.
 gbsimulator: LDLIBS += $(GTK_LIBS) -lsid -lcs212gbfinalext
 gbsimulator.o: CFLAGS += $(GTK_INCLUDE)
@@ -43,18 +44,6 @@ gbsimulator.o: gbsimulator.c sidlib.h gameboy.h bus.h memory.h \
  component.h error.h bit.h cpu.h alu.h opcode.h cartridge.h timer.h \
  lcdc.h bit_vector.h joypad.h error.h cpu-storage.h cpu-alu.h cpu-registers.h \
  bootrom.h alu_ext.h
-
-test-gameboy: LDFLAGS += -L.
-test-gameboy: LDLIBS += -lcs212gbfinalext
-
-unit-test-alu_ext: LDFLAGS += -L.
-unit-test-alu_ext: LDLIBS += -lcs212gbfinalext
-
-unit-test-cpu-dispatch: LDFLAGS += -L.
-unit-test-cpu-dispatch: LDLIBS += -lcs212gbfinalext
-
-unit-test-gameboy: LDFLAGS += -L.
-unit-test-gameboy: LDLIBS += -lcs212gbfinalext
 
 test-cpu-week08: test-cpu-week08.o opcode.o bit.o cpu.o alu.o bus.o \
  memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o  
@@ -71,22 +60,25 @@ unit-test-memory: unit-test-memory.o bus.o bit.o component.o memory.o tests.h er
 unit-test-component: unit-test-component.o bus.o bit.o component.o memory.o tests.h error.o
 unit-test-gameboy: unit-test-gameboy.o gameboy.o component.o memory.o bus.o bit.o cpu.o tests.h \
 	cpu-storage.o opcode.o cpu-registers.o cpu-alu.o alu.o bootrom.o cartridge.o timer.o error.o \
-	alu_ext.h lcdc.h joypad.h
-unit-test-cpu: unit-test-cpu.o cpu-storage.o cpu-registers.o cpu.o  bit.o component.o \
-	memory.o bus.o gameboy.o tests.h opcode.o cpu-alu.o alu.o bootrom.o cartridge.o timer.o error.o
+	alu_ext.h lcdc.h joypad.h bit_vector.o
+unit-test-cpu: unit-test-cpu.o tests.h error.o alu.o bit.o opcode.o \
+ cpu.o bus.o memory.o component.o cpu-registers.o cpu-storage.o \
+ cpu-alu.o bit_vector.o
 unit-test-cpu-dispatch-week08: unit-test-cpu-dispatch-week08.o bit.o alu.o cpu.h bus.o cpu-storage.o \
-	cpu-registers.o opcode.o component.o memory.o cpu-alu.o error.o lcdc.h joypad.h
+	cpu-registers.o opcode.o component.o memory.o cpu-alu.o error.o lcdc.h joypad.h bit_vector.o
 unit-test-cpu-dispatch-week09: unit-test-cpu-dispatch-week09.o bit.o alu.o cpu.h bus.o cpu-storage.o \
-	cpu-registers.o opcode.o component.o memory.o cpu-alu.o error.o lcdc.h joypad.h
+	cpu-registers.o opcode.o component.o memory.o cpu-alu.o error.o lcdc.h joypad.h bit_vector.o
 unit-test-cartridge: unit-test-cartridge.o tests.h cartridge.o \
  component.o memory.o bus.o bit.o cpu.h alu.o opcode.o error.o
 unit-test-timer: unit-test-timer.o tests.h timer.o \
- component.o memory.o bit.o cpu.o cpu-storage.o cpu-registers.o cpu-alu.o alu.o bus.o opcode.o error.o
+ component.o memory.o bit.o cpu.o cpu-storage.o cpu-registers.o cpu-alu.o alu.o bus.o opcode.o \
+  error.o bit_vector.o
 unit-test-alu_ext: unit-test-alu_ext.o tests.h error.o alu.o bit.o \
- alu_ext.h cpu-alu.o cpu-storage.o cpu-registers.o bus.o bit_vector.o cpu.o
+ alu_ext.h cpu-alu.o cpu-storage.o cpu-registers.o bus.o bit_vector.o cpu.o component.o\
+  opcode.o memory.o
 unit-test-cpu-dispatch: unit-test-cpu-dispatch.o error.o alu.o \
- bit.o cpu.o bus.o memory.o component.o opcode.o util.h \
- cpu-storage.o cpu-registers.o cpu-alu.o
+ bit.o bus.o memory.o component.o opcode.o util.h \
+ cpu-storage.o cpu-registers.o cpu-alu.o bit_vector.o
 unit-test-bit-vector: unit-test-bit-vector.o tests.h error.o \
  bit_vector.o bit.o image.h
 
@@ -135,10 +127,10 @@ unit-test-gameboy.o: unit-test-gameboy.c tests.h error.h bus.h memory.h \
  alu_ext.h lcdc.h joypad.h
 unit-test-cpu.o: unit-test-cpu.c tests.h error.h alu.h bit.h opcode.h \
  util.h cpu.h bus.h memory.h component.h cpu-registers.h cpu-storage.h \
- cpu-alu.h bootrom.h timer.h cartridge.h
+ cpu-alu.h
 unit-test-cpu-dispatch-week08.o: unit-test-cpu-dispatch-week08.c tests.h \
  error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h gameboy.h \
- util.h unit-test-cpu-dispatch.h cpu.c cpu-storage.h cpu-registers.h cpu-alu.h
+ util.h unit-test-cpu-dispatch.h cpu.c cpu-storage.h cpu-registers.h cpu-alu.h 
 test-cpu-week08.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
  memory.h component.h error.h cpu-storage.h util.h lcdc.h joypad.h
 unit-test-cpu-dispatch-week09.o: unit-test-cpu-dispatch-week09.c tests.h \
@@ -162,7 +154,8 @@ TARGETS := test-gameboy
 CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-bus \
 	unit-test-memory unit-test-component unit-test-gameboy unit-test-cpu \
 	unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 \
-	unit-test-cartridge unit-test-timer unit-test-alu_ext unit-test-cpu-dispatch
+	unit-test-cartridge unit-test-timer unit-test-alu_ext unit-test-cpu-dispatch \
+	unit-test-bit-vector
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 
