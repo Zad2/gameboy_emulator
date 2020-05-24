@@ -48,18 +48,18 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
 
     // Create the components
     M_EXIT_IF_ERR(component_create(&workRAM, MEM_SIZE(WORK_RAM)));
-    ++gameboy->size_components;
+    ++gameboy->nb_components;
 
     M_EXIT_IF_ERR(component_create(&registers, MEM_SIZE(REGISTERS)));
-    ++gameboy->size_components;
+    ++gameboy->nb_components;
     M_EXIT_IF_ERR(component_create(&externRAM, MEM_SIZE(EXTERN_RAM)));
-    ++gameboy->size_components;
+    ++gameboy->nb_components;
     M_EXIT_IF_ERR(component_create(&videoRAM, MEM_SIZE(VIDEO_RAM)));
-    ++gameboy->size_components;
+    ++gameboy->nb_components;
     M_EXIT_IF_ERR(component_create(&graphRAM, MEM_SIZE(GRAPH_RAM)));
-    ++gameboy->size_components;
+    ++gameboy->nb_components;
     M_EXIT_IF_ERR(component_create(&useless, MEM_SIZE(USELESS)));
-    ++gameboy->size_components;
+    ++gameboy->nb_components;
 
     M_EXIT_IF_ERR(component_create(&gameboy->bootrom, MEM_SIZE(BOOT_ROM)));
     M_EXIT_IF_ERR(timer_init(&gameboy->timer, &gameboy->cpu));
@@ -110,10 +110,10 @@ void gameboy_free(gameboy_t *gameboy)
         component_free(&gameboy->echoram);
         component_free(&gameboy->cartridge.c);
         component_free(&gameboy->bootrom);
-
+        cpu_free(&gameboy->cpu);
 
         gameboy->cycles = 0;
-        gameboy->size_components = 0;
+        gameboy->nb_components = 0;
         gameboy->boot = (bit_t) 0;
     }
 }
@@ -137,11 +137,11 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
     M_REQUIRE_NON_NULL(gameboy);
 
     while (gameboy->cycles < cycle) {
-#ifdef BLARGG
-        if (gameboy->cycles % VBLANK_PERIOD == 0) {
-            cpu_request_interrupt(&gameboy->cpu, VBLANK);
-        }
-#endif
+// #ifdef BLARGG
+//         if (gameboy->cycles % 17556 == 0) {
+//             cpu_request_interrupt(&gameboy->cpu, VBLANK);
+//         }
+// #endif
 
         M_EXIT_IF_ERR(timer_cycle(&gameboy->timer));
         M_EXIT_IF_ERR(cpu_cycle(&gameboy->cpu));

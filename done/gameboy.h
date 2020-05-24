@@ -16,6 +16,8 @@
 #include "cpu.h"
 #include "cartridge.h"
 #include "timer.h"
+#include "lcdc.h"
+#include "joypad.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,20 +29,20 @@ extern "C" {
  * @brief Game Boy data structure.
  *        Regroups everything needed to simulate the Game Boy.
  */
-typedef struct {
+struct gameboy_{
     bus_t bus;
-    component_t components[GB_NB_COMPONENTS];
-    size_t size_components;
-    component_t echoram;
-    component_t bootrom;
-    bit_t boot;
     cpu_t cpu;
     uint64_t cycles;
     gbtimer_t timer;
     cartridge_t cartridge;
-} gameboy_t;
-
-#define VBLANK_PERIOD 17556
+    component_t components[GB_NB_COMPONENTS];
+    size_t nb_components;
+    component_t bootrom;
+    bit_t boot;
+    lcdc_t screen;
+    joypad_t pad;
+    component_t echoram;
+};
 
 /**
  * @brief Enum for the different compononents' indices in the Gameboy's components array
