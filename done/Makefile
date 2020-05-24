@@ -19,8 +19,8 @@ CFLAGS += -std=c11 -Wall -pedantic -g
  
 
 # uncomment if you want to add DEBUG flag
-#CPPFLAGS += -DDEBUG
-#CPPFLAGS += -DBLARGG
+CPPFLAGS += -DDEBUG
+CPPFLAGS += -DBLARGG
 
 # ----------------------------------------------------------------------
 # feel free to update/modifiy this part as you wish
@@ -31,8 +31,7 @@ LDFLAGS += -L.
 LDLIBS += -lcs212gbfinalext 
 
 all:: gbsimulator test-image test-gameboy unit-test-alu_ext unit-test-cpu-dispatch
-gbsimulator: LDFLAGS += -L.
-gbsimulator: LDLIBS += $(GTK_LIBS) -lsid -lcs212gbfinalext
+gbsimulator: LDLIBS += $(GTK_LIBS) -lsid
 gbsimulator.o: CFLAGS += $(GTK_INCLUDE)
 
 gbsimulator: gbsimulator.o libsid.so gameboy.o bus.o memory.o \
@@ -115,7 +114,6 @@ timer.o: timer.c component.h memory.h error.h bit.h cpu.h alu.h bus.h \
 bit_vector.o: bit_vector.c bit.h bit_vector.h
 test-gameboy.o: test-gameboy.c gameboy.h bus.h memory.h component.h \
  error.h bit.h cpu.h alu.h opcode.h cartridge.h timer.h util.h
-#image.o: image.c error.h image.h bit_vector.h bit.h
 
 unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
 unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
@@ -214,7 +212,5 @@ libsid_demo: libsid_demo.o libsid.so
 
 test-image.o: CFLAGS += $(GTK_INCLUDE)
 
-test-image: LDFLAGS +=  -L.
 test-image: LDLIBS += $(GTK_LIBS) -lsid
 test-image: test-image.o error.o util.o bit_vector.o bit.o libsid.so  image.o
-test-image: LDLIBS += -lcs212gbfinalext

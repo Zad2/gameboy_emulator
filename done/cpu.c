@@ -134,6 +134,7 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
             if (check_CC(cpu, lu->opcode)) {
                 cpu->PC += lu->bytes + (int8_t) cpu_read_data_after_opcode(cpu);
                 cpu->idle_time += lu->xtra_cycles;
+                // fprintf(stderr, "In JR_CC_E8: cpu->PC = %d\n", cpu->PC);
             } else {
                 cpu->PC += lu->bytes;
             }
@@ -152,8 +153,17 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
             }
             break;
         case RST_U3:
+            // fprintf(stderr, "opcode = %d\t", lu->opcode);
+            // fprintf(stderr, "old PC = %d \t", cpu->PC);
             M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
+            // fprintf(stderr, "in RST_U3: cpu->PC = %d \t lu->bytes = %d \t n3 = %d \t", cpu->PC , lu->bytes,extract_n3(lu->opcode) );
             cpu->PC = extract_n3(lu->opcode) << 3;
+            // fprintf(stderr, "new PC = %d \n", cpu->PC);
+            // data_t dat = cpu_read_at_idx(cpu, extract_n3(lu->opcode) << 3 );
+            // fprintf(stderr, "data at new PC = %d\n", dat);
+            //new data is 195 (= JP n16) => jump to 50220 => NOPS
+            // fprintf(stderr, "data at new PC = %d\n", cpu_read16_at_idx(cpu, cpu->PC+2));
+
             break;
         case RET:
             cpu->PC = cpu_SP_pop(cpu);
@@ -177,6 +187,7 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
         case HALT:
             cpu->HALT = 1;
             cpu->PC += lu->bytes;
+
             break;
         case STOP:
             //acts like a NOP
@@ -236,20 +247,22 @@ int cpu_do_cycle(cpu_t *cpu)
     M_REQUIRE_NON_NULL(cpu->bus);
 
 
-    if ( (cpu->IME !=0) && (cpu->IE & cpu->IF) != 0) {
-        cpu->IME = 0;
+    if ( (cpu->IME !=0)) {
         interrupt_t i = first_interrupt(cpu->IE, cpu->IF);
         if (i <= JOYPAD) {
+            cpu->IME = 0;
             data_t data = cpu_read_at_idx(cpu, REG_IF);
             bit_unset(&data, i);
             M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
             M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));
             cpu->PC = 0x40 + (i<<3);
             cpu->idle_time += 5;
+
+            
         }
+        return ERR_NONE;
+    } 
 
-
-    }
     data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
     if (prefix == (data_t) 0xCB) {
         data_t opcode = cpu_read_data_after_opcode(cpu);
@@ -272,10 +285,18 @@ int cpu_cycle(cpu_t *cpu)
     cpu->write_listener = (addr_t) 0;
 
 
-    interrupt_t i = first_interrupt(cpu->IE, ~cpu->IF);
+    interrupt_t i = first_interrupt(cpu->IE, cpu->IF);
 
-    if ((cpu->HALT == 1 && i <= JOYPAD) || cpu->HALT == 0) {
+    if ((cpu->HALT == 1 && i <= JOYPAD) ) {
         cpu->HALT = 0;
+        //cpu->PC = cpu_SP_pop(cpu);
+        if (cpu->IME == 1){
+
+        }else{
+
+        }
+        return cpu_do_cycle(cpu);
+    }else if( cpu->HALT == 0){
         return cpu_do_cycle(cpu);
     }
     return ERR_NONE;
@@ -284,8 +305,13 @@ int cpu_cycle(cpu_t *cpu)
 // ==== see cpu.h ========================================
 void cpu_request_interrupt(cpu_t* cpu, interrupt_t i)
 {
-    data_t data = cpu_read_at_idx(cpu, REG_IF);
-    bit_set(&data, i);
-    M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
+    M_REQUIRE_NON_NULL(cpu);
+
+    if (i>=VBLANK && i <= JOYPAD ){
+        data_t data = cpu_read_at_idx(cpu, REG_IF);
+        bit_set(&data, i);
+        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
+
+    }
 }
 

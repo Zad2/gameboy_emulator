@@ -34,7 +34,7 @@ int bootrom_init(component_t* c)
 
 // ==== see bootrom.h ========================================
 int bootrom_bus_listener(gameboy_t* gameboy, addr_t addr)
-{
+{   
     M_REQUIRE_NON_NULL(gameboy);
 
     if(addr == REG_BOOT_ROM_DISABLE && gameboy->boot != 0) {
@@ -44,6 +44,8 @@ int bootrom_bus_listener(gameboy_t* gameboy, addr_t addr)
         M_EXIT_IF_ERR(cartridge_plug(&gameboy->cartridge, gameboy->bus));
         // Set boot bit to 0 to mark end of boot
         gameboy->boot = 0;
+        fprintf(stderr, "in BOOTROM\n");
+
     }
     return ERR_NONE;
 }

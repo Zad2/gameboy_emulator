@@ -146,23 +146,24 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
     M_REQUIRE_NON_NULL(gameboy);
 
     while (gameboy->cycles < cycle) {
-// #ifdef BLARGG
-//         if (gameboy->cycles % 17556 == 0) {
-//             cpu_request_interrupt(&gameboy->cpu, VBLANK);
-//         }
-// #endif
+#ifdef BLARGG
+        if (gameboy->cycles % 17556 == 0) {
+            cpu_request_interrupt(&gameboy->cpu, VBLANK);
+        }
+#endif
 
         M_EXIT_IF_ERR(timer_cycle(&gameboy->timer));
         M_EXIT_IF_ERR(cpu_cycle(&gameboy->cpu));
-        printf("cycle %d\n", gameboy->cycles);
-        M_EXIT_IF_ERR(lcdc_cycle(&gameboy->screen, gameboy->cycles));
+        // printf("cycle %d\n", gameboy->cycles);
+        // M_EXIT_IF_ERR(lcdc_cycle(&gameboy->screen, gameboy->cycles));
 
         ++gameboy->cycles;
-
-        M_EXIT_IF_ERR(timer_bus_listener(&gameboy->timer, gameboy->cpu.write_listener));
-        M_EXIT_IF_ERR(bootrom_bus_listener(gameboy, gameboy->cpu.write_listener));
-        M_EXIT_IF_ERR(joypad_bus_listener(&gameboy->pad, gameboy->cpu.write_listener));
-        M_EXIT_IF_ERR(lcdc_bus_listener(&gameboy->screen, gameboy->cpu.write_listener));
+        if (gameboy->cpu.write_listener!= 0){
+            M_EXIT_IF_ERR(timer_bus_listener(&gameboy->timer, gameboy->cpu.write_listener));
+            M_EXIT_IF_ERR(bootrom_bus_listener(gameboy, gameboy->cpu.write_listener));
+        }
+        // M_EXIT_IF_ERR(joypad_bus_listener(&gameboy->pad, gameboy->cpu.write_listener));
+        // M_EXIT_IF_ERR(lcdc_bus_listener(&gameboy->screen, gameboy->cpu.write_listener));
 #ifdef BLARGG
         M_EXIT_IF_ERR(blargg_bus_listener(gameboy, gameboy->cpu.write_listener));
 #endif

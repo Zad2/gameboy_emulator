@@ -4,8 +4,94 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
-            "name": "(gdb) Launch",
+            "name": "Interrupts",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/done/test-gameboy",
+            "args": ["/home/zad/Desktop/pps20-projet-bosh/done/tests/data/blargg_roms/02-interrupts.gb","25000000"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-exec-run -enable-pretty-printing -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Detach follow",
+                    "text": "-exec-run -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Additional libs for gdb",
+                    "text" : "set env LD_LIBRARY_PATH=${workspaceFolder}/done"
+                }
+            ]
+        },
+        {
+            "name": "9-op, r,r.gb (2D)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/done/test-gameboy",
+            "args": ["/home/zad/Desktop/pps20-projet-bosh/done/tests/data/blargg_roms/09-op r,r.gb","25000000"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-exec-run -enable-pretty-printing -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Detach follow",
+                    "text": "-exec-run -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Additional libs for gdb",
+                    "text" : "set env LD_LIBRARY_PATH=${workspaceFolder}/done"
+                }
+            ]
+        },
+        
+        {
+            "name": "Instr_timing",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/done/test-gameboy",
+            "args": ["/home/zad/Desktop/pps20-projet-bosh/done/tests/data/blargg_roms/instr_timing.gb","25000000"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-exec-run -enable-pretty-printing -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Detach follow",
+                    "text": "-exec-run -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Additional libs for gdb",
+                    "text" : "set env LD_LIBRARY_PATH=${workspaceFolder}/done"
+                }
+            ]
+        },
+        {
+            "name": "gbsimulator",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/done/gbsimulator",
@@ -26,6 +112,6 @@
                     "text" : "set env LD_LIBRARY_PATH=${workspaceFolder}/done"
                 }
             ]
-        }
+        },
     ]
 }

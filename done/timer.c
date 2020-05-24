@@ -113,6 +113,7 @@ int timer_cycle(gbtimer_t* timer)
 // ==== see timer.h ========================================
 int timer_bus_listener(gbtimer_t* timer, addr_t addr)
 {
+
     M_REQUIRE_NON_NULL(timer);
 
     bit_t current_state = timer_state(timer);
@@ -124,9 +125,13 @@ int timer_bus_listener(gbtimer_t* timer, addr_t addr)
         M_EXIT_IF_ERR(cpu_write_at_idx(timer->cpu, REG_DIV, 0));
         current_state = timer_state(timer);
         return timer_incr_if_state_change(timer, current_state);
+            fprintf(stderr, "\tin TIMER div\n");
+
         break;
     case REG_TAC:
         return timer_incr_if_state_change(timer, current_state);
+            fprintf(stderr, "\tin TIMER tac\n");
+
         break;
     default :
         break;

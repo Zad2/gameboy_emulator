@@ -150,12 +150,14 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     case DEC_R8: {
         M_EXIT_IF_ERR(alu_sub8(&cpu->alu, cpu_reg_get(cpu,extract_n3(lu->opcode)), (uint8_t)1, (bit_t)0));
         cpu_reg_set_from_alu8(cpu, extract_n3(lu->opcode));
+        // fprintf(stderr, "IN DEC_R8\n");
         cpu_combine_alu_flags(cpu, DEC_FLAGS_SRC);
     } break;
 
     case ADD_HL_R16SP: {
         M_EXIT_IF_ERR(alu_add16_high(&cpu->alu, cpu_HL_get(cpu), cpu_reg_pair_SP_get(cpu, extract_reg_pair(lu->opcode))));
         cpu_HL_set(cpu, cpu->alu.value);
+
         cpu_combine_alu_flags(cpu, CPU,CLEAR,ALU,ALU);
     } break;
 
