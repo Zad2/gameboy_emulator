@@ -19,8 +19,8 @@ CFLAGS += -std=c11 -Wall -pedantic -g
  
 
 # uncomment if you want to add DEBUG flag
-#CPPFLAGS += -DDEBUG
-CPPFLAGS += -DBLARGG
+CPPFLAGS += -DDEBUG
+#CPPFLAGS += -DBLARGG
 
 # ----------------------------------------------------------------------
 # feel free to update/modifiy this part as you wish
@@ -53,12 +53,15 @@ unit-test-alu_ext: LDLIBS += -lcs212gbfinalext
 unit-test-cpu-dispatch: LDFLAGS += -L.
 unit-test-cpu-dispatch: LDLIBS += -lcs212gbfinalext
 
+unit-test-gameboy: LDFLAGS += -L.
+unit-test-gameboy: LDLIBS += -lcs212gbfinalext
+
 test-cpu-week08: test-cpu-week08.o opcode.o bit.o cpu.o alu.o bus.o \
  memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o  
 test-gameboy: test-gameboy.o gameboy.o bus.o memory.o component.o \
  bit.o cpu.o alu.o opcode.o cartridge.o timer.o util.o  \
  bootrom.o cpu-storage.o cpu-registers.o cpu-alu.o error.o \
- lcdc.h joypad.h
+ lcdc.h joypad.h bit_vector.o
 
 
 unit-test-alu: unit-test-alu.o alu.o bit.o tests.h
@@ -152,8 +155,8 @@ unit-test-cpu-dispatch.o: unit-test-cpu-dispatch.c tests.h error.h alu.h \
  unit-test-cpu-dispatch.h cpu-storage.h cpu-registers.h cpu-alu.h
 unit-test-bit-vector.o: unit-test-bit-vector.c tests.h error.h \
  bit_vector.h bit.h image.h
-test-image.o: test-image.c error.h util.h image.h bit_vector.h bit.h \
- libsid.so
+test-image.o: test-image.c error.h util.h bit_vector.h bit.h \
+ libsid.so 
 
 TARGETS := test-gameboy 
 CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-bus \
@@ -220,5 +223,5 @@ test-image.o: CFLAGS += $(GTK_INCLUDE)
 
 test-image: LDFLAGS +=  -L.
 test-image: LDLIBS += $(GTK_LIBS) -lsid
-test-image: test-image.o error.o util.o bit_vector.o bit.o libsid.so
+test-image: test-image.o error.o util.o bit_vector.o bit.o libsid.so  image.o
 test-image: LDLIBS += -lcs212gbfinalext

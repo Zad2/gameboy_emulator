@@ -11,7 +11,7 @@
 #define MY_KEY_RIGHT_BIT 0x04
 #define MY_KEY_LEFT_BIT  0x08
 #define MY_KEY_A_BIT     0x10
-#define SCALE 3
+#define SCALE 1
 
 // typedef struct gameboy_ gameboy_t;
 gameboy_t gameboy;
@@ -25,7 +25,7 @@ static void set_grey(guchar* pixels, int row, int col, int width, guchar grey)
 // ======================================================================
 static void generate_image(guchar* pixels, int height, int width)
 {
-    // printf("width = %d, height = %d\n", width, height);
+    printf("width = %d, height = %d\n", width, height);
     gameboy_run_until(&gameboy, 25000000);
     // printf("No seg fault\n");
     for (int x = 0; x < width; ++x){
@@ -33,31 +33,9 @@ static void generate_image(guchar* pixels, int height, int width)
             uint8_t output = 0;
             image_get_pixel(&output, &(gameboy.screen.display), x*SCALE, y*SCALE);
             set_grey(pixels, y, x, width, 255 - 85 * output);
-            // printf("No seg fault, x = %d, y = %d\n", x, y);
+            printf("No seg fault, x = %d, y = %d\n", x, y);
         }
     }
-    // static int N = 0;
-    // // if (++N % 2) {
-    //     // draw a pattern
-    //     guchar color = 120;
-    //     // for (int i = 20; i < height; i += 20) {
-    //     //     color = (color == 0) ?  : 0;
-    //         for (int r = 0; r < height; r++)
-    //             for (int c = 0; c < width; c++) {
-    //                 set_grey(pixels, r, c,  width, color);
-    //             }
-        // }
-    // } else {
-    //     // draw another pattern
-    //     guchar color = 192;
-    //     for (int i = 20; i < height; i += 20) {
-    //         color = (color == 192) ? 64 : 192;
-    //         for (int r = i; r < height - i; r++)
-    //             for (int c = i; c < width - i; c++) {
-    //                 set_grey(pixels, r, c,  width, color);
-    //             }
-    //     }
-    // }
 }
 
 // ======================================================================
@@ -145,21 +123,23 @@ static gboolean keyrelease_handler(guint keyval, gpointer data)
 // ======================================================================
 int main(int argc, char *argv[])
 {
-    // if (argc <= 1){
-    //     error("please provide an input file (binary image)");
-    //     return 1;
-    // }
+    if (argc <= 1){
+        error("please provide an input file (binary image)");
+        return 1;
+    }
 
     memset(&gameboy, 0, sizeof(gameboy_t));
 
     // M_EXIT_IF_ERR(gameboy_create(&gameboy, argv[1]));   
-    M_EXIT_IF_ERR(gameboy_create(&gameboy, "./tests/data/blargg_roms/01-special.gb"));
+    M_EXIT_IF_ERR(gameboy_create(&gameboy, argv[1]));
 
+    int x = 0;
     sd_launch(&argc, &argv,
-                sd_init("./tests/data/blargg_roms/01-special.gb", (int) LCD_WIDTH * SCALE, (int) LCD_HEIGHT * SCALE, 40,
+                sd_init(argv[1], (int) LCD_WIDTH * SCALE, (int) LCD_HEIGHT * SCALE, 40,
                         generate_image, keypress_handler, keyrelease_handler));
 
+    x= x*3;
     gameboy_free(&gameboy);
-    
+    x = 1+4;
     return 0;
 }

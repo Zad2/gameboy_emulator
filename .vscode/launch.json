@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/done/gbsimulator",
+            "args": ["/home/zad/Desktop/pps20-projet-bosh/done/tests/data/blargg_roms/01-special.gb"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-exec-run -enable-pretty-printing -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Additional libs for gdb",
+                    "text" : "set env LD_LIBRARY_PATH=${workspaceFolder}/done"
+                }
+            ]
+        }
+    ]
+}

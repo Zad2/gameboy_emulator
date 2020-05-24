@@ -105,6 +105,7 @@ int timer_cycle(gbtimer_t* timer)
 
     // copy 8 MSB from timer principal counter to DIV register
     M_EXIT_IF_ERR(cpu_write_at_idx(timer->cpu, REG_DIV, msb8(timer->counter)));
+    
 
     return timer_incr_if_state_change(timer, current_state);
 }
