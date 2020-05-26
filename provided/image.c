@@ -18,11 +18,11 @@
 
 #define index_to_content_index(index) ((index)/ IMAGE_LINE_WORD_BITS)
 
-#define do_image_line(piml) do(piml, lsb); do(piml, msb); do(piml, opacity)
+#define do_image_line(piml) do_imlc(piml, lsb); do_imlc(piml, msb); do_imlc(piml, opacity)
 
 // ======================================================================
 #define M_REQUIRE_NON_NULL_IMAGE_LINE(iml)\
-    do{ \
+    do { \
         M_REQUIRE_NON_NULL((iml).lsb); \
         M_REQUIRE_NON_NULL((iml).msb); \
         M_REQUIRE_NON_NULL((iml).opacity); \
@@ -30,7 +30,7 @@
 
 // ======================================================================
 #define M_REQUIRE_MATCHING_IMAGE_LINE_SIZE(iml1, iml2)\
-    do{ \
+    do { \
         M_REQUIRE_NON_NULL_IMAGE_LINE(iml1);\
         M_REQUIRE_NON_NULL_IMAGE_LINE(iml2);\
         M_REQUIRE((iml1).lsb->size == (iml2).lsb->size, ERR_BAD_PARAMETER, "%s", "Sizes do not match"); \
@@ -53,13 +53,13 @@ static int valid(image_line_t* piml)
 int image_line_create(image_line_t* piml, size_t size)
 {
     M_REQUIRE_NON_NULL(piml);
-    M_REQUIRE(size > 0, ERR_BAD_PARAMETER, "Invalid Size: %lu is zero", size);
+    M_REQUIRE(size > 0, ERR_BAD_PARAMETER, "Invalid Size: %zu is zero", size);
 
-#define do(I, X) \
+#define do_imlc(I, X) \
     I->X = bit_vector_create(size, 0)
 
     do_image_line(piml);
-#undef do
+#undef do_imlc
 
     return valid(piml);
 }
@@ -69,16 +69,12 @@ int image_line_set_word(image_line_t* piml, size_t index, uint32_t msb, uint32_t
 {
     M_REQUIRE_NON_NULL(piml);
     M_REQUIRE_NON_NULL_IMAGE_LINE(*piml);
-    M_REQUIRE(index < size_to_content_size(piml->msb->size), ERR_BAD_PARAMETER,
-              "Incorrect index (%lu < %lu)", index, piml->msb->size);
-    M_REQUIRE(index < size_to_content_size(piml->lsb->size), ERR_BAD_PARAMETER,
-              "Incorrect index (%lu < %lu)", index, piml->lsb->size);
-    M_REQUIRE(index < size_to_content_size(piml->opacity->size), ERR_BAD_PARAMETER,
-              "Incorrect index (%lu < %lu)", index, piml->opacity->size);
     M_REQUIRE((piml->msb->size == piml->lsb->size) &&
               (piml->lsb->size == piml->opacity->size), ERR_BAD_PARAMETER,
-              "Incorrect size in image_line (%lu, %lu, %lu)",
+              "Incorrect sizes in image_line (%zu, %zu, %zu)",
               piml->lsb->size, piml->msb->size, piml->opacity->size);
+    M_REQUIRE(index < size_to_content_size(piml->msb->size), ERR_BAD_PARAMETER,
+              "Incorrect index (%zu >= %zu)", index, size_to_content_size(piml->msb->size));
 
     piml->msb    ->content[index] = msb;
     piml->lsb    ->content[index] = lsb;
@@ -93,11 +89,11 @@ int image_line_shift(image_line_t* output, image_line_t iml, int64_t shift)
     M_REQUIRE_NON_NULL(output);
     M_REQUIRE_NON_NULL_IMAGE_LINE(iml);
 
-#define do(I, X) \
+#define do_imlc(I, X) \
     I->X = bit_vector_shift(iml.X, shift)
 
     do_image_line(output);
-#undef do
+#undef do_imlc
 
     return valid(output);
 }
@@ -109,29 +105,27 @@ int image_line_extract_wrap_ext(image_line_t* output, image_line_t iml, int64_t 
     M_REQUIRE_NON_NULL_IMAGE_LINE(iml);
     M_REQUIRE(size > 0, ERR_BAD_PARAMETER, "%s", "Size argument cannot be zero");
 
-#define do(I, X) \
+#define do_imlc(I, X) \
     I->X = bit_vector_extract_wrap_ext(iml.X, index, size)
 
     do_image_line(output);
-#undef do
+#undef do_imlc
 
     return valid(output);
 }
 
 // ======================================================================
-#define PALETTE_MASK_BIT 0x01
-
 int image_line_map_colors(image_line_t* output, image_line_t iml, palette_t map)
 {
     M_REQUIRE_NON_NULL(output);
     M_REQUIRE_NON_NULL_IMAGE_LINE(iml);
 
     if (map == DEFAULT_PALETTE) {
-#define do(I, X) \
+#define do_imlc(I, X) \
         I->X = bit_vector_cpy(iml.X)
 
         do_image_line(output);
-#undef do
+#undef do_imlc
         return ERR_NONE;
     }
 
@@ -142,56 +136,61 @@ int image_line_map_colors(image_line_t* output, image_line_t iml, palette_t map)
     for (size_t i = 0; i < PALETTE_COLOR_COUNT; ++i) {
         bit_vector_t* mask = NULL;
 
-        switch (i) {
-        case 0: {
-            bit_vector_t* tmp = bit_vector_not(bit_vector_cpy(iml.lsb));
+        const bit_t color_bit_0 = (bit_t) (map & (1 << (i * 2    )));
+        const bit_t color_bit_1 = (bit_t) (map & (1 << (i * 2 + 1)));
 
-            if (tmp == NULL) {
+        if (color_bit_0 || color_bit_1) {
+            switch (i) {
+            case 0: {
+                bit_vector_t* tmp = bit_vector_not(bit_vector_cpy(iml.lsb));
+
+                if (tmp == NULL) {
+                    image_line_free(output);
+                    return ERR_MEM;
+                }
+
+                mask = bit_vector_and(bit_vector_not(bit_vector_cpy(iml.msb)), tmp);
+                bit_vector_free(&tmp);
+            } break;
+
+            case 1: {
+                mask = bit_vector_and(bit_vector_not(bit_vector_cpy(iml.msb)), iml.lsb);
+            } break;
+
+            case 2: {
+                mask = bit_vector_and(bit_vector_not(bit_vector_cpy(iml.lsb)), iml.msb);
+            } break;
+
+            case 3: {
+                mask = bit_vector_and(bit_vector_cpy(iml.lsb), iml.msb);
+            } break;
+            }
+
+            if (mask == NULL) {
                 image_line_free(output);
                 return ERR_MEM;
             }
 
-            mask = bit_vector_and(bit_vector_not(bit_vector_cpy(iml.msb)), tmp);
-            bit_vector_free(&tmp);
-        } break;
+            if (color_bit_0) {
+                output->lsb = bit_vector_or(output->lsb, mask);
 
-        case 1: {
-            mask = bit_vector_and(bit_vector_not(bit_vector_cpy(iml.msb)), iml.lsb);
-        } break;
-
-        case 2: {
-            mask = bit_vector_and(bit_vector_not(bit_vector_cpy(iml.lsb)), iml.msb);
-        } break;
-
-        case 3: {
-            mask = bit_vector_and(bit_vector_cpy(iml.lsb), iml.msb);
-        } break;
-        }
-
-        if (mask == NULL) {
-            image_line_free(output);
-            return ERR_MEM;
-        }
-
-        if (map & (PALETTE_MASK_BIT << (i * 2))) {
-            output->lsb = bit_vector_or(output->lsb, mask);
-
-            if (output->lsb == NULL) {
-                image_line_free(output);
-                return ERR_MEM;
+                if (output->lsb == NULL) {
+                    image_line_free(output);
+                    return ERR_MEM;
+                }
             }
-        }
 
-        if (map & (PALETTE_MASK_BIT << ((i * 2) + 1))) {
-            output->msb = bit_vector_or(output->msb, mask);
+            if (color_bit_1) {
+                output->msb = bit_vector_or(output->msb, mask);
 
-            if (output->msb == NULL) {
-                image_line_free(output);
-                return ERR_MEM;
+                if (output->msb == NULL) {
+                    image_line_free(output);
+                    return ERR_MEM;
+                }
             }
-        }
 
-        bit_vector_free(&mask);
+            bit_vector_free(&mask);
+        }
     }
 
     return ERR_NONE;
@@ -251,29 +250,29 @@ int image_line_join(image_line_t* output, image_line_t iml1, image_line_t iml2, 
     M_REQUIRE_NON_NULL(output);
     M_REQUIRE_NON_NULL_IMAGE_LINE(iml1);
     M_REQUIRE_NON_NULL_IMAGE_LINE(iml2);
+    M_REQUIRE((iml1.msb->size == iml1.lsb->size) &&
+              (iml1.lsb->size == iml1.opacity->size), ERR_BAD_PARAMETER,
+              "Incorrect sizes in image_line #1 (%zu, %zu, %zu)",
+              iml1.lsb->size, iml1.msb->size, iml1.opacity->size);
     M_REQUIRE_MATCHING_IMAGE_LINE_SIZE(iml1, iml2);
     M_REQUIRE(start >= 0, ERR_BAD_PARAMETER, "Incorrect start (%ld < 0)", start);
     M_REQUIRE(start < (int64_t)iml1.msb->size, ERR_BAD_PARAMETER,
-              "Incorrect start (%ld < %lu)", start, iml1.msb->size);
-    M_REQUIRE(start < (int64_t)iml1.lsb->size, ERR_BAD_PARAMETER,
-              "Incorrect start (%ld < %lu)", start, iml1.lsb->size);
-    M_REQUIRE(start < (int64_t)iml1.opacity->size, ERR_BAD_PARAMETER,
-              "Incorrect start (%ld < %lu)", start, iml1.opacity->size);
+              "Incorrect start (%ld >= %zu)", start, iml1.msb->size);
 
     const int64_t size = (int64_t)iml1.lsb->size;
 
     if (start % size == 0) {
-#define do(I, X) \
+#define do_imlc(I, X) \
         I->X = bit_vector_cpy(iml2.X)
 
         do_image_line(output);
-#undef do
+#undef do_imlc
     } else {
-#define do(I, X) \
+#define do_imlc(I, X) \
         I->X = bit_vector_join(iml1.X, iml2.X, start)
 
         do_image_line(output);
-#undef do
+#undef do_imlc
     }
 
     return valid(output);
@@ -318,15 +317,15 @@ int image_create(image_t* pim, size_t width, size_t height)
 int image_set_line(image_t* pim, size_t y, image_line_t line)
 {
     M_REQUIRE_NON_NULL(pim);
-    M_REQUIRE(y < pim->height, ERR_BAD_PARAMETER, "Invalid Y parameter (%lu < %lu)", y, pim->height);
+    M_REQUIRE(y < pim->height, ERR_BAD_PARAMETER, "Invalid Y parameter (%zu < %zu)", y, pim->height);
     M_REQUIRE_NON_NULL_IMAGE_LINE(pim->content[y]);
     M_REQUIRE_MATCHING_IMAGE_LINE_SIZE(pim->content[y], line);
 
-#define do(I, X) \
+#define do_imlc(I, X) \
     memcpy(I->content[y].X->content, line.X->content, size_to_content_size(I->content[y].X->size) * sizeof(uint32_t))
 
     do_image_line(pim);
-#undef do
+#undef do_imlc
 
     return ERR_NONE;
 }
@@ -336,9 +335,9 @@ int image_get_pixel(uint8_t* output, image_t* pim, size_t x, size_t y)
 {
     M_REQUIRE_NON_NULL(output);
     M_REQUIRE_NON_NULL(pim);
-    M_REQUIRE(y < pim->height, ERR_BAD_PARAMETER, "Invalid Y parameter (%lu >= %lu)", y, pim->height);
-    M_REQUIRE(x < pim->content[y].msb->size, ERR_BAD_PARAMETER, "Invalid X parameter (%lu >= %lu)", x, pim->content[y].msb->size);
-    M_REQUIRE(x < pim->content[y].lsb->size, ERR_BAD_PARAMETER, "Invalid X parameter (%lu >= %lu)", x, pim->content[y].lsb->size);
+    M_REQUIRE(y < pim->height, ERR_BAD_PARAMETER, "Invalid Y parameter (%zu >= %zu)", y, pim->height);
+    M_REQUIRE(x < pim->content[y].msb->size, ERR_BAD_PARAMETER, "Invalid X parameter (%zu >= %zu)", x, pim->content[y].msb->size);
+    M_REQUIRE(x < pim->content[y].lsb->size, ERR_BAD_PARAMETER, "Invalid X parameter (%zu >= %zu)", x, pim->content[y].lsb->size);
 
     *output = (uint8_t)((bit_vector_get(pim->content[y].msb, x) ? 0x2 : 0x0) |
                         (bit_vector_get(pim->content[y].lsb, x) ? 0x1 : 0x0));
@@ -350,17 +349,17 @@ int image_get_pixel(uint8_t* output, image_t* pim, size_t x, size_t y)
 int image_own_line_content(image_t* pim, size_t y, image_line_t line)
 {
     M_REQUIRE_NON_NULL(pim);
-    M_REQUIRE(y < pim->height, ERR_BAD_PARAMETER, "Invalid Y parameter (%lu < %lu)", y, pim->height);
+    M_REQUIRE(y < pim->height, ERR_BAD_PARAMETER, "Invalid Y parameter (%zu < %zu)", y, pim->height);
     M_REQUIRE_NON_NULL_IMAGE_LINE(pim->content[y]);
     M_REQUIRE_NON_NULL_IMAGE_LINE(line);
     M_REQUIRE_MATCHING_IMAGE_LINE_SIZE(pim->content[y], line);
 
-#define do(I, X) \
+#define do_imlc(I, X) \
     bit_vector_free(&(I->content[y].X)); \
     I->content[y].X = line.X
 
     do_image_line(pim);
-#undef do
+#undef do_imlc
     return ERR_NONE;
 }
 
