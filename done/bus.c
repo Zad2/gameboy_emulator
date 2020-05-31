@@ -71,8 +71,8 @@ int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 {
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NON_NULL(bus);
-    M_REQUIRE_NON_NULL(c->mem);
-    M_REQUIRE_NON_NULL(c->mem->memory);
+    // M_REQUIRE_NON_NULL(c->mem);
+    // M_REQUIRE_NON_NULL(c->mem->memory);
 
     for (int i = start; i <= end; i++) {
         if (bus[i] != NULL) {
@@ -89,8 +89,6 @@ int bus_unplug(bus_t bus, component_t *c)
 {
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NON_NULL(bus);
-    M_REQUIRE_NON_NULL(c->mem);
-    M_REQUIRE_NON_NULL(c->mem->memory);
 
     addr_t start = c->start;
     addr_t end = c->end;

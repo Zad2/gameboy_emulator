@@ -41,7 +41,6 @@ struct gameboy_{
     bit_t boot;
     lcdc_t screen;
     joypad_t pad;
-    //component_t echoram;
 };
 
 /**

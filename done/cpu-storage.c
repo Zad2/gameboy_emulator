@@ -50,6 +50,10 @@ int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
     // while getting potential errors
     M_EXIT_IF_ERR(bus_write(*cpu->bus, addr, data));
 
+    if(addr == 49697 || addr == 49698){
+        int x = 0;
+    }
+
     cpu->write_listener = addr;
     return ERR_NONE;
 }
@@ -63,6 +67,10 @@ int cpu_write16_at_idx(cpu_t *cpu, addr_t addr, addr_t data16)
     // Call bus_write16 from bus.c and write to the cpu's bus at addresses addr and addr+1,
     // while getting potential errors
     M_EXIT_IF_ERR(bus_write16(*cpu->bus, addr, data16));
+
+    if(addr == 49697 || addr == 49698){
+        int x = 0;
+    }
 
     cpu->write_listener = addr;
     return ERR_NONE;
@@ -155,22 +163,26 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         M_EXIT_IF_ERR(cpu_write_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_read_data_after_opcode(cpu)), cpu_reg_get(cpu, REG_A_CODE)));
         break;
 
-    case LD_R16SP_N16:
-        cpu_reg_pair_SP_set(cpu, extract_reg_pair(lu->opcode), cpu_read_addr_after_opcode(cpu));
+    case LD_R16SP_N16:{
+        reg_pair_kind pair = extract_reg_pair(lu->opcode);
+        addr_t add = cpu_read_addr_after_opcode(cpu);
+        cpu_reg_pair_SP_set(cpu, pair, add);
+        // fprintf(stderr, "in LD_R16SP_N16\n");
+    }
         break;
 
     case LD_R8_HLR:
-        cpu_reg_set(cpu, extract_n3(lu->opcode), cpu_read_at_HL(cpu));
+        cpu_reg_set(cpu, extract_reg(lu->opcode, 3), cpu_read_at_HL(cpu));
         break;
 
     case LD_R8_N8:
-        cpu_reg_set(cpu, extract_n3(lu->opcode), cpu_read_data_after_opcode(cpu));
+        cpu_reg_set(cpu, extract_reg(lu->opcode, 3), cpu_read_data_after_opcode(cpu));
         break;
 
     case LD_R8_R8: {
-        reg_kind r = extract_n3(lu->opcode);
+        reg_kind r = extract_reg(lu->opcode, 3);
         reg_kind s = extract_reg(lu->opcode, 0);
-        (r != s) ? cpu_reg_set(cpu, r, cpu_reg_get(cpu, s)) : cpu_reg_set(cpu, r, r) /*Do nothing*/;
+        (r != s) ? cpu_reg_set(cpu, r, cpu_reg_get(cpu, s)) : 0;
     }
     break;
 
@@ -181,11 +193,13 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
     case POP_R16:
         cpu_reg_pair_set(cpu, extract_reg_pair(lu->opcode), cpu_read16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE)));
         cpu_reg_pair_SP_set(cpu, REG_AF_CODE, cpu_reg_pair_SP_get(cpu, REG_AF_CODE) + WORD_SIZE);
+        // fprintf(stderr, "In pop\n");
         break;
 
     case PUSH_R16:
         cpu_reg_pair_SP_set(cpu, REG_AF_CODE, cpu_reg_pair_SP_get(cpu, REG_AF_CODE) - WORD_SIZE);
         M_EXIT_IF_ERR(cpu_write16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE), cpu_reg_pair_get(cpu, extract_reg_pair(lu->opcode))));
+        // fprintf(stderr, "In push\n");
         break;
 
     default:
@@ -193,6 +207,9 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         return ERR_INSTR;
         break;
     } // switch
+
+    // Update PC
+    cpu->PC += lu->bytes;
 
     return ERR_NONE;
 }

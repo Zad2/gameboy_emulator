@@ -25,17 +25,17 @@ static void set_grey(guchar* pixels, int row, int col, int width, guchar grey)
 // ======================================================================
 static void generate_image(guchar* pixels, int height, int width)
 {
-    printf("width = %d, height = %d\n", width, height);
-    gameboy_run_until(&gameboy, 25000000);
+    // printf("width = %d, height = %d\n", width, height);
+    gameboy_run_until(&gameboy, 5000000);
     // printf("No seg fault\n");
-    for (int x = 0; x < width; ++x){
-        for (int y = 0; y < height; ++y){
-            uint8_t output = 0;
-            image_get_pixel(&output, &(gameboy.screen.display), x*SCALE, y*SCALE);
-            set_grey(pixels, y, x, width, 255 - 85 * output);
-            printf("No seg fault, x = %d, y = %d\n", x, y);
-        }
-    }
+    // for (int x = 0; x < width; ++x){
+    //     for (int y = 0; y < height; ++y){
+    //         uint8_t output = 0;
+    //         image_get_pixel(&output, &(gameboy.screen.display), x*SCALE, y*SCALE);
+    //         set_grey(pixels, y, x, width, 255 - 85 * output);
+    //         // printf("No seg fault, x = %d, y = %d\n", x, y);
+    //     }
+    // }
 }
 
 // ======================================================================

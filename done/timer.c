@@ -78,7 +78,7 @@ int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
     data_t tima = cpu_read_at_idx(timer->cpu, REG_TIMA);
 
     if (old_state && !timer_state(timer)) {
-        ++tima;
+        // ++tima;
 
         if (tima == 0xFF) {
             //raise timer interrupt
@@ -86,6 +86,8 @@ int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
 
             //reload value
             tima = cpu_read_at_idx(timer->cpu, REG_TMA);
+        }else{
+            ++tima;
         }
     }
 
@@ -123,7 +125,7 @@ int timer_bus_listener(gbtimer_t* timer, addr_t addr)
         // Reset initial counter to 0
         timer->counter = 0;
         M_EXIT_IF_ERR(cpu_write_at_idx(timer->cpu, REG_DIV, 0));
-        current_state = timer_state(timer);
+        // current_state = timer_state(timer);
         return timer_incr_if_state_change(timer, current_state);
             fprintf(stderr, "\tin TIMER div\n");
 

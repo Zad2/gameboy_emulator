@@ -399,7 +399,6 @@ bit_vector_t* bit_vector_join(const bit_vector_t* pbv1, const bit_vector_t* pbv2
 int bit_vector_print(const bit_vector_t* pbv)
 {
     for (size_t i = 0; i < pbv->size / 32 ; ++i) {
-        pbv->content[i] = pbv->content[i] & pbv->content[i];
         printf(""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN"",
                BYTE_TO_BINARY(pbv->content[i]>>24), BYTE_TO_BINARY(pbv->content[i]>>16), BYTE_TO_BINARY(pbv->content[i]>>8), BYTE_TO_BINARY(pbv->content[i]));
     }

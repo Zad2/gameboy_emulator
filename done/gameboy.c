@@ -95,9 +95,9 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     gameboy->boot = (bit_t) 1;
 
     M_EXIT_IF_ERR(cpu_plug(&gameboy->cpu, &gameboy->bus));
+    M_EXIT_IF_ERR(joypad_init_and_plug(&gameboy->pad, &gameboy->cpu));
     M_EXIT_IF_ERR(lcdc_init(gameboy));
     M_EXIT_IF_ERR(lcdc_plug(&gameboy->screen, gameboy->bus));
-    M_EXIT_IF_ERR(joypad_init_and_plug(&gameboy->pad, &gameboy->cpu));
 
 
     return ERR_NONE;
@@ -118,8 +118,10 @@ void gameboy_free(gameboy_t *gameboy)
         //component_free(&gameboy->echoram);
         component_free(&gameboy->cartridge.c);
         component_free(&gameboy->bootrom);
-        cpu_free(&gameboy->cpu);
         lcdc_free(&gameboy->screen);
+        cpu_free(&gameboy->cpu);
+        
+        
 
         gameboy->cycles = 0;
         gameboy->nb_components = 0;
@@ -140,6 +142,19 @@ static int blargg_bus_listener(gameboy_t* gameboy, addr_t addr)
 }
 #endif
 
+void bus_dump(bus_t* bus){
+
+    
+FILE* file = fopen("dump_bus.txt", "w");
+
+        for(int i = 0; i<BUS_SIZE; ++i){
+            fprintf(file, "%u\t", bus[i]);
+        }
+    fclose(file);
+
+    return;
+}
+
 // ==== see gameboy.h ========================================
 int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
 {
@@ -152,12 +167,15 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
         }
 #endif
 
+        if (gameboy->cpu.idle_time == 0){
+            int x = 0;
+        }
+
         M_EXIT_IF_ERR(timer_cycle(&gameboy->timer));
         M_EXIT_IF_ERR(cpu_cycle(&gameboy->cpu));
         // printf("cycle %d\n", gameboy->cycles);
         // M_EXIT_IF_ERR(lcdc_cycle(&gameboy->screen, gameboy->cycles));
 
-        ++gameboy->cycles;
         if (gameboy->cpu.write_listener!= 0){
             M_EXIT_IF_ERR(timer_bus_listener(&gameboy->timer, gameboy->cpu.write_listener));
             M_EXIT_IF_ERR(bootrom_bus_listener(gameboy, gameboy->cpu.write_listener));
@@ -167,12 +185,9 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
 #ifdef BLARGG
         M_EXIT_IF_ERR(blargg_bus_listener(gameboy, gameboy->cpu.write_listener));
 #endif
-
-
-
-
+        ++gameboy->cycles;
     }
-
+    bus_dump(&gameboy->bus);
 
     return ERR_NONE;
 }

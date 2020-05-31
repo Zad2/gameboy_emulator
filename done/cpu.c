@@ -90,70 +90,164 @@ int check_CC(cpu_t *cpu, opcode_t op)
     }
     return 0;
 }
-/**
- * @brief Obtain next instruction to execute, then call cpu_dispatch
- *
- * @param cpu Cpu which shall execute
- * @param lu Instruction to execute
- * @return int Error code
- */
-int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
+
+static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 {
-    M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(lu);
+    M_REQUIRE_NON_NULL(cpu);
 
     // Set flags and value to 0
     cpu->alu.flags = (flags_t) 0;
     cpu->alu.value = (uint16_t) 0;
+    if (lu->opcode != 0){
+        int x =0;
+    }
+    switch (lu->family) {
 
-    // Execute instruction
-    if (lu->family >= LD_A_BCR && lu->family <= LD_SP_HL) {
-        M_EXIT_IF_ERR(cpu_dispatch_storage(lu, cpu));
-    } else if(lu->family >= ADD_A_HLR && lu->family <= SCCF) {
+    // ALU
+    case AND_A_N8: {int x = 0;}
+    case ADD_A_HLR:
+    case ADD_A_N8:
+    case ADD_A_R8:
+    case INC_HLR:
+    case INC_R8:
+    case ADD_HL_R16SP:
+    case INC_R16SP:
+    case SUB_A_HLR:
+    case SUB_A_N8:
+    case SUB_A_R8:
+    case DEC_HLR:
+    case DEC_R8:
+    case DEC_R16SP:
+    case AND_A_HLR:
+    case AND_A_R8:
+    case OR_A_HLR:
+    case OR_A_N8:
+    case OR_A_R8:
+    case XOR_A_HLR:
+    case XOR_A_N8:
+    case XOR_A_R8:
+    case CPL:
+    case CP_A_HLR:
+    case CP_A_N8:
+    case CP_A_R8:
+    case SLA_HLR:
+    case SLA_R8:
+    case SRA_HLR:
+    case SRA_R8:
+    case SRL_HLR:
+    case SRL_R8:
+    case ROTCA:
+    case ROTA:
+    case ROTC_HLR:
+    case ROT_HLR:
+    case ROTC_R8:
+    case ROT_R8:
+    case SWAP_HLR:
+    case SWAP_R8:
+    case BIT_U3_HLR:
+    case BIT_U3_R8:
+    case CHG_U3_HLR:
+    case CHG_U3_R8:
+    case LD_HLSP_S8:
+    case DAA:
+    case SCCF:
         M_EXIT_IF_ERR(cpu_dispatch_alu(lu, cpu));
-    } else  {
-        switch (lu->family) {
-        case JP_N16:
-            cpu->PC = cpu_read_addr_after_opcode(cpu);
-            break;
-        case JP_HL:
-            cpu->PC = cpu_HL_get(cpu);
-            break;
-        case JR_E8:
-            cpu->PC += lu->bytes + (int8_t) cpu_read_data_after_opcode(cpu);
-            break;
-        case JP_CC_N16:
-            if (check_CC(cpu, lu->opcode)) {
+        break;
+
+    // STORAGE
+    case LD_A_BCR:
+    case LD_A_CR:
+    case LD_A_DER:
+    case LD_A_HLRU:
+    case LD_A_N16R:
+    case LD_A_N8R:
+    case LD_BCR_A:
+    case LD_CR_A:
+    case LD_DER_A:
+    case LD_HLRU_A:
+    case LD_HLR_N8:
+    case LD_HLR_R8:
+    case LD_N16R_A:
+    case LD_N16R_SP:
+    case LD_N8R_A:
+    case LD_R16SP_N16:
+    case LD_R8_HLR:
+    case LD_R8_N8:
+    case LD_R8_R8:
+    case LD_SP_HL:
+    case POP_R16:
+    case PUSH_R16:
+        M_EXIT_IF_ERR(cpu_dispatch_storage(lu, cpu));
+        break;
+
+
+    // JUMP
+    case JP_CC_N16:
+    if (check_CC(cpu, lu->opcode)) {
                 cpu->PC = cpu_read_addr_after_opcode(cpu);
                 cpu->idle_time += lu->xtra_cycles;
             } else {
                 cpu->PC += lu->bytes;
             }
-            break;
-        case JR_CC_E8:
-            if (check_CC(cpu, lu->opcode)) {
+        break;
+
+    case JP_HL:
+        cpu->PC = cpu_HL_get(cpu);
+        break;
+
+    case JP_N16:
+        cpu->PC = cpu_read_addr_after_opcode(cpu);
+        break;
+
+    case JR_CC_E8:
+     if (check_CC(cpu, lu->opcode)) {
                 cpu->PC += lu->bytes + (int8_t) cpu_read_data_after_opcode(cpu);
                 cpu->idle_time += lu->xtra_cycles;
                 // fprintf(stderr, "In JR_CC_E8: cpu->PC = %d\n", cpu->PC);
             } else {
                 cpu->PC += lu->bytes;
             }
-            break;
-        case CALL_N16:
+        break;
+
+    case JR_E8:
+        cpu->PC += lu->bytes + (int8_t) cpu_read_data_after_opcode(cpu);
+        break;
+
+
+    // CALLS
+    case CALL_CC_N16:
+        if (check_CC(cpu, lu->opcode)) {
             M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
             cpu->PC = cpu_read_addr_after_opcode(cpu);
-            break;
-        case CALL_CC_N16:
-            if (check_CC(cpu, lu->opcode)) {
-                M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
-                cpu->PC = cpu_read_addr_after_opcode(cpu);
+            cpu->idle_time += lu->xtra_cycles;
+        } else {
+            cpu->PC += lu->bytes;
+        }
+        break;
+
+    case CALL_N16:
+     M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
+            cpu->PC = cpu_read_addr_after_opcode(cpu);
+        break;
+
+
+    // RETURN (from call)
+    case RET:
+        cpu->PC = cpu_SP_pop(cpu);
+        break;
+
+    case RET_CC:
+    if (check_CC(cpu, lu->opcode)) {
+                cpu->PC = cpu_SP_pop(cpu);
                 cpu->idle_time += lu->xtra_cycles;
             } else {
                 cpu->PC += lu->bytes;
             }
-            break;
-        case RST_U3:
-            // fprintf(stderr, "opcode = %d\t", lu->opcode);
+        break;
+
+    case RST_U3:
+    // fprintf(stderr, "opcode = %d\t", lu->opcode);
             // fprintf(stderr, "old PC = %d \t", cpu->PC);
             M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
             // fprintf(stderr, "in RST_U3: cpu->PC = %d \t lu->bytes = %d \t n3 = %d \t", cpu->PC , lu->bytes,extract_n3(lu->opcode) );
@@ -164,53 +258,41 @@ int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
             //new data is 195 (= JP n16) => jump to 50220 => NOPS
             // fprintf(stderr, "data at new PC = %d\n", cpu_read16_at_idx(cpu, cpu->PC+2));
 
-            break;
-        case RET:
-            cpu->PC = cpu_SP_pop(cpu);
-            break;
-        case RET_CC:
-            if (check_CC(cpu, lu->opcode)) {
-                cpu->PC = cpu_SP_pop(cpu);
-                cpu->idle_time += lu->xtra_cycles;
-            } else {
-                cpu->PC += lu->bytes;
-            }
-            break;
-        case EDI:
-            cpu->IME = extract_ime(lu->opcode);
-            cpu->PC += lu->bytes;
-            break;
-        case RETI:
-            cpu->IME = 1;
-            cpu->PC = cpu_SP_pop(cpu);
-            break;
-        case HALT:
-            cpu->HALT = 1;
-            cpu->PC += lu->bytes;
+        break;
 
-            break;
-        case STOP:
-            //acts like a NOP
-            break;
-        case NOP:
-            cpu->PC += lu->bytes;
-            break;
-        default:
-            cpu->PC += lu->bytes;
-            break;
-        }
 
-        // Update idle_time
-        cpu->idle_time += lu->cycles-1;
-        return ERR_NONE;
+    // INTERRUPT & MISC.
+    case EDI:
+        cpu->IME = extract_ime(lu->opcode);
+        cpu->PC += lu->bytes;
+        // fprintf(stderr, "in EDI\n");
+        break;
 
-    }
+    case RETI:
+        cpu->IME = 1;
+        cpu->PC = cpu_SP_pop(cpu);
+        break;
 
+    case HALT:
+        cpu->HALT = 1;
+        cpu->PC += lu->bytes;
+        // fprintf(stderr, "in HALT\n");
+        break;
+
+    case STOP:
+    case NOP:
+        // ne rien faire
+        cpu->PC += lu->bytes;
+        break;
+
+    default: {
+        fprintf(stderr, "Unknown instruction, Code: 0x%" PRIX8 "\n", cpu_read_at_idx(cpu, cpu->PC));
+        return ERR_INSTR;
+    } break;
+
+    } // switch
     // Update idle_time
     cpu->idle_time += lu->cycles-1;
-
-    // Update PC
-    cpu->PC += lu->bytes;
 
     return ERR_NONE;
 }
@@ -254,13 +336,13 @@ int cpu_do_cycle(cpu_t *cpu)
             data_t data = cpu_read_at_idx(cpu, REG_IF);
             bit_unset(&data, i);
             M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
-            M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));
+            M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));//+lu->bytes?
             cpu->PC = 0x40 + (i<<3);
             cpu->idle_time += 5;
-
+            return ERR_NONE;
             
         }
-        return ERR_NONE;
+        // return ERR_NONE;
     } 
 
     data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
@@ -278,23 +360,18 @@ int cpu_cycle(cpu_t *cpu)
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu->bus);
 
+    cpu->write_listener = (addr_t) 0;
     if (cpu->idle_time != 0) {
         --cpu->idle_time;
         return ERR_NONE;
     }
-    cpu->write_listener = (addr_t) 0;
+    
 
 
     interrupt_t i = first_interrupt(cpu->IE, cpu->IF);
 
     if ((cpu->HALT == 1 && i <= JOYPAD) ) {
         cpu->HALT = 0;
-        //cpu->PC = cpu_SP_pop(cpu);
-        if (cpu->IME == 1){
-
-        }else{
-
-        }
         return cpu_do_cycle(cpu);
     }else if( cpu->HALT == 0){
         return cpu_do_cycle(cpu);
