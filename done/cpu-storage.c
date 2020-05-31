@@ -46,13 +46,14 @@ int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu->bus);
 
+    if(addr == 80 || addr == 80){
+        int x = 0;
+    }
     // Call bus_write from bus.c and write to the cpu's bus at address addr,
     // while getting potential errors
     M_EXIT_IF_ERR(bus_write(*cpu->bus, addr, data));
 
-    if(addr == 49697 || addr == 49698){
-        int x = 0;
-    }
+    
 
     cpu->write_listener = addr;
     return ERR_NONE;
@@ -64,13 +65,14 @@ int cpu_write16_at_idx(cpu_t *cpu, addr_t addr, addr_t data16)
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu->bus);
 
+    if(addr == 80 || addr == 80){
+        int x = 0;
+    }
     // Call bus_write16 from bus.c and write to the cpu's bus at addresses addr and addr+1,
     // while getting potential errors
     M_EXIT_IF_ERR(bus_write16(*cpu->bus, addr, data16));
 
-    if(addr == 49697 || addr == 49698){
-        int x = 0;
-    }
+
 
     cpu->write_listener = addr;
     return ERR_NONE;

@@ -142,7 +142,8 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     } break;
 
     case INC_R8: {
-         if (extract_reg(lu->opcode, 3) == REG_B_CODE){
+        reg_kind reg = extract_reg(lu->opcode, 3);
+         if ( reg == REG_B_CODE){
             int x = 0;
         }
         M_EXIT_IF_ERR(alu_add8(&cpu->alu, cpu_reg_get(cpu,extract_reg(lu->opcode, 3)), (uint8_t)1, (bit_t)0));
@@ -168,8 +169,9 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     } break;
 
     case INC_R16SP: {
-        M_EXIT_IF_ERR(alu_add16_high(&cpu->alu, cpu_reg_pair_SP_get(cpu,extract_reg_pair(lu->opcode)), (uint16_t)1));
-        cpu_reg_pair_SP_set(cpu, extract_reg_pair(lu->opcode), cpu->alu.value);
+        reg_pair_kind pair = extract_reg_pair(lu->opcode);
+        M_EXIT_IF_ERR(alu_add16_high(&cpu->alu, cpu_reg_pair_SP_get(cpu,pair), (uint16_t)1));
+        cpu_reg_pair_SP_set(cpu, pair, cpu->alu.value);
         M_EXIT_IF_ERR(cpu_combine_alu_flags(cpu,CPU, CPU, CPU, CPU)); //same as doing nothing
     } break;
 

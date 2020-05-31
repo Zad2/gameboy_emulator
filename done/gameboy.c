@@ -166,10 +166,22 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
             cpu_request_interrupt(&gameboy->cpu, VBLANK);
         }
 #endif
+        if(gameboy->cycles ==477120){
+            int x = 0;
+        }
 
         if (gameboy->cpu.idle_time == 0){
             int x = 0;
         }
+
+        if (gameboy->cpu.PC < 518 || gameboy->cpu.PC>521){
+            int x = 0;
+        }
+        if (gameboy->cpu.SP == 78){
+            int x = 0;
+        }
+
+        data_t eighty = cpu_read_at_idx(&gameboy->cpu, 80);
 
         M_EXIT_IF_ERR(timer_cycle(&gameboy->timer));
         M_EXIT_IF_ERR(cpu_cycle(&gameboy->cpu));
