@@ -164,11 +164,10 @@ bit_vector_t* bit_vector_create(size_t size, bit_t value)
                     break;
                 }
             }
-            if (rest!=0){
-            // Joining the four 8-bit values into a 32-bit word
-            uint32_t last_word = create_word32_arr(bytes);
-            vect->content[size / FOUR_BYTES_SIZE] = last_word;
-            }
+        // Joining the four 8-bit values into a 32-bit word
+        uint32_t last_word = create_word32_arr(bytes);
+        vect->content[size / FOUR_BYTES_SIZE] = last_word;
+            
         }
     }
     return vect;
@@ -187,7 +186,7 @@ bit_vector_t* bit_vector_cpy(const bit_vector_t* pbv)
     // Deep copy of the content of pbv into the copy
     for (size_t i = 0; i < (pbv-> allocated)/FOUR_BYTES_SIZE ; ++i) {
         copy->content[i] = pbv->content[i];
-    }//fixme
+    }
 
     return copy;
 }

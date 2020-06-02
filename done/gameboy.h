@@ -52,6 +52,7 @@ typedef enum {
 
 // Number of Game Boy cycles per second (= 2^20)
 #define GB_CYCLES_PER_S  (((uint64_t) 1) << 20)
+#define GB_TICS_PER_CYCLE 4
 
 /**
  * @brief Creates a gameboy

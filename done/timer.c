@@ -12,6 +12,7 @@
 #include "bit.h"
 #include "cpu.h"
 #include "bus.h"
+#include "gameboy.h"
 
 #include "timer.h"
 
@@ -82,8 +83,7 @@ int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
 
         if (tima == 0xFF) {
             //raise timer interrupt
-            bit_set(&timer->cpu->IF, TIMER);
-
+            cpu_request_interrupt(timer->cpu, TIMER);
             //reload value
             tima = cpu_read_at_idx(timer->cpu, REG_TMA);
         }else{
@@ -103,7 +103,7 @@ int timer_cycle(gbtimer_t* timer)
     bit_t current_state = timer_state(timer);
 
     // Increment counter by 4 (A cycle is 4 clock ticks)
-    timer->counter += 4;
+    timer->counter += GB_TICS_PER_CYCLE;
 
     // copy 8 MSB from timer principal counter to DIV register
     M_EXIT_IF_ERR(cpu_write_at_idx(timer->cpu, REG_DIV, msb8(timer->counter)));

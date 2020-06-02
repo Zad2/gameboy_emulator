@@ -46,7 +46,9 @@ int cpu_plug(cpu_t *cpu, bus_t *bus)
 void cpu_free(cpu_t *cpu)
 {
     if (cpu != NULL) {
-        // bus_unplug(*cpu->bus, &cpu->high_ram);
+        (*cpu->bus)[REG_IE]=NULL;
+        (*cpu->bus)[REG_IF]=NULL;
+        bus_unplug(*cpu->bus, &cpu->high_ram);
         component_free(&cpu->high_ram);
         cpu->bus = NULL;
     }
@@ -339,7 +341,7 @@ int cpu_do_cycle(cpu_t *cpu)
             M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
             M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));//+lu->bytes?
             cpu->PC = 0x40 + (i<<3);
-            cpu->idle_time += 5;
+            cpu->idle_time += INTERRUPT_IDLE_TIME;
             return ERR_NONE;
             
         }
@@ -347,7 +349,7 @@ int cpu_do_cycle(cpu_t *cpu)
     } 
 
     data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
-    if (prefix == (data_t) 0xCB) {
+    if (prefix == PREFIXED) {
         data_t opcode = cpu_read_data_after_opcode(cpu);
         return cpu_dispatch(&instruction_prefixed[opcode], cpu);
     }

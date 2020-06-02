@@ -11,7 +11,7 @@
 #define MY_KEY_RIGHT_BIT 0x04
 #define MY_KEY_LEFT_BIT  0x08
 #define MY_KEY_A_BIT     0x10
-#define SCALE 1
+#define SCALE 3
 
 // typedef struct gameboy_ gameboy_t;
 gameboy_t gameboy;

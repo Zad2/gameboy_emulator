@@ -136,7 +136,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
 
     case INC_HLR: {
         M_EXIT_IF_ERR(alu_add8(&cpu->alu,cpu_read_at_HL(cpu), (uint8_t)1,(bit_t) 0));
-        cpu_write_at_HL(cpu, cpu->alu.value);
+        M_EXIT_IF_ERR(cpu_write_at_HL(cpu, cpu->alu.value));
         M_EXIT_IF_ERR(cpu_combine_alu_flags(cpu, INC_FLAGS_SRC));
 
     } break;
@@ -154,6 +154,10 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     } break;
 
     case DEC_R8: {
+        reg_kind reg = extract_reg(lu->opcode, 3);
+        if (reg == REG_L_CODE){
+            int x =0;
+        }
         M_EXIT_IF_ERR(alu_sub8(&cpu->alu, cpu_reg_get(cpu,extract_reg(lu->opcode, 3)), (uint8_t)1, (bit_t)0));
         cpu_reg_set_from_alu8(cpu, extract_reg(lu->opcode,3));
 

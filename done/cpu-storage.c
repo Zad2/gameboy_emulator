@@ -141,16 +141,16 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_HLRU_A:
-        cpu_write_at_HL(cpu, cpu_reg_get(cpu, REG_A_CODE));
+        M_EXIT_IF_ERR(cpu_write_at_HL(cpu, cpu_reg_get(cpu, REG_A_CODE)));
         cpu->HL += extract_HL_increment(lu->opcode);
         break;
 
     case LD_HLR_N8:
-        cpu_write_at_HL(cpu, cpu_read_data_after_opcode(cpu));
+        M_EXIT_IF_ERR(cpu_write_at_HL(cpu, cpu_read_data_after_opcode(cpu)));
         break;
 
     case LD_HLR_R8:
-        cpu_write_at_HL(cpu, cpu_reg_get(cpu, extract_reg(lu->opcode, 0)));
+        M_EXIT_IF_ERR(cpu_write_at_HL(cpu, cpu_reg_get(cpu, extract_reg(lu->opcode, 0))));
         break;
 
     case LD_N16R_A:
@@ -191,7 +191,11 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
     case LD_R8_R8: {
         reg_kind r = extract_reg(lu->opcode, 3);
         reg_kind s = extract_reg(lu->opcode, 0);
-        (r != s) ? cpu_reg_set(cpu, r, cpu_reg_get(cpu, s)) : 0;
+        if (r!=s){
+            cpu_reg_set(cpu, r, cpu_reg_get(cpu, s));
+        }else{
+            M_EXIT_ERR(ERR_INSTR, "Used LD_R8_R8 with both registers equal\n\t reg_kind 1 = %zu\treg_kind 2 = %zu", r, s);
+        }
     }
     break;
 

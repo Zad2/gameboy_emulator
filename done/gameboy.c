@@ -90,6 +90,7 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     gameboy->components[USELESS] = useless;
 
     gameboy->boot = (bit_t) 1;
+    gameboy->cycles = 1;
 
     M_EXIT_IF_ERR(timer_init(&gameboy->timer, &gameboy->cpu));
     M_EXIT_IF_ERR(cpu_plug(&gameboy->cpu, &gameboy->bus));
@@ -98,13 +99,12 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     M_EXIT_IF_ERR(lcdc_init(gameboy));
 
     M_EXIT_IF_ERR(lcdc_plug(&gameboy->screen, gameboy->bus));
-    // gameboy->screen.cpu = &gameboy->cpu;
     gameboy->screen.on_cycle = -1;
     gameboy->screen.next_cycle = -1;
     gameboy->screen.DMA_from = cpu_read_at_idx(&gameboy->cpu, REG_DMA);
     gameboy->screen.DMA_to = FRAME_TOTAL_CYCLES;
     // M_EXIT_IF_ERR(image_create(&gameboy->screen.display, LCD_WIDTH, LCD_HEIGHT));
-
+    M_EXIT_IF_ERR(image_create(&gameboy->screen.display, LCD_WIDTH, LCD_HEIGHT ));
     cpu_write_at_idx(&gameboy->cpu, REG_LCDC, 0);
 
     return ERR_NONE;
@@ -120,6 +120,9 @@ void gameboy_free(gameboy_t *gameboy)
             bus_unplug(gameboy->bus, &gameboy->components[i]);
             component_free(&gameboy->components[i]);
         }
+        component_t temp = {NULL, ECHO_RAM_START, ECHO_RAM_END};
+        bus_unplug(gameboy->bus, &temp);
+
         bus_unplug(gameboy->bus, &gameboy->bootrom);
         bus_unplug(gameboy->bus, &gameboy->cartridge.c);
         component_free(&gameboy->cartridge.c);
@@ -167,12 +170,14 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
     M_REQUIRE_NON_NULL(gameboy);
 
     while (gameboy->cycles < cycle) {
-#ifdef BLARGG
         if (gameboy->cycles % 17556 == 0) {
             // cpu_request_interrupt(&gameboy->cpu, VBLANK);
         }
-#endif
+
         if(gameboy->cycles%1000 == 0){
+            int x = 0;
+        }
+        if(gameboy->cpu.PC>521){
             int x = 0;
         }
         data_t eighty = cpu_read_at_idx(&gameboy->cpu, 80);
@@ -187,13 +192,12 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
 
         gameboy->screen.on_cycle= gameboy->cycles;
         gameboy->screen.next_cycle = gameboy->cycles+1;
-        // gameboy->screen.window_y = cpu_read_at_idx(&gameboy->cpu, REG_WY);
+        gameboy->screen.window_y = cpu_read_at_idx(&gameboy->cpu, REG_WY);
         gameboy->screen.DMA_from = cpu_read_at_idx(&gameboy->cpu, REG_DMA);
         gameboy->screen.DMA_to = LINE_TOTAL_CYCLES;
+        gameboy->screen.on = cpu_read_at_idx(&gameboy->cpu, REG_STAT&LCDC_REG_LCD_STATUS_MASK);
         M_EXIT_IF_ERR(lcdc_cycle(&gameboy->screen, gameboy->cycles));
 
-        // gameboy->screen.on = cpu_read_at_idx(&gameboy->cpu, REG_STAT);
-        
 
         if (gameboy->cpu.write_listener!= 0){
             M_EXIT_IF_ERR(timer_bus_listener(&gameboy->timer, gameboy->cpu.write_listener));

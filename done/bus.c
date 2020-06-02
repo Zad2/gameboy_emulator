@@ -18,6 +18,7 @@
 // ==== see bus.h ========================================
 int bus_remap(bus_t bus, component_t *c, addr_t offset)
 {
+    M_REQUIRE_NON_NULL(bus);
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NON_NULL(c->mem);
     M_REQUIRE_NON_NULL(c->mem->memory);
