@@ -133,6 +133,7 @@ void sd_launch(int* p_argc, char*** p_argv, simple_image_displayer_t* p_sd)
                       3*p_sd->width              // rowstride
                       )
                       );
+        free(bw);
         gtk_container_add(GTK_CONTAINER(window), p_sd->image);
 
         // quit function

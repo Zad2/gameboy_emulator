@@ -6,11 +6,67 @@
     "configurations": [
         
         {
+            "name": "gb DAA",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/done/test-gameboy",
+            "args": ["/home/zad/Desktop/pps20-projet-bosh/done/gb/acceptance/instr/daa.gb","5000000"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-exec-run -enable-pretty-printing -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Detach follow",
+                    "text": "-exec-run -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Additional libs for gdb",
+                    "text" : "set env LD_LIBRARY_PATH=${workspaceFolder}/done"
+                }
+            ]
+        },
+        {
+            "name": "03-op sp,hl",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/done/test-gameboy",
+            "args": ["/home/zad/Desktop/pps20-projet-bosh/done/tests/data/blargg_roms/03-op sp,hl.gb","5000000"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-exec-run -enable-pretty-printing -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Detach follow",
+                    "text": "-exec-run -gdb-set detach-on-fork off -gdb-set follow-fork-mode child",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Additional libs for gdb",
+                    "text" : "set env LD_LIBRARY_PATH=${workspaceFolder}/done"
+                }
+            ]
+        },
+        {
             "name": "Interrupts",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/done/test-gameboy",
-            "args": ["/home/zad/Desktop/pps20-projet-bosh/done/tests/data/blargg_roms/02-interrupts.gb","25000000"],
+            "args": ["/home/zad/Desktop/pps20-projet-bosh/done/tests/data/blargg_roms/02-interrupts.gb","5000000"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -34,7 +90,7 @@
             ]
         },
         {
-            "name": "9-op, r,r.gb (2D)",
+            "name": "09-op, r,r (2D)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/done/test-gameboy",

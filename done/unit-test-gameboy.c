@@ -38,7 +38,14 @@ START_TEST(gameboy_create_err)
 #endif
     INIT;
     //component_t c = {(memory_t *) 0xdeadbeef, 1, 2};
-    gameboy_create(&g, "assfour");
+    gameboy_create(&g, "./tests/data/blargg_roms/01-special.gb");
+    // printf("size of bus = %u\n", sizeof(bus_t));
+    // printf("size of cpu = %u\n", sizeof(cpu_t));
+    // printf("size of gbtimer_t = %u\n", sizeof(gbtimer_t));
+    // printf("size of cartridge = %u\n", sizeof(cartridge_t));
+    // printf("size of component = %u\n", sizeof(component_t));
+    // printf("size of gameboy = %u\n", sizeof(gameboy_t));
+
     gameboy_free(&g);
 
     //component_create(&c, 0);

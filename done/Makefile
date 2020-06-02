@@ -8,6 +8,9 @@ GTK_LIBS := `pkg-config --libs gtk+-3.0`
 .PHONY: clean new style feedback submit1 submit2 submit
 
 CFLAGS += -std=c11 -Wall -pedantic -g
+# CFLAGS += -fsanitize=address
+# CPPFLAGS += -fsanitize=address
+# LDFLAGS += -fsanitize=address
 
 # a bit more checks if you'd like to (uncomment
  #CFLAGS += -Wextra -Wfloat-equal -Wshadow                         \

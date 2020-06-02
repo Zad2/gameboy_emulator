@@ -126,13 +126,13 @@ int timer_bus_listener(gbtimer_t* timer, addr_t addr)
         timer->counter = 0;
         M_EXIT_IF_ERR(cpu_write_at_idx(timer->cpu, REG_DIV, 0));
         // current_state = timer_state(timer);
+        // fprintf(stderr, "\tin TIMER div\n");
         return timer_incr_if_state_change(timer, current_state);
-            fprintf(stderr, "\tin TIMER div\n");
 
         break;
     case REG_TAC:
+        // fprintf(stderr, "\tin TIMER tac\n");
         return timer_incr_if_state_change(timer, current_state);
-            fprintf(stderr, "\tin TIMER tac\n");
 
         break;
     default :

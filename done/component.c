@@ -75,6 +75,7 @@ int component_shared(component_t *c, component_t *c_old)
     M_REQUIRE_NON_NULL(c_old->mem);
     M_REQUIRE_NON_NULL(c->mem->memory);
     M_REQUIRE_NON_NULL(c_old->mem->memory);
+    component_free(c);
 
     // Reset the component's start and end and plug c'memory to c_old's memory
     c->start = 0;

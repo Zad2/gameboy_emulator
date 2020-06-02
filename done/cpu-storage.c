@@ -178,6 +178,13 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_R8_N8:
+        if (extract_reg(lu->opcode, 3) == REG_C_CODE && cpu_read_data_after_opcode(cpu) == 0){
+            int x = 0;
+        }
+        if (extract_reg(lu->opcode, 3) == REG_C_CODE && cpu_read_data_after_opcode(cpu) == 16){
+            int x = 0;
+        }
+
         cpu_reg_set(cpu, extract_reg(lu->opcode, 3), cpu_read_data_after_opcode(cpu));
         break;
 

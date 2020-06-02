@@ -26,16 +26,19 @@ int cartridge_init_from_file(component_t* c, const char* filename)
     input = fopen(filename, "rb");
 
     if (input == NULL) {
+        component_free(c);
         return ERR_IO;
     } else {
         // Check if number of read elements is correct
         if(fread(c->mem->memory, sizeof(uint8_t), BANK_ROM_SIZE, input) != BANK_ROM_SIZE) {
+            component_free(c);
             fclose(input); // Close stream in case of error
             return ERR_IO;
         }
         c->mem->size = BANK_ROM_SIZE;
         // Check if type of cartridge is correct
         if (c->mem->memory[CARTRIDGE_TYPE_ADDR] != 0) {
+            component_free(c);
             fclose(input); // Close stream in case of error
             return ERR_NOT_IMPLEMENTED;
         }

@@ -101,11 +101,11 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
     cpu->alu.value = (uint16_t) 0;
     if (lu->opcode != 0){
         int x =0;
+        // printf("lu->family = %d\n", lu->family);
     }
     switch (lu->family) {
 
     // ALU
-    case AND_A_N8: {int x = 0;}
     case ADD_A_HLR:
     case ADD_A_N8:
     case ADD_A_R8:
@@ -121,6 +121,7 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
     case DEC_R16SP:
     case AND_A_HLR:
     case AND_A_R8:
+    case AND_A_N8:
     case OR_A_HLR:
     case OR_A_N8:
     case OR_A_R8:

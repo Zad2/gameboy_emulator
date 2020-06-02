@@ -114,6 +114,7 @@ bit_vector_t* bit_vector_set(bit_vector_t* pbv, size_t index, bit_t value)
 
     word = create_word32_arr(bytes);
     free(bytes);
+    bytes=NULL;
 
     pbv->content[index_of_word] = word;
     return pbv;
@@ -163,10 +164,11 @@ bit_vector_t* bit_vector_create(size_t size, bit_t value)
                     break;
                 }
             }
-
+            if (rest!=0){
             // Joining the four 8-bit values into a 32-bit word
             uint32_t last_word = create_word32_arr(bytes);
             vect->content[size / FOUR_BYTES_SIZE] = last_word;
+            }
         }
     }
     return vect;
@@ -185,7 +187,7 @@ bit_vector_t* bit_vector_cpy(const bit_vector_t* pbv)
     // Deep copy of the content of pbv into the copy
     for (size_t i = 0; i < (pbv-> allocated)/FOUR_BYTES_SIZE ; ++i) {
         copy->content[i] = pbv->content[i];
-    }
+    }//fixme
 
     return copy;
 }
@@ -212,6 +214,7 @@ bit_t bit_vector_get(const bit_vector_t* pbv, size_t index)
         }
     }
     free(bytes);
+    bytes=NULL;
     return value;
 }
 
@@ -248,6 +251,7 @@ bit_vector_t* bit_vector_not(bit_vector_t* pbv)
 
         last_word = create_word32_arr(bytes);
         free(bytes);
+        bytes=NULL;
         pbv->content[num_words] = last_word;
     }
     return pbv;
@@ -369,17 +373,30 @@ bit_vector_t* bit_vector_join(const bit_vector_t* pbv1, const bit_vector_t* pbv2
     if (pbv1 == NULL || pbv2 == NULL || pbv1->size != pbv2->size || shift < 0 || shift > pbv1->size) {
         return NULL;
     }
-    bit_vector_t *pbv1_cpy = bit_vector_cpy(pbv1);
-    bit_vector_t *pbv2_cpy = bit_vector_cpy(pbv2);
+    // bit_vector_t *pbv1_cpy = bit_vector_cpy(pbv1);
+    // bit_vector_t *pbv2_cpy = bit_vector_cpy(pbv2);
+    bit_vector_t pbv1_cpy = *pbv1;
+    bit_vector_t pbv2_cpy = *pbv2;
 
-    bit_vector_t *pbv_mask = bit_vector_create(pbv1->size, 1);
+    // bit_vector_t *pbv_m = bit_vector_create(pbv1->size, 1);
+    bit_vector_t *pbv_m = bit_vector_create(pbv1->size, 1);
 
-    pbv_mask = bit_vector_extract_zero_ext(pbv_mask, -shift, pbv1->size);
+    bit_vector_t *pbv_mask = bit_vector_extract_zero_ext(pbv_m, -shift, pbv1->size);
+    // const bit_vector_t *pbv2_shift = bit_vector_and(pbv2_cpy, pbv_mask);
+    // bit_vector_t *pbv1_shift = bit_vector_and(pbv1_cpy, bit_vector_not(pbv_mask));
 
-    const bit_vector_t *pbv2_shift = bit_vector_and(pbv2_cpy, pbv_mask);
-    bit_vector_t *pbv1_shift = bit_vector_and(pbv1_cpy, bit_vector_not(pbv_mask));
-
-    bit_vector_t *result = bit_vector_or(pbv1_shift, pbv2_shift);
+    // bit_vector_t *result = bit_vector_or(pbv1_shift, pbv2_shift);
+    bit_vector_t *result = 
+        bit_vector_or(
+            bit_vector_and(&pbv1_cpy, bit_vector_not(pbv_mask)), 
+            bit_vector_and(&pbv2_cpy, pbv_mask));
+    result = bit_vector_cpy(result);
+    bit_vector_free(&pbv_m);
+    bit_vector_free(&pbv_mask);
+    // free(pbv_m->content);
+    // free(pbv_mask->content);
+    // bit_vector_free(pbv1_cpy);
+    // bit_vector_free(pbv2_cpy);
 
     return result;
 }
@@ -398,6 +415,9 @@ bit_vector_t* bit_vector_join(const bit_vector_t* pbv1, const bit_vector_t* pbv2
 // ==== see bit_vector.h ========================================
 int bit_vector_print(const bit_vector_t* pbv)
 {
+    // if(pbv==NULL){
+    //     printf("there's a NULL\n");
+    // }
     for (size_t i = 0; i < pbv->size / 32 ; ++i) {
         printf(""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN"",
                BYTE_TO_BINARY(pbv->content[i]>>24), BYTE_TO_BINARY(pbv->content[i]>>16), BYTE_TO_BINARY(pbv->content[i]>>8), BYTE_TO_BINARY(pbv->content[i]));
@@ -408,6 +428,9 @@ int bit_vector_print(const bit_vector_t* pbv)
 // ==== see bit_vector.h ========================================
 int bit_vector_println(const char* prefix, const bit_vector_t* pbv)
 {
+    // if(pbv==NULL){
+    //     printf("there's a NULL\n");
+    // }
     printf("%s", prefix);
     int printed = bit_vector_print(pbv);
     printf("\n");
@@ -417,6 +440,9 @@ int bit_vector_println(const char* prefix, const bit_vector_t* pbv)
 // ==== see bit_vector.h ========================================
 void bit_vector_free(bit_vector_t** pbv)
 {
+    //fixme add null checks
+    free((*pbv)->content);
+
     free(*pbv);
     pbv = NULL;
 }
