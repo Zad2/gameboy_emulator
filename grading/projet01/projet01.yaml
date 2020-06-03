@@ -79,7 +79,7 @@
       init de base:                 2 # max 2, 
       plug work-ram:                5 # max 5, 
       plug echo-ram:                2 # max 2.5, -0.5 you should not create a component for the echo ram, but use instead a temporary local one
-  - gameboy_free():               1 # max 5, -1 missing unplugging of echo ram
+  - gameboy_free():               4 # max 5, -1 missing unplugging of echo ram
 - cpu.h: # NE PAS REMPLIR CETTE LIGNE
       typedef:          1 # max 1, 
       une reg-pair:     5 # max 5, 
