@@ -33,7 +33,7 @@ LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 LDFLAGS += -L.
 LDLIBS += -lcs212gbfinalext-debug
 
-all:: gbsimulator test-image test-gameboy unit-test-alu_ext unit-test-cpu-dispatch
+all:: gbsimulator test-gameboy test-cpu-week08 test-cpu-week09 check
 gbsimulator: LDLIBS += $(GTK_LIBS) -lsid
 gbsimulator.o: CFLAGS += $(GTK_INCLUDE)
 
@@ -51,7 +51,11 @@ gbsimulator.o: gbsimulator.c sidlib.h gameboy.h bus.h memory.h \
  bootrom.h alu_ext.h image.o
 
 test-cpu-week08: test-cpu-week08.o opcode.o bit.o cpu.o alu.o bus.o \
- memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o  
+ memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o error.o image.o \
+ bit_vector.o
+test-cpu-week09: test-cpu-week09.o opcode.o bit.o cpu.o alu.o bus.o \
+ memory.o component.o cpu-storage.o cpu-registers.o cpu-alu.o error.o image.o \
+ bit_vector.o
 test-gameboy: test-gameboy.o gameboy.o bus.o memory.o component.o \
  bit.o cpu.o alu.o opcode.o cartridge.o timer.o util.o  \
  bootrom.o cpu-storage.o cpu-registers.o cpu-alu.o error.o \
@@ -137,6 +141,8 @@ unit-test-cpu-dispatch-week08.o: unit-test-cpu-dispatch-week08.c tests.h \
  error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h gameboy.h \
  util.h unit-test-cpu-dispatch.h cpu.c cpu-storage.h cpu-registers.h cpu-alu.h 
 test-cpu-week08.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
+ memory.h component.h error.h cpu-storage.h util.h lcdc.h joypad.h
+test-cpu-week09.o: test-cpu-week09.c opcode.h bit.h cpu.h alu.h bus.h \
  memory.h component.h error.h cpu-storage.h util.h lcdc.h joypad.h
 unit-test-cpu-dispatch-week09.o: unit-test-cpu-dispatch-week09.c tests.h \
  error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h gameboy.h \

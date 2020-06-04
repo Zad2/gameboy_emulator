@@ -46,8 +46,8 @@ int cpu_plug(cpu_t *cpu, bus_t *bus)
 void cpu_free(cpu_t *cpu)
 {
     if (cpu != NULL) {
-        (*cpu->bus)[REG_IE]=NULL;
-        (*cpu->bus)[REG_IF]=NULL;
+        // cpu->IE = NULL;
+        // cpu->IF = NULL;
         bus_unplug(*cpu->bus, &cpu->high_ram);
         component_free(&cpu->high_ram);
         cpu->bus = NULL;
@@ -268,7 +268,6 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
     case EDI:
         cpu->IME = extract_ime(lu->opcode);
         cpu->PC += lu->bytes;
-        // fprintf(stderr, "in EDI\n");
         break;
 
     case RETI:
@@ -279,7 +278,6 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
     case HALT:
         cpu->HALT = 1;
         cpu->PC += lu->bytes;
-        // fprintf(stderr, "in HALT\n");
         break;
 
     case STOP:
@@ -337,8 +335,10 @@ int cpu_do_cycle(cpu_t *cpu)
         if (i <= JOYPAD) {
             cpu->IME = 0;
             data_t data = cpu_read_at_idx(cpu, REG_IF);
+            data = cpu->IF;
             bit_unset(&data, i);
-            M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
+            // M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
+            cpu->IF = data;
             M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));//+lu->bytes?
             cpu->PC = 0x40 + (i<<3);
             cpu->idle_time += INTERRUPT_IDLE_TIME;
@@ -389,8 +389,15 @@ void cpu_request_interrupt(cpu_t* cpu, interrupt_t i)
 
     if (i>=VBLANK && i <= JOYPAD ){
         data_t data = cpu_read_at_idx(cpu, REG_IF);
+        printf("b data = %zu\n", data);
+        printf("b cpu->IF = %zu\n", cpu->IF);
+        data= cpu->IF;
         bit_set(&data, i);
-        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
+        
+        // M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
+        cpu->IF = data;
+        printf("data = %zu\n", data);
+        printf("cpu->IF = %zu\n", cpu->IF);
 
     }
 }

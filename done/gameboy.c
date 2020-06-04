@@ -188,18 +188,18 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
         M_EXIT_IF_ERR(cpu_cycle(&gameboy->cpu));
         ++gameboy->cycles;
 
-        if(gameboy->cycles%5000000==0){
-            printf("cycle %d\n", gameboy->cycles);
-            for (int x = 0; x < 160; ++x){
-                for (int y = 0; y < 144; ++y){
-            uint8_t output = 0;
-            image_get_pixel(&output, &(gameboy->screen.display), x, y);
-            if (output != 0)
-                printf("output = %zu\n", output);
-        }
-    }
+    //     if(gameboy->cycles%5000000==0){
+    //         printf("cycle %d\n", gameboy->cycles);
+    //         for (int x = 0; x < 160; ++x){
+    //             for (int y = 0; y < 144; ++y){
+    //         uint8_t output = 0;
+    //         image_get_pixel(&output, &(gameboy->screen.display), x, y);
+    //         if (output != 0)
+    //             printf("output = %zu\n", output);
+    //     }
+    // }
                 
-        }
+    //     }
 
         gameboy->screen.on_cycle= gameboy->cycles;
         gameboy->screen.next_cycle = gameboy->cycles+1;
