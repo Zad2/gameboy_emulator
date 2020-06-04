@@ -36,7 +36,6 @@ struct timeval paused;
         return delta.tv_sec * GB_CYCLES_PER_S +  (delta.tv_usec * GB_CYCLES_PER_S) / 1000000;
     }
 
-    // fixme
     fprintf(stderr, "current time (sec=%zu, usec=%zu) was not strctly greater than parameter from (sec=%zu, usec=%zu)\n",
     current.tv_sec, current.tv_usec, from->tv_sec, from->tv_usec);
     return 0;
@@ -53,15 +52,14 @@ static void set_grey(guchar* pixels, int row, int col, int width, guchar grey)
 static void generate_image(guchar* pixels, int height, int width)
 {
     
-    gameboy_run_until(&gameboy, get_time_in_GB_cyles_since(&start));
-    // gameboy_run_until(&gameboy, 5000000);
+    // gameboy_run_until(&gameboy, get_time_in_GB_cyles_since(&start));
+    gameboy_run_until(&gameboy, 5000000);
     gameboy_t g = gameboy;
+
     for (int x = 0; x < width; ++x){
         for (int y = 0; y < height; ++y){
             uint8_t output = 0;
             image_get_pixel(&output, &(gameboy.screen.display), x/SCALE, y/SCALE);
-            if (output != 0)
-                printf("output = %zu\n", output);
             set_grey(pixels, y, x, width, 255 - 85 * output);
         }
     }
@@ -215,13 +213,12 @@ int main(int argc, char *argv[])
     // M_EXIT_IF_ERR(gameboy_create(&gameboy, argv[1]));   
     M_EXIT_IF_ERR(gameboy_create(&gameboy, argv[1]));
 
-    int x = 0;
     sd_launch(&argc, &argv,
                 sd_init(argv[1], (int) LCD_WIDTH * SCALE, (int) LCD_HEIGHT * SCALE, 40,
                         generate_image, keypress_handler, keyrelease_handler));
 
-    x= x*3;
+
     gameboy_free(&gameboy);
-    x = 1+4;
+
     return 0;
 }

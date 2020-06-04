@@ -46,9 +46,7 @@ int cpu_plug(cpu_t *cpu, bus_t *bus)
 void cpu_free(cpu_t *cpu)
 {
     if (cpu != NULL) {
-        // cpu->IE = NULL;
-        // cpu->IF = NULL;
-        bus_unplug(*cpu->bus, &cpu->high_ram);
+        bus_unplug(cpu->bus, &cpu->high_ram);
         component_free(&cpu->high_ram);
         cpu->bus = NULL;
     }
@@ -101,10 +99,7 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
     // Set flags and value to 0
     cpu->alu.flags = (flags_t) 0;
     cpu->alu.value = (uint16_t) 0;
-    if (lu->opcode != 0){
-        int x =0;
-        // printf("lu->family = %d\n", lu->family);
-    }
+    addr_t next_pc = cpu->PC + lu->bytes;
     switch (lu->family) {
 
     // ALU
@@ -191,7 +186,7 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
                 cpu->PC = cpu_read_addr_after_opcode(cpu);
                 cpu->idle_time += lu->xtra_cycles;
             } else {
-                cpu->PC += lu->bytes;
+                cpu->PC = next_pc;
             }
         break;
 
@@ -205,16 +200,15 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 
     case JR_CC_E8:
      if (check_CC(cpu, lu->opcode)) {
-                cpu->PC += lu->bytes + (int8_t) cpu_read_data_after_opcode(cpu);
+                cpu->PC = next_pc + (int8_t) cpu_read_data_after_opcode(cpu);
                 cpu->idle_time += lu->xtra_cycles;
-                // fprintf(stderr, "In JR_CC_E8: cpu->PC = %d\n", cpu->PC);
             } else {
-                cpu->PC += lu->bytes;
+                cpu->PC = next_pc;
             }
         break;
 
     case JR_E8:
-        cpu->PC += lu->bytes + (int8_t) cpu_read_data_after_opcode(cpu);
+        cpu->PC = next_pc + (int8_t) cpu_read_data_after_opcode(cpu);
         break;
 
 
@@ -250,17 +244,8 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
         break;
 
     case RST_U3:
-    // fprintf(stderr, "opcode = %d\t", lu->opcode);
-            // fprintf(stderr, "old PC = %d \t", cpu->PC);
-            M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
-            // fprintf(stderr, "in RST_U3: cpu->PC = %d \t lu->bytes = %d \t n3 = %d \t", cpu->PC , lu->bytes,extract_n3(lu->opcode) );
-            cpu->PC = extract_n3(lu->opcode) << 3;
-            // fprintf(stderr, "new PC = %d \n", cpu->PC);
-            // data_t dat = cpu_read_at_idx(cpu, extract_n3(lu->opcode) << 3 );
-            // fprintf(stderr, "data at new PC = %d\n", dat);
-            //new data is 195 (= JP n16) => jump to 50220 => NOPS
-            // fprintf(stderr, "data at new PC = %d\n", cpu_read16_at_idx(cpu, cpu->PC+2));
-
+        M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
+        cpu->PC = extract_n3(lu->opcode) << 3;
         break;
 
 
@@ -339,13 +324,13 @@ int cpu_do_cycle(cpu_t *cpu)
             bit_unset(&data, i);
             // M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
             cpu->IF = data;
-            M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));//+lu->bytes?
+            M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));
             cpu->PC = 0x40 + (i<<3);
             cpu->idle_time += INTERRUPT_IDLE_TIME;
             return ERR_NONE;
             
         }
-        // return ERR_NONE;
+        
     } 
 
     data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
@@ -389,15 +374,10 @@ void cpu_request_interrupt(cpu_t* cpu, interrupt_t i)
 
     if (i>=VBLANK && i <= JOYPAD ){
         data_t data = cpu_read_at_idx(cpu, REG_IF);
-        printf("b data = %zu\n", data);
-        printf("b cpu->IF = %zu\n", cpu->IF);
         data= cpu->IF;
         bit_set(&data, i);
-        
         // M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
         cpu->IF = data;
-        printf("data = %zu\n", data);
-        printf("cpu->IF = %zu\n", cpu->IF);
 
     }
 }

@@ -21,6 +21,7 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
 {
 
     M_REQUIRE_NON_NULL(gameboy);
+    memset(gameboy, 0, sizeof(gameboy_t));
 
     // Instanciate components
     component_t workRAM;
@@ -96,18 +97,17 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     M_EXIT_IF_ERR(cpu_plug(&gameboy->cpu, &gameboy->bus));
 
     M_EXIT_IF_ERR(joypad_init_and_plug(&gameboy->pad, &gameboy->cpu));
-    M_EXIT_IF_ERR(lcdc_init(gameboy));
 
+
+    M_EXIT_IF_ERR(lcdc_init(gameboy));
     M_EXIT_IF_ERR(lcdc_plug(&gameboy->screen, gameboy->bus));
+
     gameboy->screen.on_cycle = -1;
     gameboy->screen.next_cycle = -1;
     gameboy->screen.DMA_from = cpu_read_at_idx(&gameboy->cpu, REG_DMA);
     gameboy->screen.DMA_to = FRAME_TOTAL_CYCLES;
-    // M_EXIT_IF_ERR(image_create(&gameboy->screen.display, LCD_WIDTH, LCD_HEIGHT));
-    // M_EXIT_IF_ERR(image_create(&gameboy->screen.display, LCD_WIDTH, LCD_HEIGHT ));
-    cpu_write_at_idx(&gameboy->cpu, REG_LCDC, 0);
-    gameboy->screen.cpu =&(gameboy->cpu);
-
+    M_EXIT_IF_ERR(image_create(&gameboy->screen.display, LCD_WIDTH, LCD_HEIGHT ));
+    M_EXIT_IF_ERR(cpu_write_at_idx(&gameboy->cpu, REG_LCDC, 0));
     return ERR_NONE;
 }
 
@@ -152,69 +152,29 @@ static int blargg_bus_listener(gameboy_t* gameboy, addr_t addr)
 }
 #endif
 
-void bus_dump(bus_t* bus){
-
-    
-FILE* file = fopen("dump_bus.txt", "w");
-
-        for(int i = 0; i<BUS_SIZE; ++i){
-            fprintf(file, "%u\t", bus[i]);
-        }
-    fclose(file);
-
-    return;
-}
-
 // ==== see gameboy.h ========================================
 int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
 {
     M_REQUIRE_NON_NULL(gameboy);
 
     while (gameboy->cycles < cycle) {
-        if (gameboy->cycles % 17556 == 0) {
-            // cpu_request_interrupt(&gameboy->cpu, VBLANK);
-        }
-
-        if(gameboy->cycles%1000 == 0){
-            int x = 0;
-        }
-        if(gameboy->cpu.PC>521){
-            int x = 0;
-        }
-        data_t eighty = cpu_read_at_idx(&gameboy->cpu, 80);
-       
 
         M_EXIT_IF_ERR(timer_cycle(&gameboy->timer));
         M_EXIT_IF_ERR(cpu_cycle(&gameboy->cpu));
         ++gameboy->cycles;
 
-    //     if(gameboy->cycles%5000000==0){
-    //         printf("cycle %d\n", gameboy->cycles);
-    //         for (int x = 0; x < 160; ++x){
-    //             for (int y = 0; y < 144; ++y){
-    //         uint8_t output = 0;
-    //         image_get_pixel(&output, &(gameboy->screen.display), x, y);
-    //         if (output != 0)
-    //             printf("output = %zu\n", output);
-    //     }
-    // }
-                
-    //     }
-
         gameboy->screen.on_cycle= gameboy->cycles;
         gameboy->screen.next_cycle = gameboy->cycles+1;
         gameboy->screen.window_y = cpu_read_at_idx(&gameboy->cpu, REG_WY);
         gameboy->screen.DMA_from = cpu_read_at_idx(&gameboy->cpu, REG_DMA);
-        gameboy->screen.DMA_to = LINE_TOTAL_CYCLES;
-        gameboy->screen.on = cpu_read_at_idx(&gameboy->cpu, REG_STAT&LCDC_REG_LCD_STATUS_MASK);
+        gameboy->screen.DMA_to = cpu_read_at_idx(&gameboy->cpu, REG_DMA) +LINE_TOTAL_CYCLES;
+        gameboy->screen.on = (cpu_read_at_idx(&gameboy->cpu, REG_LCDC)&LCDC_REG_LCD_STATUS_MASK != 0);
         
         M_EXIT_IF_ERR(lcdc_cycle(&gameboy->screen, gameboy->cycles));
 
 
-        if (gameboy->cpu.write_listener!= 0){
-            M_EXIT_IF_ERR(timer_bus_listener(&gameboy->timer, gameboy->cpu.write_listener));
-            M_EXIT_IF_ERR(bootrom_bus_listener(gameboy, gameboy->cpu.write_listener));
-        }
+        M_EXIT_IF_ERR(timer_bus_listener(&gameboy->timer, gameboy->cpu.write_listener));
+        M_EXIT_IF_ERR(bootrom_bus_listener(gameboy, gameboy->cpu.write_listener));
         M_EXIT_IF_ERR(joypad_bus_listener(&gameboy->pad, gameboy->cpu.write_listener));
         M_EXIT_IF_ERR(lcdc_bus_listener(&gameboy->screen, gameboy->cpu.write_listener));
 #ifdef BLARGG
@@ -222,7 +182,6 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
 #endif
         
     }
-    // bus_dump(&gameboy->bus);
 
     return ERR_NONE;
 }

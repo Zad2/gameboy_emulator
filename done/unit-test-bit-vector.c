@@ -919,7 +919,7 @@ Suite* cartridge_test_suite()
     tcase_add_test(tc1, bit_vector_shift_exec);
     tcase_add_test(tc1, bit_vector_join_exec);
     tcase_add_test(tc1, bit_vector_various);
-    // tcase_add_test(tc1, bit_vector_deadboss);
+    tcase_add_test(tc1, bit_vector_deadboss);
 
     return s;
 }

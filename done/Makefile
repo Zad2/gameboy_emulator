@@ -8,21 +8,20 @@ GTK_LIBS := `pkg-config --libs gtk+-3.0`
 .PHONY: clean new style feedback submit1 submit2 submit
 
 CFLAGS += -std=c11 -Wall -pedantic -g -D_DEFAULT_SOURCE
+
+# uncomment to check for memory leaks
 # CFLAGS += -fsanitize=address
 # CPPFLAGS += -fsanitize=address
 # LDFLAGS += -fsanitize=address
 
 # a bit more checks if you'd like to (uncomment
- #CFLAGS += -Wextra -Wfloat-equal -Wshadow                         \
+ CFLAGS += -Wextra -Wfloat-equal -Wshadow                         \
  -Wpointer-arith -Wbad-function-cast -Wcast-align -Wwrite-strings \
- -Wunreachable-code \
- -Wcast-qual -Winit-self \
- -Wconversion \
- -Wstrict-prototypes -Wmissing-declarations
+ -Wunreachable-code
  
 
 # uncomment if you want to add DEBUG flag
-CPPFLAGS += -DDEBUG
+# CPPFLAGS += -DDEBUG
 CPPFLAGS += -DBLARGG
 
 # ----------------------------------------------------------------------
@@ -33,7 +32,14 @@ LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 LDFLAGS += -L.
 LDLIBS += -lcs212gbfinalext-debug
 
-all:: gbsimulator test-gameboy test-cpu-week08 test-cpu-week09 check
+all:: gbsimulator test-gameboy test-cpu-week08 test-cpu-week09 unit-tests
+
+unit-tests: unit-test-bit unit-test-alu unit-test-bus \
+	unit-test-memory unit-test-component unit-test-cpu \
+	unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 \
+	unit-test-cartridge unit-test-timer unit-test-alu_ext unit-test-cpu-dispatch \
+	unit-test-bit-vector
+
 gbsimulator: LDLIBS += $(GTK_LIBS) -lsid
 gbsimulator.o: CFLAGS += $(GTK_INCLUDE)
 
@@ -161,9 +167,9 @@ unit-test-bit-vector.o: unit-test-bit-vector.c tests.h error.h \
 test-image.o: test-image.c error.h util.h bit_vector.h bit.h \
  libsid.so 
 
-TARGETS := test-gameboy 
+TARGETS := 
 CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-bus \
-	unit-test-memory unit-test-component unit-test-gameboy unit-test-cpu \
+	unit-test-memory unit-test-component unit-test-cpu \
 	unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 \
 	unit-test-cartridge unit-test-timer unit-test-alu_ext unit-test-cpu-dispatch \
 	unit-test-bit-vector
@@ -171,6 +177,7 @@ OBJS =
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 
 OBJS = $(OBJS_STATIC_TESTS) $(OBJS_NO_STATIC_TESTS)
+
 
 # ----------------------------------------------------------------------
 # This part is to make your life easier. See handouts how to make use of it.

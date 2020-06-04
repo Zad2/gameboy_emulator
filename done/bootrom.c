@@ -44,8 +44,6 @@ int bootrom_bus_listener(gameboy_t* gameboy, addr_t addr)
         M_EXIT_IF_ERR(cartridge_plug(&gameboy->cartridge, gameboy->bus));
         // Set boot bit to 0 to mark end of boot
         gameboy->boot = 0;
-        fprintf(stderr, "in BOOTROM\n");
-
     }
     return ERR_NONE;
 }

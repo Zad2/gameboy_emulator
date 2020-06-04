@@ -24,7 +24,7 @@ int mem_create(memory_t *mem, size_t size)
     // space for it in the computer memory
     memory_t m = {0, NULL};
     m.memory = calloc(size, sizeof(data_t));
-    M_EXIT_IF_NULL(m.memory, sizeof(data_t));
+    M_EXIT_IF_NULL(m.memory, size*sizeof(data_t));
 
     m.size = size;
 

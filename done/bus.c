@@ -131,6 +131,10 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
 
     *data16 = (addr_t)dat16;
     if (bus[address] != NULL) {
+        if (address == 0xFFFF) {
+            *data16 = 0xFF;
+            return ERR_NONE;
+        }
         data_t ptr1 = dat16;
         data_t ptr2 = dat16;
 
@@ -141,9 +145,7 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
         M_EXIT_IF_ERR(bus_read(bus, (addr_t)(address + 1), &ptr2));
 
         *data16 = (addr_t)merge8(ptr1, ptr2);
-        if (*data16 == 0xFFFF) {
-            *data16 = 0xFF;
-        }
+        
     }
     return ERR_NONE;
 }
@@ -178,7 +180,9 @@ int bus_write16(bus_t bus, addr_t address, addr_t data16)
 
     // Same as bus_write but write on 2 consecutive addresses (1 word = 2 bytes)
     *bus[address] = data1;
-    *bus[address + 1] = data2;
+    if (address != 0xFFFF){
+        *bus[address + 1] = data2;
+    }
 
     return ERR_NONE;
 }

@@ -46,9 +46,6 @@ int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu->bus);
 
-    if(addr == 80 || addr == 80){
-        int x = 0;
-    }
     // Call bus_write from bus.c and write to the cpu's bus at address addr,
     // while getting potential errors
     M_EXIT_IF_ERR(bus_write(*cpu->bus, addr, data));
@@ -65,9 +62,6 @@ int cpu_write16_at_idx(cpu_t *cpu, addr_t addr, addr_t data16)
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu->bus);
 
-    if(addr == 80 || addr == 80){
-        int x = 0;
-    }
     // Call bus_write16 from bus.c and write to the cpu's bus at addresses addr and addr+1,
     // while getting potential errors
     M_EXIT_IF_ERR(bus_write16(*cpu->bus, addr, data16));
@@ -167,9 +161,8 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
 
     case LD_R16SP_N16:{
         reg_pair_kind pair = extract_reg_pair(lu->opcode);
-        addr_t add = cpu_read_addr_after_opcode(cpu);
-        cpu_reg_pair_SP_set(cpu, pair, add);
-        // fprintf(stderr, "in LD_R16SP_N16\n");
+        addr_t addr = cpu_read_addr_after_opcode(cpu);
+        cpu_reg_pair_SP_set(cpu, pair, addr);
     }
         break;
 
@@ -178,13 +171,6 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_R8_N8:
-        if (extract_reg(lu->opcode, 3) == REG_C_CODE && cpu_read_data_after_opcode(cpu) == 0){
-            int x = 0;
-        }
-        if (extract_reg(lu->opcode, 3) == REG_C_CODE && cpu_read_data_after_opcode(cpu) == 16){
-            int x = 0;
-        }
-
         cpu_reg_set(cpu, extract_reg(lu->opcode, 3), cpu_read_data_after_opcode(cpu));
         break;
 
@@ -206,13 +192,11 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
     case POP_R16:
         cpu_reg_pair_set(cpu, extract_reg_pair(lu->opcode), cpu_read16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE)));
         cpu_reg_pair_SP_set(cpu, REG_AF_CODE, cpu_reg_pair_SP_get(cpu, REG_AF_CODE) + WORD_SIZE);
-        // fprintf(stderr, "In pop\n");
         break;
 
     case PUSH_R16:
         cpu_reg_pair_SP_set(cpu, REG_AF_CODE, cpu_reg_pair_SP_get(cpu, REG_AF_CODE) - WORD_SIZE);
         M_EXIT_IF_ERR(cpu_write16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE), cpu_reg_pair_get(cpu, extract_reg_pair(lu->opcode))));
-        // fprintf(stderr, "In push\n");
         break;
 
     default:

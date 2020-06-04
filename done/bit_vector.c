@@ -95,7 +95,7 @@ uint8_t * create_bytes_from_word(uint32_t word)
  */
 bit_vector_t* bit_vector_set(bit_vector_t* pbv, size_t index, bit_t value)
 {
-    if (pbv == NULL || index < 0 || index >= pbv->size) {
+    if (pbv == NULL || index >= pbv->size) {
         return NULL;
     }
 
@@ -139,7 +139,7 @@ bit_vector_t* bit_vector_create(size_t size, bit_t value)
             alloc = (alloc / FOUR_BYTES_SIZE + 1) * FOUR_BYTES_SIZE;
         }
         // Allocate space in the memory for the array of uint32_t
-        result.content = calloc(alloc / FOUR_BYTES_SIZE, sizeof(uint32_t));
+        result.content = calloc(alloc / FOUR_BYTES_SIZE+1, sizeof(uint32_t));
         if (result.content != NULL) {
             result.allocated = alloc;
             result.size = size;
@@ -322,7 +322,7 @@ bit_vector_t* bit_vector_extract_zero_ext(const bit_vector_t* pbv, int64_t index
     // 3- Else the bit is 0
     for (size_t i = 0; i< size; ++i) {
         bit_t value = 0;
-        if (i + index >= 0 && i+index < pbv->size) {
+        if (i+index < pbv->size) {
             value = bit_vector_get(pbv, i + index);
         }
         result = bit_vector_set(result, i, value);
@@ -346,7 +346,7 @@ bit_vector_t* bit_vector_extract_wrap_ext(const bit_vector_t* pbv, int64_t index
     // 3- Else compute a new index (old index % size of pbv) and take the bit from pbv
     for (size_t i = 0; i< size; ++i) {
         bit_t value = 0;
-        if (i + index >= 0 && i+index < pbv->size) {
+        if (i+index < pbv->size) {
             value = bit_vector_get(pbv, i + index);
         } else {
             value = bit_vector_get(pbv, (i+index) % pbv->size);
@@ -414,9 +414,10 @@ bit_vector_t* bit_vector_join(const bit_vector_t* pbv1, const bit_vector_t* pbv2
 // ==== see bit_vector.h ========================================
 int bit_vector_print(const bit_vector_t* pbv)
 {
-    // if(pbv==NULL){
-    //     printf("there's a NULL\n");
-    // }
+    if(pbv==NULL){
+        fprintf(stderr, "bit vector to print is NULL\n");
+        return 0;
+    }
     for (size_t i = 0; i < pbv->size / 32 ; ++i) {
         printf(""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN""BYTE_TO_BINARY_PATTERN"",
                BYTE_TO_BINARY(pbv->content[i]>>24), BYTE_TO_BINARY(pbv->content[i]>>16), BYTE_TO_BINARY(pbv->content[i]>>8), BYTE_TO_BINARY(pbv->content[i]));
@@ -427,9 +428,10 @@ int bit_vector_print(const bit_vector_t* pbv)
 // ==== see bit_vector.h ========================================
 int bit_vector_println(const char* prefix, const bit_vector_t* pbv)
 {
-    // if(pbv==NULL){
-    //     printf("there's a NULL\n");
-    // }
+    if(pbv==NULL){
+        fprintf(stderr, "bit vector to print is NULL\n");
+        return 0;
+    }
     printf("%s", prefix);
     int printed = bit_vector_print(pbv);
     printf("\n");
@@ -439,7 +441,9 @@ int bit_vector_println(const char* prefix, const bit_vector_t* pbv)
 // ==== see bit_vector.h ========================================
 void bit_vector_free(bit_vector_t** pbv)
 {
-    //fixme add null checks
+    if(pbv == NULL){
+        return;
+    }
     free((*pbv)->content);
 
     free(*pbv);

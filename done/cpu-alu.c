@@ -136,33 +136,24 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
 
     case INC_HLR: {
         M_EXIT_IF_ERR(alu_add8(&cpu->alu,cpu_read_at_HL(cpu), (uint8_t)1,(bit_t) 0));
-        M_EXIT_IF_ERR(cpu_write_at_HL(cpu, cpu->alu.value));
+        M_EXIT_IF_ERR(cpu_write_at_HL(cpu, (data_t) cpu->alu.value));
         M_EXIT_IF_ERR(cpu_combine_alu_flags(cpu, INC_FLAGS_SRC));
 
     } break;
 
     case INC_R8: {
         reg_kind reg = extract_reg(lu->opcode, 3);
-         if ( reg == REG_B_CODE){
-            int x = 0;
-        }
-        M_EXIT_IF_ERR(alu_add8(&cpu->alu, cpu_reg_get(cpu,extract_reg(lu->opcode, 3)), (uint8_t)1, (bit_t)0));
-        cpu_reg_set_from_alu8(cpu, extract_reg(lu->opcode,3));
-        M_EXIT_IF_ERR(cpu_combine_alu_flags(cpu, INC_FLAGS_SRC));
-        // fprintf(stderr, "in INC_R8\n");
-       
+        M_EXIT_IF_ERR(alu_add8(&cpu->alu, cpu_reg_get(cpu,reg), (uint8_t)1, (bit_t)0));
+        cpu_reg_set_from_alu8(cpu, reg);
+        M_EXIT_IF_ERR(cpu_combine_alu_flags(cpu, INC_FLAGS_SRC));       
     } break;
 
     case DEC_R8: {
         reg_kind reg = extract_reg(lu->opcode, 3);
-        if (reg == REG_L_CODE){
-            int x =0;
-        }
-        M_EXIT_IF_ERR(alu_sub8(&cpu->alu, cpu_reg_get(cpu,extract_reg(lu->opcode, 3)), (uint8_t)1, (bit_t)0));
-        cpu_reg_set_from_alu8(cpu, extract_reg(lu->opcode,3));
+        M_EXIT_IF_ERR(alu_sub8(&cpu->alu, cpu_reg_get(cpu,reg), (uint8_t)1, (bit_t)0));
+        cpu_reg_set_from_alu8(cpu, reg);
 
         M_EXIT_IF_ERR(cpu_combine_alu_flags(cpu, DEC_FLAGS_SRC));
-        // fprintf(stderr, "in DEC_R8\n");
     } break;
 
     case ADD_HL_R16SP: {
@@ -194,14 +185,14 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     case SLA_R8: {
         reg_kind r = extract_reg(lu->opcode, 0);
         M_EXIT_IF_ERR(alu_shift(&cpu->alu, cpu_reg_get(cpu, r), LEFT));
-        cpu_reg_set(cpu,r, cpu->alu.value );
+        cpu_reg_set(cpu,r, lsb8(cpu->alu.value));
         M_EXIT_IF_ERR(cpu_combine_alu_flags(cpu, SHIFT_FLAGS_SRC));
     } break;
 
     case ROT_R8: {
         reg_kind r = extract_reg(lu->opcode, 0);
         M_EXIT_IF_ERR(alu_carry_rotate(&cpu->alu, cpu_reg_get(cpu, r), extract_rot_dir(lu->opcode), get_C(cpu->F)));
-        cpu_reg_set(cpu,r, cpu->alu.value );
+        cpu_reg_set(cpu,r, lsb8(cpu->alu.value) );
         M_EXIT_IF_ERR(cpu_combine_alu_flags(cpu, SHIFT_FLAGS_SRC));
     } break;
 
