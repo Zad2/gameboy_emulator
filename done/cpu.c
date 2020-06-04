@@ -36,8 +36,8 @@ int cpu_plug(cpu_t *cpu, bus_t *bus)
 
     cpu->bus = bus;
 
-    (*bus)[REG_IE]=&cpu->IE;
-    (*bus)[REG_IF]=&cpu->IF;
+    (*bus)[REG_IE] = &cpu->IE;
+    (*bus)[REG_IF] = &cpu->IF;
 
     return bus_plug(*cpu->bus, &cpu->high_ram, HIGH_RAM_START, HIGH_RAM_END);
 }
@@ -45,7 +45,8 @@ int cpu_plug(cpu_t *cpu, bus_t *bus)
 // ==== see cpu.h ========================================
 void cpu_free(cpu_t *cpu)
 {
-    if (cpu != NULL) {
+    if (cpu != NULL)
+    {
         bus_unplug(cpu->bus, &cpu->high_ram);
         component_free(&cpu->high_ram);
         cpu->bus = NULL;
@@ -56,7 +57,14 @@ void cpu_free(cpu_t *cpu)
  * @brief Maps cc to condition
  *
  */
-typedef enum { NZ, Z, NC, C, CC_COUNT } cc_t;
+typedef enum
+{
+    NZ,
+    Z,
+    NC,
+    C,
+    CC_COUNT
+} cc_t;
 
 /**
  * @brief Extract cc code from instruction opcode and check the appropriate flag
@@ -67,13 +75,15 @@ typedef enum { NZ, Z, NC, C, CC_COUNT } cc_t;
  */
 int check_CC(cpu_t *cpu, opcode_t op)
 {
-    if (cpu != NULL) {
+    if (cpu != NULL)
+    {
         uint8_t cc = extract_cc(op);
         flags_t f = lsb8(cpu_reg_pair_get(cpu, REG_AF_CODE));
 
-        switch(cc) {
+        switch (cc)
+        {
         case NZ:
-            return  get_Z(f) == 0;
+            return get_Z(f) == 0;
             break;
         case Z:
             return get_Z(f) != 0;
@@ -91,16 +101,17 @@ int check_CC(cpu_t *cpu, opcode_t op)
     return 0;
 }
 
-static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
+static int cpu_dispatch(const instruction_t *lu, cpu_t *cpu)
 {
     M_REQUIRE_NON_NULL(lu);
     M_REQUIRE_NON_NULL(cpu);
 
     // Set flags and value to 0
-    cpu->alu.flags = (flags_t) 0;
-    cpu->alu.value = (uint16_t) 0;
+    cpu->alu.flags = (flags_t)0;
+    cpu->alu.value = (uint16_t)0;
     addr_t next_pc = cpu->PC + lu->bytes;
-    switch (lu->family) {
+    switch (lu->family)
+    {
 
     // ALU
     case ADD_A_HLR:
@@ -179,15 +190,17 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
         M_EXIT_IF_ERR(cpu_dispatch_storage(lu, cpu));
         break;
 
-
     // JUMP
     case JP_CC_N16:
-    if (check_CC(cpu, lu->opcode)) {
-                cpu->PC = cpu_read_addr_after_opcode(cpu);
-                cpu->idle_time += lu->xtra_cycles;
-            } else {
-                cpu->PC = next_pc;
-            }
+        if (check_CC(cpu, lu->opcode))
+        {
+            cpu->PC = cpu_read_addr_after_opcode(cpu);
+            cpu->idle_time += lu->xtra_cycles;
+        }
+        else
+        {
+            cpu->PC = next_pc;
+        }
         break;
 
     case JP_HL:
@@ -199,35 +212,39 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
         break;
 
     case JR_CC_E8:
-     if (check_CC(cpu, lu->opcode)) {
-                cpu->PC = next_pc + (int8_t) cpu_read_data_after_opcode(cpu);
-                cpu->idle_time += lu->xtra_cycles;
-            } else {
-                cpu->PC = next_pc;
-            }
+        if (check_CC(cpu, lu->opcode))
+        {
+            cpu->PC = next_pc + (int8_t)cpu_read_data_after_opcode(cpu);
+            cpu->idle_time += lu->xtra_cycles;
+        }
+        else
+        {
+            cpu->PC = next_pc;
+        }
         break;
 
     case JR_E8:
-        cpu->PC = next_pc + (int8_t) cpu_read_data_after_opcode(cpu);
+        cpu->PC = next_pc + (int8_t)cpu_read_data_after_opcode(cpu);
         break;
-
 
     // CALLS
     case CALL_CC_N16:
-        if (check_CC(cpu, lu->opcode)) {
+        if (check_CC(cpu, lu->opcode))
+        {
             M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
             cpu->PC = cpu_read_addr_after_opcode(cpu);
             cpu->idle_time += lu->xtra_cycles;
-        } else {
+        }
+        else
+        {
             cpu->PC += lu->bytes;
         }
         break;
 
     case CALL_N16:
-     M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
-            cpu->PC = cpu_read_addr_after_opcode(cpu);
+        M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
+        cpu->PC = cpu_read_addr_after_opcode(cpu);
         break;
-
 
     // RETURN (from call)
     case RET:
@@ -235,19 +252,21 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
         break;
 
     case RET_CC:
-    if (check_CC(cpu, lu->opcode)) {
-                cpu->PC = cpu_SP_pop(cpu);
-                cpu->idle_time += lu->xtra_cycles;
-            } else {
-                cpu->PC += lu->bytes;
-            }
+        if (check_CC(cpu, lu->opcode))
+        {
+            cpu->PC = cpu_SP_pop(cpu);
+            cpu->idle_time += lu->xtra_cycles;
+        }
+        else
+        {
+            cpu->PC += lu->bytes;
+        }
         break;
 
     case RST_U3:
         M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC + lu->bytes));
         cpu->PC = extract_n3(lu->opcode) << 3;
         break;
-
 
     // INTERRUPT & MISC.
     case EDI:
@@ -267,18 +286,21 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 
     case STOP:
     case NOP:
-        // ne rien faire
+        // Do nothing
         cpu->PC += lu->bytes;
         break;
 
-    default: {
+    default:
+    {
         fprintf(stderr, "Unknown instruction, Code: 0x%" PRIX8 "\n", cpu_read_at_idx(cpu, cpu->PC));
         return ERR_INSTR;
-    } break;
+    }
+    break;
 
     } // switch
+    
     // Update idle_time
-    cpu->idle_time += lu->cycles-1;
+    cpu->idle_time += lu->cycles - 1;
 
     return ERR_NONE;
 }
@@ -294,8 +316,10 @@ interrupt_t first_interrupt(data_t IE, data_t IF)
 {
     data_t interrupts = IE & IF;
 
-    for (interrupt_t i = VBLANK; i <= JOYPAD ; ++i) {
-        if (bit_get(interrupts, i) == 1) {
+    for (interrupt_t i = VBLANK; i <= JOYPAD; ++i)
+    {
+        if (bit_get(interrupts, i) == 1)
+        {
             return i;
         }
     }
@@ -314,27 +338,25 @@ int cpu_do_cycle(cpu_t *cpu)
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu->bus);
 
-
-    if ( (cpu->IME !=0)) {
+    if ((cpu->IME != 0))
+    {
         interrupt_t i = first_interrupt(cpu->IE, cpu->IF);
-        if (i <= JOYPAD) {
+        if (i <= JOYPAD)
+        {
             cpu->IME = 0;
-            data_t data = cpu_read_at_idx(cpu, REG_IF);
-            data = cpu->IF;
+            data_t data = cpu->IF;
             bit_unset(&data, i);
-            // M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
             cpu->IF = data;
             M_EXIT_IF_ERR(cpu_SP_push(cpu, cpu->PC));
-            cpu->PC = 0x40 + (i<<3);
+            cpu->PC = 0x40 + (i << 3);
             cpu->idle_time += INTERRUPT_IDLE_TIME;
             return ERR_NONE;
-            
         }
-        
-    } 
+    }
 
     data_t prefix = cpu_read_at_idx(cpu, cpu->PC);
-    if (prefix == PREFIXED) {
+    if (prefix == PREFIXED)
+    {
         data_t opcode = cpu_read_data_after_opcode(cpu);
         return cpu_dispatch(&instruction_prefixed[opcode], cpu);
     }
@@ -348,37 +370,37 @@ int cpu_cycle(cpu_t *cpu)
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu->bus);
 
-    cpu->write_listener = (addr_t) 0;
-    if (cpu->idle_time != 0) {
+    cpu->write_listener = (addr_t)0;
+    if (cpu->idle_time != 0)
+    {
         --cpu->idle_time;
         return ERR_NONE;
     }
-    
-
 
     interrupt_t i = first_interrupt(cpu->IE, cpu->IF);
 
-    if ((cpu->HALT == 1 && i <= JOYPAD) ) {
+    if ((cpu->HALT == 1 && i <= JOYPAD))
+    {
         cpu->HALT = 0;
         return cpu_do_cycle(cpu);
-    }else if( cpu->HALT == 0){
+    }
+    else if (cpu->HALT == 0)
+    {
         return cpu_do_cycle(cpu);
     }
     return ERR_NONE;
 }
 
 // ==== see cpu.h ========================================
-void cpu_request_interrupt(cpu_t* cpu, interrupt_t i)
+void cpu_request_interrupt(cpu_t *cpu, interrupt_t i)
 {
     M_REQUIRE_NON_NULL(cpu);
 
-    if (i>=VBLANK && i <= JOYPAD ){
+    if (i >= VBLANK && i <= JOYPAD)
+    {
         data_t data = cpu_read_at_idx(cpu, REG_IF);
-        data= cpu->IF;
+        data = cpu->IF;
         bit_set(&data, i);
-        // M_EXIT_IF_ERR(cpu_write_at_idx(cpu, REG_IF, data));
         cpu->IF = data;
-
     }
 }
-

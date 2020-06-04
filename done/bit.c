@@ -66,7 +66,8 @@ bit_t bit_get(uint8_t value, int index)
 // ==== see bit.h ========================================
 void bit_set(uint8_t *value, int index)
 {
-    if (value != NULL) {
+    if (value != NULL)
+    {
         int k = CLAMP07(index);
         *value = (uint8_t)((1 << k) | *value);
     }
@@ -75,7 +76,8 @@ void bit_set(uint8_t *value, int index)
 // ==== see bit.h ========================================
 void bit_unset(uint8_t *value, int index)
 {
-    if (value != NULL) {
+    if (value != NULL)
+    {
         int k = CLAMP07(index);
         *value = (uint8_t)(~(1 << k) & *value);
     }
@@ -84,16 +86,20 @@ void bit_unset(uint8_t *value, int index)
 // ==== see bit.h ========================================
 void bit_rotate(uint8_t *value, rot_dir_t dir, int d)
 {
-    if (value != NULL) {
+    if (value != NULL)
+    {
         int k = CLAMP07(d);
 
         uint8_t temp = 0;
         int shift_complement = SIZE_BYTE - k;
 
-        if (dir == LEFT) {
+        if (dir == LEFT)
+        {
             temp = (uint8_t)(*value >> shift_complement);
             *value = (uint8_t)((*value << k) | temp);
-        } else if (dir == RIGHT) {
+        }
+        else if (dir == RIGHT)
+        {
             temp = (uint8_t)(*value << shift_complement);
             *value = (uint8_t)((*value >> k) | temp);
         }
@@ -103,11 +109,15 @@ void bit_rotate(uint8_t *value, rot_dir_t dir, int d)
 // ==== see bit.h ========================================
 void bit_edit(uint8_t *value, int index, uint8_t v)
 {
-    if (value != NULL) {
+    if (value != NULL)
+    {
         // Check if we want to set (v = 1) or unset (v = 0) the indexed bit
-        if (v == 0) {
+        if (v == 0)
+        {
             bit_unset(value, index);
-        } else if (v == 1) {
+        }
+        else if (v == 1)
+        {
             bit_set(value, index);
         }
     }

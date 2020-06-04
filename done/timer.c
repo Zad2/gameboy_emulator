@@ -17,14 +17,14 @@
 #include "timer.h"
 
 // ==== see timer.h ========================================
-int timer_init(gbtimer_t* timer, cpu_t* cpu)
+int timer_init(gbtimer_t *timer, cpu_t *cpu)
 {
     M_REQUIRE_NON_NULL(timer);
     M_REQUIRE_NON_NULL(cpu);
 
     timer->cpu = cpu;
 
-    timer->counter = (uint16_t) 0;
+    timer->counter = (uint16_t)0;
     return ERR_NONE;
 }
 
@@ -34,31 +34,39 @@ int timer_init(gbtimer_t* timer, cpu_t* cpu)
  * @param timer The given timer
  * @return bit_t The boolean value of current_state
  */
-bit_t timer_state(gbtimer_t* timer)
+bit_t timer_state(gbtimer_t *timer)
 {
-    if (timer == NULL) {
+    if (timer == NULL)
+    {
         return 0;
     }
 
     data_t tac = cpu_read_at_idx(timer->cpu, REG_TAC);
-    bit_t x = bit_get((uint8_t) tac, 2);
+    bit_t x = bit_get((uint8_t)tac, 2);
     data_t div = cpu_read_at_idx(timer->cpu, REG_DIV);
     bit_t y = 0;
-    enum {BIT9, BIT3, BIT5, BIT7}; // Enum created locally for the switch
+    enum
+    {
+        BIT9,
+        BIT3,
+        BIT5,
+        BIT7
+    }; // Enum created locally for the switch
     uint8_t mask2 = 3;
-    switch(tac & mask2) {
+    switch (tac & mask2)
+    {
     case BIT9:
         //Bit 9 is bit 1 of the 8 MSBs
-        y = bit_get((uint8_t) div, 1);
+        y = bit_get((uint8_t)div, 1);
         break;
     case BIT3:
-        y = bit_get((uint8_t) timer->counter, 3);
+        y = bit_get((uint8_t)timer->counter, 3);
         break;
     case BIT5:
-        y = bit_get((uint8_t) timer->counter, 5);
+        y = bit_get((uint8_t)timer->counter, 5);
         break;
     case BIT7:
-        y = bit_get((uint8_t) timer->counter, 7);
+        y = bit_get((uint8_t)timer->counter, 7);
         break;
     default:
         break;
@@ -73,20 +81,22 @@ bit_t timer_state(gbtimer_t* timer)
  * @param old_state The timer's state when entering the method
  * @return int Error code
  */
-int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
+int timer_incr_if_state_change(gbtimer_t *timer, bit_t old_state)
 {
     M_REQUIRE_NON_NULL(timer);
     data_t tima = cpu_read_at_idx(timer->cpu, REG_TIMA);
 
-    if (old_state && !timer_state(timer)) {
-        // ++tima;
-
-        if (tima == 0xFF) {
+    if (old_state && !timer_state(timer))
+    {
+        if (tima == 0xFF)
+        {
             //raise timer interrupt
             cpu_request_interrupt(timer->cpu, TIMER);
             //reload value
             tima = cpu_read_at_idx(timer->cpu, REG_TMA);
-        }else{
+        }
+        else
+        {
             ++tima;
         }
     }
@@ -95,7 +105,7 @@ int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
 }
 
 // ==== see timer.h ========================================
-int timer_cycle(gbtimer_t* timer)
+int timer_cycle(gbtimer_t *timer)
 {
     M_REQUIRE_NON_NULL(timer);
 
@@ -107,20 +117,20 @@ int timer_cycle(gbtimer_t* timer)
 
     // copy 8 MSB from timer principal counter to DIV register
     M_EXIT_IF_ERR(cpu_write_at_idx(timer->cpu, REG_DIV, msb8(timer->counter)));
-    
 
     return timer_incr_if_state_change(timer, current_state);
 }
 
 // ==== see timer.h ========================================
-int timer_bus_listener(gbtimer_t* timer, addr_t addr)
+int timer_bus_listener(gbtimer_t *timer, addr_t addr)
 {
 
     M_REQUIRE_NON_NULL(timer);
 
     bit_t current_state = timer_state(timer);
 
-    switch(addr) {
+    switch (addr)
+    {
     case REG_DIV:
         // Reset initial counter to 0
         timer->counter = 0;
@@ -132,7 +142,7 @@ int timer_bus_listener(gbtimer_t* timer, addr_t addr)
         return timer_incr_if_state_change(timer, current_state);
 
         break;
-    default :
+    default:
         break;
     }
 

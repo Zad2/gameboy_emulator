@@ -13,7 +13,7 @@
 #include "bootrom.h"
 
 // ==== see bootrom.h ========================================
-int bootrom_init(component_t* c)
+int bootrom_init(component_t *c)
 {
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NON_NULL(c->mem);
@@ -29,15 +29,15 @@ int bootrom_init(component_t* c)
 
     *c = bootROM;
     return ERR_NONE;
-
 }
 
 // ==== see bootrom.h ========================================
-int bootrom_bus_listener(gameboy_t* gameboy, addr_t addr)
-{   
+int bootrom_bus_listener(gameboy_t *gameboy, addr_t addr)
+{
     M_REQUIRE_NON_NULL(gameboy);
 
-    if(addr == REG_BOOT_ROM_DISABLE && gameboy->boot != 0) {
+    if (addr == REG_BOOT_ROM_DISABLE && gameboy->boot != 0)
+    {
         // Deactivates the bootrom
         M_EXIT_IF_ERR(bus_unplug(gameboy->bus, &gameboy->bootrom));
         // Maps the component to the corresponding part of the bus

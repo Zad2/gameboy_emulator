@@ -16,22 +16,23 @@
 // ==== see cpu-storage.h ========================================
 data_t cpu_read_at_idx(const cpu_t *cpu, addr_t addr)
 {
-    if (cpu == NULL || cpu->bus == NULL) {
-        return (data_t) 0;
+    if (cpu == NULL || cpu->bus == NULL)
+    {
+        return (data_t)0;
     }
     data_t data = (data_t)0;
 
     // Call bus_read from bus.c and reads from the cpu's bus at address addr
     bus_read(*cpu->bus, addr, &data);
     return data;
-
 }
 
 // ==== see cpu-storage.h ========================================
 addr_t cpu_read16_at_idx(const cpu_t *cpu, addr_t addr)
 {
-    if (cpu == NULL || cpu->bus == NULL) {
-        return (data_t) 0;
+    if (cpu == NULL || cpu->bus == NULL)
+    {
+        return (data_t)0;
     }
     addr_t a = (addr_t)0;
 
@@ -50,8 +51,6 @@ int cpu_write_at_idx(cpu_t *cpu, addr_t addr, data_t data)
     // while getting potential errors
     M_EXIT_IF_ERR(bus_write(*cpu->bus, addr, data));
 
-    
-
     cpu->write_listener = addr;
     return ERR_NONE;
 }
@@ -65,8 +64,6 @@ int cpu_write16_at_idx(cpu_t *cpu, addr_t addr, addr_t data16)
     // Call bus_write16 from bus.c and write to the cpu's bus at addresses addr and addr+1,
     // while getting potential errors
     M_EXIT_IF_ERR(bus_write16(*cpu->bus, addr, data16));
-
-
 
     cpu->write_listener = addr;
     return ERR_NONE;
@@ -96,13 +93,14 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
 
-    switch (lu->family) {
+    switch (lu->family)
+    {
     case LD_A_BCR:
         cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, cpu_BC_get(cpu)));
         break;
 
     case LD_A_CR:
-        cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_reg_get(cpu, REG_C_CODE))));
+        cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, (addr_t)(REGISTERS_START + cpu_reg_get(cpu, REG_C_CODE))));
         break;
 
     case LD_A_DER:
@@ -119,7 +117,7 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_A_N8R:
-        cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_read_data_after_opcode(cpu))));
+        cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, (addr_t)(REGISTERS_START + cpu_read_data_after_opcode(cpu))));
         break;
 
     case LD_BCR_A:
@@ -127,7 +125,7 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_CR_A:
-        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_reg_get(cpu, REG_C_CODE)), cpu_reg_get(cpu, REG_A_CODE)));
+        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, (addr_t)(REGISTERS_START + cpu_reg_get(cpu, REG_C_CODE)), cpu_reg_get(cpu, REG_A_CODE)));
         break;
 
     case LD_DER_A:
@@ -156,15 +154,16 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         break;
 
     case LD_N8R_A:
-        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, (addr_t) (REGISTERS_START + cpu_read_data_after_opcode(cpu)), cpu_reg_get(cpu, REG_A_CODE)));
+        M_EXIT_IF_ERR(cpu_write_at_idx(cpu, (addr_t)(REGISTERS_START + cpu_read_data_after_opcode(cpu)), cpu_reg_get(cpu, REG_A_CODE)));
         break;
 
-    case LD_R16SP_N16:{
+    case LD_R16SP_N16:
+    {
         reg_pair_kind pair = extract_reg_pair(lu->opcode);
         addr_t addr = cpu_read_addr_after_opcode(cpu);
         cpu_reg_pair_SP_set(cpu, pair, addr);
     }
-        break;
+    break;
 
     case LD_R8_HLR:
         cpu_reg_set(cpu, extract_reg(lu->opcode, 3), cpu_read_at_HL(cpu));
@@ -174,12 +173,16 @@ int cpu_dispatch_storage(const instruction_t *lu, cpu_t *cpu)
         cpu_reg_set(cpu, extract_reg(lu->opcode, 3), cpu_read_data_after_opcode(cpu));
         break;
 
-    case LD_R8_R8: {
+    case LD_R8_R8:
+    {
         reg_kind r = extract_reg(lu->opcode, 3);
         reg_kind s = extract_reg(lu->opcode, 0);
-        if (r!=s){
+        if (r != s)
+        {
             cpu_reg_set(cpu, r, cpu_reg_get(cpu, s));
-        }else{
+        }
+        else
+        {
             M_EXIT_ERR(ERR_INSTR, "Used LD_R8_R8 with both registers equal\n\t reg_kind 1 = %zu\treg_kind 2 = %zu", r, s);
         }
     }

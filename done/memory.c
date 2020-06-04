@@ -16,7 +16,8 @@
 int mem_create(memory_t *mem, size_t size)
 {
     M_REQUIRE_NON_NULL(mem);
-    if (size <= 0) {
+    if (size <= 0)
+    {
         return ERR_BAD_PARAMETER;
     }
 
@@ -24,7 +25,7 @@ int mem_create(memory_t *mem, size_t size)
     // space for it in the computer memory
     memory_t m = {0, NULL};
     m.memory = calloc(size, sizeof(data_t));
-    M_EXIT_IF_NULL(m.memory, size*sizeof(data_t));
+    M_EXIT_IF_NULL(m.memory, size * sizeof(data_t));
 
     m.size = size;
 
@@ -37,7 +38,8 @@ int mem_create(memory_t *mem, size_t size)
 // ==== see memory.h ========================================
 void mem_free(memory_t *mem)
 {
-    if ((mem != NULL) && (mem->memory != NULL)) {
+    if ((mem != NULL) && (mem->memory != NULL))
+    {
         // Free the memory from the computer's memory and setting all of its
         // elements to default state
         free(mem->memory);
