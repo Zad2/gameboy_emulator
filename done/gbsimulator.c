@@ -55,8 +55,8 @@ static void set_grey(guchar *pixels, int row, int col, int width, guchar grey)
 static void generate_image(guchar *pixels, int height, int width)
 {
 
-    // gameboy_run_until(&gameboy, get_time_in_GB_cyles_since(&start));
-    gameboy_run_until(&gameboy, 5000000);
+    gameboy_run_until(&gameboy, get_time_in_GB_cyles_since(&start));
+    // gameboy_run_until(&gameboy, 5000000);
     gameboy_t g = gameboy;
 
     for (int x = 0; x < width; ++x)
@@ -223,7 +223,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    memset(&gameboy, 0, sizeof(gameboy_t));
     gettimeofday(&start, NULL);
     timerclear(&paused);
     

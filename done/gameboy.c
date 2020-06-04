@@ -90,19 +90,19 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     M_EXIT_IF_ERR(timer_init(&gameboy->timer, &gameboy->cpu));
     M_EXIT_IF_ERR(cpu_plug(&gameboy->cpu, &gameboy->bus));
 
-    M_EXIT_IF_ERR(lcdc_init(gameboy));
-    M_EXIT_IF_ERR(lcdc_plug(&gameboy->screen, &gameboy->bus));
+    
 
     M_EXIT_IF_ERR(joypad_init_and_plug(&gameboy->pad, &gameboy->cpu));
+    M_EXIT_IF_ERR(lcdc_init(gameboy));
+    M_EXIT_IF_ERR(lcdc_plug(&gameboy->screen, gameboy->bus));
 
     M_EXIT_IF_ERR(cpu_write_at_idx(&gameboy->cpu, REG_P1, 0));
 
     gameboy->screen.on_cycle = -1;
     gameboy->screen.next_cycle = -1;
-    gameboy->screen.DMA_from = cpu_read_at_idx(&gameboy->cpu, REG_DMA);
-    gameboy->screen.DMA_to = FRAME_TOTAL_CYCLES;
-    M_EXIT_IF_ERR(image_create(&gameboy->screen.display, LCD_WIDTH, LCD_HEIGHT));
     M_EXIT_IF_ERR(cpu_write_at_idx(&gameboy->cpu, REG_LCDC, 0));
+
+    gameboy->cpu.SP = 0xE000;
     return ERR_NONE;
 }
 
@@ -154,7 +154,12 @@ int gameboy_run_until(gameboy_t *gameboy, uint64_t cycle)
 
     while (gameboy->cycles < cycle)
     {
-
+if(gameboy->cycles ==1832921){
+    // printf("%zu\n", gameboy->cycles);
+}
+if(gameboy->cycles % 500000 ==0){
+    // printf("%zu\n", gameboy->cycles);
+}
         M_EXIT_IF_ERR(timer_cycle(&gameboy->timer));
         M_EXIT_IF_ERR(cpu_cycle(&gameboy->cpu));
         ++gameboy->cycles;

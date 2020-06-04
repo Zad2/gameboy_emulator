@@ -15,7 +15,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g -D_DEFAULT_SOURCE
 # LDFLAGS += -fsanitize=address
 
 # a bit more checks if you'd like to (uncomment
- CFLAGS += -Wextra -Wfloat-equal -Wshadow                         \
+# CFLAGS += -Wextra -Wfloat-equal -Wshadow                         \
  -Wpointer-arith -Wbad-function-cast -Wcast-align -Wwrite-strings \
  -Wunreachable-code
  
