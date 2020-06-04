@@ -14,4 +14,12 @@ D'après notre fichier time.csv, on a passé environs 20h par semaine sur le pro
 <li>Ne pas oublier d'utiliser la commande <i>export LD_LIBRARY_PATH=.</i> après avoir compilé le projet.</li>
 <li>Dans le Makefile, les lignes 12 à 25 sont utiles pour afficher des avertissements supplémentaires, s'assurer de la présence de fuites de mémoire, ou bien pour activer le mode DDEBUG ou BLARGG.</li>
 <li>La commande <i>make check</i> permet de compiler et exécuter tous les tests unitaires.</li>
+<li> <b><ins>Important:</ins></b> Touches utilisées pour contrôler la gameboy dans gbsimulator.c:
+  <ul>
+    <li> UP, RIGHT, LEFT, DOWN, A, SPACE sont pareilles à la donnée</li>
+    <li> Pour la touche B, appuyer sur Z</li>
+    <li> Pour SELECT, appuyer sur P</li>
+    <li> Pour START, appuyer sur L</li>
+  </ul>
+  </li>
 </ul>
