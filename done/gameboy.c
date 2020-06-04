@@ -21,12 +21,11 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
 {
 
     M_REQUIRE_NON_NULL(gameboy);
+    memset(gameboy, 0, sizeof(gameboy_t));
 
     // Instanciate components
     component_t workRAM;
     memset(&workRAM, 0, sizeof(component_t));
-
-    // memset(&gb.echoram, 0, sizeof(component_t));
 
     component_t registers;
     memset(&registers, 0, sizeof(component_t));
@@ -48,7 +47,6 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
 
     M_EXIT_IF_ERR(cpu_init(&gameboy->cpu));
 
-
     // Create the components
     M_EXIT_IF_ERR(component_create(&workRAM, MEM_SIZE(WORK_RAM)));
     ++gameboy->nb_components;
@@ -66,7 +64,6 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     M_EXIT_IF_ERR(component_create(&echoRAM, MEM_SIZE(ECHO_RAM)));
 
     M_EXIT_IF_ERR(component_create(&gameboy->bootrom, MEM_SIZE(BOOT_ROM)));
-    M_EXIT_IF_ERR(timer_init(&gameboy->timer, &gameboy->cpu));
     M_EXIT_IF_ERR(cartridge_init(&gameboy->cartridge, filename));
 
     // Plug the components to the bus
@@ -80,11 +77,6 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     M_EXIT_IF_ERR(bootrom_plug(&gameboy->bootrom, gameboy->bus));
     M_EXIT_IF_ERR(cartridge_plug(&gameboy->cartridge, gameboy->bus));
 
-
-    // Copy the created bus to the Gameboy's bus
-    // for (size_t i = 0; i < BUS_SIZE; ++i) {
-    //     gameboy->bus[i] = bus[i];
-    // }
     gameboy->components[WORK_RAM] = workRAM;
     gameboy->components[REGISTERS] = registers;
     gameboy->components[EXTERN_RAM] = externRAM;
@@ -92,47 +84,62 @@ int gameboy_create(gameboy_t *gameboy, const char *filename)
     gameboy->components[GRAPH_RAM] = graphRAM;
     gameboy->components[USELESS] = useless;
 
-    gameboy->boot = (bit_t) 1;
+    gameboy->boot = (bit_t)1;
+    gameboy->cycles = 1;
 
+    M_EXIT_IF_ERR(timer_init(&gameboy->timer, &gameboy->cpu));
     M_EXIT_IF_ERR(cpu_plug(&gameboy->cpu, &gameboy->bus));
+
+    
+
+    M_EXIT_IF_ERR(joypad_init_and_plug(&gameboy->pad, &gameboy->cpu));
     M_EXIT_IF_ERR(lcdc_init(gameboy));
     M_EXIT_IF_ERR(lcdc_plug(&gameboy->screen, gameboy->bus));
-    M_EXIT_IF_ERR(joypad_init_and_plug(&gameboy->pad, &gameboy->cpu));
 
+    M_EXIT_IF_ERR(cpu_write_at_idx(&gameboy->cpu, REG_P1, 0));
 
+    gameboy->screen.on_cycle = -1;
+    gameboy->screen.next_cycle = -1;
+    M_EXIT_IF_ERR(cpu_write_at_idx(&gameboy->cpu, REG_LCDC, 0));
+
+    gameboy->cpu.SP = 0xE000;
     return ERR_NONE;
 }
-
 
 // ==== see gameboy.h ========================================
 void gameboy_free(gameboy_t *gameboy)
 {
-    if (gameboy != NULL) {
-        for (size_t i = 0; i < GB_NB_COMPONENTS; ++i) {
+    if (gameboy != NULL)
+    {
+        for (size_t i = 0; i < GB_NB_COMPONENTS; ++i)
+        {
             // Unplug the bus from all components and free them
             bus_unplug(gameboy->bus, &gameboy->components[i]);
             component_free(&gameboy->components[i]);
         }
+        component_t temp = {NULL, ECHO_RAM_START, ECHO_RAM_END};
+        bus_unplug(gameboy->bus, &temp);
+
         bus_unplug(gameboy->bus, &gameboy->bootrom);
         bus_unplug(gameboy->bus, &gameboy->cartridge.c);
-        //component_free(&gameboy->echoram);
         component_free(&gameboy->cartridge.c);
         component_free(&gameboy->bootrom);
-        cpu_free(&gameboy->cpu);
         lcdc_free(&gameboy->screen);
+        cpu_free(&gameboy->cpu);
 
         gameboy->cycles = 0;
         gameboy->nb_components = 0;
-        gameboy->boot = (bit_t) 0;
+        gameboy->boot = (bit_t)0;
     }
 }
 
 #ifdef BLARGG
-static int blargg_bus_listener(gameboy_t* gameboy, addr_t addr)
+static int blargg_bus_listener(gameboy_t *gameboy, addr_t addr)
 {
     M_REQUIRE_NON_NULL(gameboy);
 
-    if (addr == BLARGG_REG) {
+    if (addr == BLARGG_REG)
+    {
         data_t data = cpu_read_at_idx(&gameboy->cpu, addr);
         printf("%c", data);
     }
@@ -141,39 +148,39 @@ static int blargg_bus_listener(gameboy_t* gameboy, addr_t addr)
 #endif
 
 // ==== see gameboy.h ========================================
-int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
+int gameboy_run_until(gameboy_t *gameboy, uint64_t cycle)
 {
     M_REQUIRE_NON_NULL(gameboy);
 
-    while (gameboy->cycles < cycle) {
-#ifdef BLARGG
-        if (gameboy->cycles % 17556 == 0) {
-            cpu_request_interrupt(&gameboy->cpu, VBLANK);
-        }
-#endif
-
+    while (gameboy->cycles < cycle)
+    {
+if(gameboy->cycles ==1832921){
+    // printf("%zu\n", gameboy->cycles);
+}
+if(gameboy->cycles % 500000 ==0){
+    // printf("%zu\n", gameboy->cycles);
+}
         M_EXIT_IF_ERR(timer_cycle(&gameboy->timer));
         M_EXIT_IF_ERR(cpu_cycle(&gameboy->cpu));
-        // printf("cycle %d\n", gameboy->cycles);
-        // M_EXIT_IF_ERR(lcdc_cycle(&gameboy->screen, gameboy->cycles));
-
         ++gameboy->cycles;
-        if (gameboy->cpu.write_listener!= 0){
-            M_EXIT_IF_ERR(timer_bus_listener(&gameboy->timer, gameboy->cpu.write_listener));
-            M_EXIT_IF_ERR(bootrom_bus_listener(gameboy, gameboy->cpu.write_listener));
-        }
-        // M_EXIT_IF_ERR(joypad_bus_listener(&gameboy->pad, gameboy->cpu.write_listener));
-        // M_EXIT_IF_ERR(lcdc_bus_listener(&gameboy->screen, gameboy->cpu.write_listener));
+
+        gameboy->screen.on_cycle = gameboy->cycles;
+        gameboy->screen.next_cycle = gameboy->cycles + 1;
+        gameboy->screen.window_y = cpu_read_at_idx(&gameboy->cpu, REG_WY);
+        gameboy->screen.DMA_from = cpu_read_at_idx(&gameboy->cpu, REG_DMA);
+        gameboy->screen.DMA_to = cpu_read_at_idx(&gameboy->cpu, REG_DMA) + LINE_TOTAL_CYCLES;
+        gameboy->screen.on = (cpu_read_at_idx(&gameboy->cpu, REG_LCDC) & LCDC_REG_LCD_STATUS_MASK != 0);
+
+        M_EXIT_IF_ERR(lcdc_cycle(&gameboy->screen, gameboy->cycles));
+
+        M_EXIT_IF_ERR(timer_bus_listener(&gameboy->timer, gameboy->cpu.write_listener));
+        M_EXIT_IF_ERR(bootrom_bus_listener(gameboy, gameboy->cpu.write_listener));
+        M_EXIT_IF_ERR(joypad_bus_listener(&gameboy->pad, gameboy->cpu.write_listener));
+        M_EXIT_IF_ERR(lcdc_bus_listener(&gameboy->screen, gameboy->cpu.write_listener));
 #ifdef BLARGG
         M_EXIT_IF_ERR(blargg_bus_listener(gameboy, gameboy->cpu.write_listener));
 #endif
-
-
-
-
     }
-
 
     return ERR_NONE;
 }
-

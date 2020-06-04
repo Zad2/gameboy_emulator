@@ -35,6 +35,7 @@ typedef enum {
 #define HIGH_RAM_END     0xFFFE
 #define HIGH_RAM_SIZE ((HIGH_RAM_END - HIGH_RAM_START)+1)
 
+#define INTERRUPT_IDLE_TIME 5
 //=========================================================================
 /**
  * @brief Structure representing a CPU with register pairs, a Program Counter

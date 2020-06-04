@@ -18,6 +18,7 @@
 // ==== see bus.h ========================================
 int bus_remap(bus_t bus, component_t *c, addr_t offset)
 {
+    M_REQUIRE_NON_NULL(bus);
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NON_NULL(c->mem);
     M_REQUIRE_NON_NULL(c->mem->memory);
@@ -27,12 +28,14 @@ int bus_remap(bus_t bus, component_t *c, addr_t offset)
 
     // Check if the span of the zone is larger than the component's memory,
     // Or if the component's start address is bigger than its end
-    if (end - start + offset >= c->mem->size || start > end) {
+    if (end - start + offset >= c->mem->size || start > end)
+    {
         return ERR_ADDRESS;
     }
 
     // Go through all the data of the bus and assigning the pointers in the memory
-    for (int i = 0; i <= end - start; ++i) {
+    for (int i = 0; i <= end - start; ++i)
+    {
         bus[start + i] = &(c->mem->memory[offset + i]);
     }
 
@@ -47,7 +50,8 @@ int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t 
     M_REQUIRE_NON_NULL(c->mem->memory);
 
     // Same error checks as bus_remap
-    if ( end - start + offset >= c->mem->size || start > end) {
+    if (end - start + offset >= c->mem->size || start > end)
+    {
         return ERR_ADDRESS;
     }
 
@@ -57,7 +61,8 @@ int bus_forced_plug(bus_t bus, component_t *c, addr_t start, addr_t end, addr_t 
     // Call bus_remap and get potential errors
     int err = bus_remap(bus, c, offset);
 
-    if (err != ERR_NONE) {
+    if (err != ERR_NONE)
+    {
         c->start = 0;
         c->end = 0;
         return err;
@@ -71,11 +76,13 @@ int bus_plug(bus_t bus, component_t *c, addr_t start, addr_t end)
 {
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NON_NULL(bus);
-    M_REQUIRE_NON_NULL(c->mem);
-    M_REQUIRE_NON_NULL(c->mem->memory);
+    // M_REQUIRE_NON_NULL(c->mem);
+    // M_REQUIRE_NON_NULL(c->mem->memory);
 
-    for (int i = start; i <= end; i++) {
-        if (bus[i] != NULL) {
+    for (int i = start; i <= end; i++)
+    {
+        if (bus[i] != NULL)
+        {
             return ERR_ADDRESS;
         }
     }
@@ -89,14 +96,13 @@ int bus_unplug(bus_t bus, component_t *c)
 {
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NON_NULL(bus);
-    M_REQUIRE_NON_NULL(c->mem);
-    M_REQUIRE_NON_NULL(c->mem->memory);
 
     addr_t start = c->start;
     addr_t end = c->end;
 
     // Get throug all data_t pointers from c's start till end and unplug the pointers from the data
-    for (int i = start; i <= end; ++i) {
+    for (int i = start; i <= end; ++i)
+    {
         bus[i] = NULL;
     }
 
@@ -115,7 +121,8 @@ int bus_read(const bus_t bus, addr_t address, data_t *data)
     *data = dat;
 
     // Get the data pointer from the bus and make the given data pointer point to it
-    if (bus[address] != NULL) {
+    if (bus[address] != NULL)
+    {
         *data = *bus[address];
     }
 
@@ -131,7 +138,13 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
     data_t dat16 = 0xff; // Initialize dat16 to the default value
 
     *data16 = (addr_t)dat16;
-    if (bus[address] != NULL) {
+    if (bus[address] != NULL)
+    {
+        if (address == 0xFFFF)
+        {
+            *data16 = 0xFF;
+            return ERR_NONE;
+        }
         data_t ptr1 = dat16;
         data_t ptr2 = dat16;
 
@@ -142,9 +155,6 @@ int bus_read16(const bus_t bus, addr_t address, addr_t *data16)
         M_EXIT_IF_ERR(bus_read(bus, (addr_t)(address + 1), &ptr2));
 
         *data16 = (addr_t)merge8(ptr1, ptr2);
-        if (*data16 == 0xFFFF) {
-            *data16 = 0xFF;
-        }
     }
     return ERR_NONE;
 }
@@ -167,19 +177,21 @@ int bus_write16(bus_t bus, addr_t address, addr_t data16)
 #ifndef DBLARGG
     M_REQUIRE_NON_NULL(bus[address]);
 #else
-    if (bus[address] == NULL) {
+    if (bus[address] == NULL)
+    {
         return ERR_BAD_PARAMETER;
     }
 #endif
-
-
 
     data_t data1 = lsb8(data16);
     data_t data2 = msb8(data16);
 
     // Same as bus_write but write on 2 consecutive addresses (1 word = 2 bytes)
     *bus[address] = data1;
-    *bus[address + 1] = data2;
+    if (address != 0xFFFF)
+    {
+        *bus[address + 1] = data2;
+    }
 
     return ERR_NONE;
 }

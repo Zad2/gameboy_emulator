@@ -25,7 +25,7 @@ int mem_create(memory_t *mem, size_t size)
 
     if (m.memory != NULL) {
         m.size = size;
-        m.allocated = size; //fixme
+        m.allocated = size;
     } else {
         return ERR_MEM;
     }

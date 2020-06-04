@@ -24,9 +24,9 @@ extern "C" {
  * @brief Type to represent image lines
  */
 typedef struct {
+    uint32_t *content;
     size_t size;
     size_t allocated;
-    uint32_t *content;
 } bit_vector_t;
 
 //=========================================================================

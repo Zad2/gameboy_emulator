@@ -37,53 +37,16 @@ START_TEST(gameboy_create_err)
     printf("=== %s:\n", __func__);
 #endif
     INIT;
-    //component_t c = {(memory_t *) 0xdeadbeef, 1, 2};
-    gameboy_create(&g, "assfour");
+    gameboy_create(&g, "./tests/data/blargg_roms/01-special.gb");
+
     gameboy_free(&g);
 
-    //component_create(&c, 0);
-    //ck_assert(c.mem == NULL);
-    //ck_assert(c.start == 0);
-    //ck_assert(c.end == 0);
-
 #ifdef WITH_PRINT
     printf("=== END of %s\n", __func__);
 #endif
 
 }
 END_TEST
-/*
-START_TEST(component_create_free_exec)
-{
-// ------------------------------------------------------------
-#ifdef WITH_PRINT
-    printf("=== %s:\n", __func__);
-#endif
-    component_t c = {NULL, 0, 0};
-
-    const size_t s = 2;
-    ck_assert_int_eq(component_create(&c, s), ERR_NONE);
-    ck_assert(c.mem != NULL);
-    ck_assert(c.start == 0);
-    ck_assert(c.end == 0);
-    ck_assert(c.mem->size == s);
-    ck_assert(c.mem->memory != NULL);
-
-    c.start = 42;
-    c.end = (addr_t)(c.start + s - 1);
-    component_free(&c);
-    ck_assert(c.mem == NULL);
-    ck_assert(c.start == 0);
-    ck_assert(c.end == 0);
-
-#ifdef WITH_PRINT
-    printf("=== END of %s\n", __func__);
-#endif
-
-}
-END_TEST
-
-*/
 
 Suite* bus_test_suite()
 {
@@ -99,7 +62,6 @@ Suite* bus_test_suite()
     Add_Case(s, tc2, "gameboy tests");
 
     tcase_add_test(tc2, gameboy_create_err);
-    //tcase_add_test(tc2, component_create_free_exec);
 
     return s;
 }

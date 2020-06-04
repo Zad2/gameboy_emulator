@@ -268,8 +268,7 @@ const instruction_t instruction_prefixed[] = {
     OP_SET_7_H,
     OP_SET_7_L,
     OP_SET_7_HLR,
-    OP_SET_7_A
-};
+    OP_SET_7_A};
 
 // Game Boy CPU DIRECT instructions ordered by OpCode
 const instruction_t instruction_direct[] = {
@@ -528,34 +527,37 @@ const instruction_t instruction_direct[] = {
     OP_UNKOWN,
     OP_UNKOWN,
     OP_CP_A_N8,
-    OP_RST_7
-};
+    OP_RST_7};
 
 // ======================================================================
 int opcode_check_integrity()
 {
 #define last(TAB) (sizeof TAB / sizeof TAB[0])
 
-#define do_check(TAB, KIND) \
-  do { \
-  const size_t end = last(TAB); \
-  for(size_t i = 0; i < end; ++i) { \
-    if (TAB[i].kind != KIND) { \
-      fprintf(stderr, "opcode_check_integrity(): wrong kind (%0x) in " #TAB "[], index %zu\n", \
-              TAB[i].kind, i); \
-      return 0; \
-    } \
-    if ((TAB[i].family != UNKN) && (TAB[i].opcode != i)) { \
-      fprintf(stderr, "opcode_check_integrity(): wrong index/opcode in " #TAB "[]: index=%zu, opcode=%d\n", \
-              i, TAB[i].opcode); \
-      return 0;  \
-    } \
-  } \
-  } while(0)
+#define do_check(TAB, KIND)                                                                                   \
+  do                                                                                                          \
+  {                                                                                                           \
+    const size_t end = last(TAB);                                                                             \
+    for (size_t i = 0; i < end; ++i)                                                                          \
+    {                                                                                                         \
+      if (TAB[i].kind != KIND)                                                                                \
+      {                                                                                                       \
+        fprintf(stderr, "opcode_check_integrity(): wrong kind (%0x) in " #TAB "[], index %zu\n",              \
+                TAB[i].kind, i);                                                                              \
+        return 0;                                                                                             \
+      }                                                                                                       \
+      if ((TAB[i].family != UNKN) && (TAB[i].opcode != i))                                                    \
+      {                                                                                                       \
+        fprintf(stderr, "opcode_check_integrity(): wrong index/opcode in " #TAB "[]: index=%zu, opcode=%d\n", \
+                i, TAB[i].opcode);                                                                            \
+        return 0;                                                                                             \
+      }                                                                                                       \
+    }                                                                                                         \
+  } while (0)
 
-    do_check(instruction_direct, DIRECT);
-    do_check(instruction_prefixed, PREFIXED);
-    return 1;
+  do_check(instruction_direct, DIRECT);
+  do_check(instruction_prefixed, PREFIXED);
+  return 1;
 #undef last
 #undef do_check
 }

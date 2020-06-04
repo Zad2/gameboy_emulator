@@ -262,7 +262,6 @@ START_TEST(bit_vector_not_exec)
 }
 END_TEST
 
-
 START_TEST(bit_vector_and_exec)
 {
 // ------------------------------------------------------------
@@ -326,7 +325,6 @@ START_TEST(bit_vector_and_exec)
 
 }
 END_TEST
-
 
 START_TEST(bit_vector_or_exec)
 {
@@ -540,7 +538,6 @@ START_TEST(bit_vector_extract_zero_exec)
 }
 END_TEST
 
-
 START_TEST(bit_vector_extract_wrap_exec)
 {
 // ------------------------------------------------------------
@@ -686,6 +683,7 @@ START_TEST(bit_vector_shift_exec)
 END_TEST
 
 
+
 START_TEST(bit_vector_join_exec)
 {
 // ------------------------------------------------------------
@@ -738,7 +736,6 @@ START_TEST(bit_vector_join_exec)
 
 
     pbv1 = bit_vector_create(PV1_SIZE * IMAGE_LINE_WORD_BITS, 1);
-
     fill_vector_with(pbv1, 0xB055B055, PV1_SIZE);
     pbv0 = bit_vector_create(PV1_SIZE * IMAGE_LINE_WORD_BITS, 0);
     fill_vector_with(pbv0, 0xDEADDEAD, PV1_SIZE);
@@ -750,7 +747,6 @@ START_TEST(bit_vector_join_exec)
     bit_vector_free(&pbv0);
     bit_vector_free(&pbv1);
     bit_vector_free(&pbvj);
-
 #ifdef WITH_PRINT
     printf("=== END of %s\n", __func__);
 #endif
@@ -880,7 +876,7 @@ START_TEST(bit_vector_deadboss)
     bit_vector_free(&pv4_00SS);
     bit_vector_free(&pv4_DEAD);
     bit_vector_free(&pv4_0E0D);
-    bit_vector_free(&pv4_D0A0);
+    // bit_vector_free(&pv4_D0A0);
     bit_vector_free(&pv1_5);
     bit_vector_free(&pv1_B);
     bit_vector_free(&pv1_A);
